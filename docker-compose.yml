@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.web
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/mds?schema=public
       - NODE_ENV=development
