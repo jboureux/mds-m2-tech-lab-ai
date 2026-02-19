@@ -6,9 +6,19 @@
 	"scripts": {
 		"dev": "pnpm --filter web dev",
 		"build": "pnpm --filter web build",
-		"lint": "biome lint .",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write --unsafe",
 		"format": "biome format . --write",
-		"test": "pnpm --filter web test"
+		"test": "pnpm -r test",
+		"test:watch": "pnpm -r exec vitest",
+		"test:coverage": "pnpm -r exec vitest run --coverage",
+		"check": "pnpm lint && pnpm test",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+			"biome check --write --no-errors-on-unmatched"
+		]
 	},
 	"keywords": [],
 	"author": "",
@@ -25,7 +35,9 @@
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"@vitejs/plugin-react": "^5.1.4",
+		"husky": "^9.1.7",
 		"jsdom": "^28.1.0",
+		"lint-staged": "^16.2.7",
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
