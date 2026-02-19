@@ -55,6 +55,9 @@ export async function proxy(request: NextRequest) {
 	// 4. Inject network location into the request headers
 	const requestHeaders = new Headers(request.headers);
 	requestHeaders.set("x-network-location", networkLocation);
+	if (ip) {
+		requestHeaders.set("x-client-ip", ip);
+	}
 
 	// Create response with modified request headers
 	const response = NextResponse.next({
@@ -65,6 +68,9 @@ export async function proxy(request: NextRequest) {
 
 	// Also inject into response headers for visibility/debugging
 	response.headers.set("x-network-location", networkLocation);
+	if (ip) {
+		response.headers.set("x-client-ip", ip);
+	}
 
 	return response;
 }
