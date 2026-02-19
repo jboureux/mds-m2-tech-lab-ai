@@ -19,7 +19,7 @@ if [ -d "apps/web/prisma/migrations" ]; then
   pnpm --filter web exec prisma migrate deploy
 else
   echo "🚀 Syncing database schema (db push)..."
-  pnpm --filter web exec prisma db push --skip-generate
+  pnpm --filter web exec prisma db push
 fi
 
 # Start the application
