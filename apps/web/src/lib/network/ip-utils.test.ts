@@ -74,7 +74,10 @@ describe("ip-utils", () => {
 
 		it("should normalize IPv6 addresses with port numbers", () => {
 			const headers = new Headers();
-			headers.set("x-forwarded-for", "[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443");
+			headers.set(
+				"x-forwarded-for",
+				"[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443",
+			);
 			expect(getClientIp(headers)).toBe("2001:db8:85a3:8d3:1319:8a2e:370:7348");
 		});
 
