@@ -42,6 +42,20 @@ export const auth = betterAuth({
 						},
 					};
 				},
+				after: async (user) => {
+					// Remove user from pre-registered list once they have joined
+					await db.preRegisteredUser
+						.delete({
+							where: { email: user.email },
+						})
+						.catch((err) => {
+							// Log error but don't fail the whole auth flow if deletion fails
+							console.error(
+								`[Auth] Failed to remove ${user.email} from PreRegisteredUser:`,
+								err,
+							);
+						});
+				},
 			},
 		},
 	},
