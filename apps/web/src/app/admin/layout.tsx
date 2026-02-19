@@ -22,9 +22,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 		redirect("/access-denied");
 	}
 
+	const headerList = await headers();
+	const networkLocation = headerList.get("x-network-location") || "off-campus";
+
 	return (
 		<SidebarProvider>
-			<AppSidebar />
+			<AppSidebar networkLocation={networkLocation} />
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
 					<SidebarTrigger className="-ml-1" />

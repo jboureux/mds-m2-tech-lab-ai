@@ -55,10 +55,16 @@ const adminNavItems = [
 	},
 ];
 
+interface AppSidebarProps {
+	networkLocation?: string;
+}
+
 /**
  * AppSidebar wrapper to ensure it only renders on the client.
  */
-export function AppSidebar() {
+export function AppSidebar({
+	networkLocation = "off-campus",
+}: AppSidebarProps) {
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -79,15 +85,13 @@ export function AppSidebar() {
 		);
 	}
 
-	return <AppSidebarContent />;
+	return <AppSidebarContent networkLocation={networkLocation} />;
 }
 
-function AppSidebarContent() {
+function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 	const { data: session } = useSession();
 	const pathname = usePathname();
 	const router = useRouter();
-
-	const networkLocation = "on-campus";
 
 	const handleSignOut = async () => {
 		await signOut({
@@ -109,10 +113,13 @@ function AppSidebarContent() {
 		: "U";
 
 	return (
-		<Sidebar collapsible="icon" className="border-r bg-sidebar">
-			<SidebarHeader className="h-16 flex items-center justify-center border-b bg-background">
+		<Sidebar
+			collapsible="icon"
+			className="border-r bg-zinc-50/50 dark:bg-zinc-900/50"
+		>
+			<SidebarHeader className="h-16 flex items-center justify-center border-b bg-background/50 backdrop-blur-sm">
 				<Link href="/" className="flex items-center gap-3 px-2 group">
-					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105 active:scale-95">
+					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 active:scale-95">
 						<School className="h-5 w-5" />
 					</div>
 					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
@@ -126,7 +133,7 @@ function AppSidebarContent() {
 
 			<SidebarContent className="px-2 py-4">
 				<SidebarGroup>
-					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
 						Core Systems
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -140,8 +147,8 @@ function AppSidebarContent() {
 										className={cn(
 											"transition-all duration-200 rounded-lg py-5 px-3",
 											pathname === item.url
-												? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-												: "text-sidebar-foreground hover:bg-sidebar-accent/50",
+												? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
+												: "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
 										)}
 									>
 										<Link href={item.url} className="flex items-center gap-3">
@@ -149,7 +156,7 @@ function AppSidebarContent() {
 												className={cn(
 													"h-4.5 w-4.5",
 													pathname === item.url
-														? "text-primary"
+														? "text-primary-foreground"
 														: "text-muted-foreground",
 												)}
 											/>
@@ -163,10 +170,10 @@ function AppSidebarContent() {
 				</SidebarGroup>
 
 				<div className="mt-auto px-4 py-4 group-data-[collapsible=icon]:hidden">
-					<div className="rounded-xl border bg-card p-3 shadow-sm">
+					<div className="rounded-xl border bg-muted/30 p-3 shadow-inner">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-[10px] font-bold uppercase text-muted-foreground">
-								Network
+							<span className="text-[10px] font-bold uppercase text-muted-foreground/70">
+								Network Status
 							</span>
 							{networkLocation === "on-campus" ? (
 								<School className="h-3 w-3 text-emerald-500" />
@@ -183,7 +190,7 @@ function AppSidebarContent() {
 										: "bg-amber-500",
 								)}
 							/>
-							<span className="text-[11px] font-semibold text-foreground capitalize">
+							<span className="text-[11px] font-bold text-foreground capitalize">
 								{networkLocation.replace("-", " ")}
 							</span>
 						</div>
@@ -191,14 +198,14 @@ function AppSidebarContent() {
 				</div>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t p-3 bg-background">
+			<SidebarFooter className="border-t p-3 bg-background/50">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size="lg"
-									className="transition-colors hover:bg-accent rounded-xl"
+									className="transition-colors hover:bg-muted rounded-xl"
 								>
 									<Avatar className="h-9 w-9 rounded-lg border shadow-sm">
 										<AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-bold">

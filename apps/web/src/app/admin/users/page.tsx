@@ -103,7 +103,6 @@ export default async function AdminUsersPage() {
 					value={totalUsers}
 					description="Verified accounts on the network"
 					icon={UserCheck}
-					trend="+12% from last month"
 					color="emerald"
 				/>
 				<StatsCard
@@ -111,7 +110,6 @@ export default async function AdminUsersPage() {
 					value={totalPreRegistered}
 					description="Emails pending first login"
 					icon={UserPlus}
-					trend="5 added today"
 					color="blue"
 				/>
 				<StatsCard
@@ -119,7 +117,6 @@ export default async function AdminUsersPage() {
 					value={totalUsers + totalPreRegistered}
 					description="Maximum authorized capacity"
 					icon={Users}
-					trend="98% utilization"
 					color="amber"
 				/>
 			</div>
@@ -127,14 +124,14 @@ export default async function AdminUsersPage() {
 			{/* Main Content Areas */}
 			<div className="grid grid-cols-1 2xl:grid-cols-5 gap-8">
 				{/* Recent Users Table */}
-				<Card className="2xl:col-span-3 shadow-xl overflow-hidden">
+				<Card className="2xl:col-span-3 shadow-xl overflow-hidden border-border/50">
 					<CardHeader className="border-b bg-muted/20 py-6 px-8">
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<CardTitle className="text-xl font-bold tracking-tight">
 									Active Network Users
 								</CardTitle>
-								<CardDescription className="text-sm">
+								<CardDescription className="text-sm text-muted-foreground/70">
 									Recently joined and active scholars.
 								</CardDescription>
 							</div>
@@ -249,12 +246,12 @@ export default async function AdminUsersPage() {
 				</Card>
 
 				{/* Pre-registered Pool Card */}
-				<Card className="2xl:col-span-2 shadow-xl overflow-hidden">
+				<Card className="2xl:col-span-2 shadow-xl overflow-hidden border-border/50">
 					<CardHeader className="border-b bg-muted/20 py-6 px-8">
 						<CardTitle className="text-xl font-bold tracking-tight">
 							Authorization Pool
 						</CardTitle>
-						<CardDescription className="text-sm">
+						<CardDescription className="text-sm text-muted-foreground/70">
 							Members eligible to claim their identity.
 						</CardDescription>
 					</CardHeader>
@@ -343,14 +340,12 @@ function StatsCard({
 	value,
 	description,
 	icon: Icon,
-	trend,
 	color,
 }: {
 	title: string;
 	value: number;
 	description: string;
 	icon: React.ElementType;
-	trend: string;
 	color: "blue" | "emerald" | "amber";
 }) {
 	const colorMap = {
@@ -362,9 +357,9 @@ function StatsCard({
 	};
 
 	return (
-		<Card className="shadow-sm bg-card group hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+		<Card className="shadow-sm bg-card group hover:shadow-md transition-all duration-300 hover:-translate-y-1 border-border/50">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-				<CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+				<CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
 					{title}
 				</CardTitle>
 				<div className={cn("p-2 rounded-lg border", colorMap[color])}>
@@ -376,12 +371,6 @@ function StatsCard({
 				<p className="text-[11px] text-muted-foreground font-medium mt-1">
 					{description}
 				</p>
-				<div className="mt-4 pt-4 border-t flex items-center justify-between">
-					<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-						{trend}
-					</span>
-					<div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-				</div>
 			</CardContent>
 		</Card>
 	);
