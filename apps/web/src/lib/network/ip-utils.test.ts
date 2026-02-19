@@ -71,5 +71,35 @@ describe("ip-utils", () => {
 			};
 			expect(getClientIp(headers, config)).toBe("1.1.1.1");
 		});
+
+		it("should normalize IPv6 addresses with port numbers", () => {
+			const headers = new Headers();
+			headers.set("x-forwarded-for", "[2001:db8:85a3:8d3:1319:8a2e:370:7348]:443");
+			expect(getClientIp(headers)).toBe("2001:db8:85a3:8d3:1319:8a2e:370:7348");
+		});
+
+		it("should normalize IPv4-mapped IPv6 addresses", () => {
+			const headers = new Headers();
+			headers.set("x-forwarded-for", "::ffff:192.168.1.1");
+			expect(getClientIp(headers)).toBe("192.168.1.1");
+		});
+
+		it("should support CIDR ranges for trusted proxies", () => {
+			const headers = new Headers();
+			headers.set("x-forwarded-for", "192.168.1.1, 10.0.0.5, 172.16.0.10");
+			const config = {
+				trustedProxies: ["10.0.0.0/8", "172.16.0.0/12"],
+			};
+			expect(getClientIp(headers, config)).toBe("192.168.1.1");
+		});
+
+		it("should support IPv6 CIDR ranges for trusted proxies", () => {
+			const headers = new Headers();
+			headers.set("x-forwarded-for", "2001:db8::1, fd00::1");
+			const config = {
+				trustedProxies: ["fd00::/8"],
+			};
+			expect(getClientIp(headers, config)).toBe("2001:db8::1");
+		});
 	});
 });
