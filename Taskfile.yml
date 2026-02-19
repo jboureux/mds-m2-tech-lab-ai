@@ -5,7 +5,7 @@ vars:
 
 tasks:
   up:
-    desc: Start the Docker development environment (App + DB)
+    desc: "Start the Docker development environment (App + DB)"
     cmds:
       - |
         PORT={{.PORT | default "3000"}}
@@ -18,22 +18,22 @@ tasks:
         WEB_PORT=$PORT {{.DOCKER_COMPOSE}} up -d --build
 
   down:
-    desc: Stop all containers
+    desc: "Stop all containers"
     cmds:
       - "{{.DOCKER_COMPOSE}} down"
 
   sh:
-    desc: Open a shell inside the app container (interactive)
+    desc: "Open a shell inside the app container (interactive)"
     cmds:
       - "{{.DOCKER_COMPOSE}} exec web sh"
     interactive: true
 
   logs:
-    desc: Follow container logs (optional filter: task logs -- web)
+    desc: "Follow container logs (optional filter: task logs -- web)"
     cmds:
       - "{{.DOCKER_COMPOSE}} logs -f {{.CLI_ARGS}}"
 
   migrate:data:
-    desc: Execute pending data migrations
+    desc: "Execute pending data migrations"
     cmds:
       - "{{.DOCKER_COMPOSE}} exec web pnpm --filter web run migrate:data"
