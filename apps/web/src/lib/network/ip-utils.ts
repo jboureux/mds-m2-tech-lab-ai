@@ -113,3 +113,36 @@ function isTrusted(ip: string, trustedProxies: string[]): boolean {
 	}
 	return false;
 }
+
+/**
+ * Checks if a client's IP is within any of the allowed campus network CIDR ranges.
+ *
+ * @param ip - The client's IP address
+ * @param allowedRanges - List of allowed CIDR ranges or exact IP addresses
+ * @returns true if the IP is within any of the allowed ranges, false otherwise
+ */
+export function isIpInAllowedRanges(
+	ip: string,
+	allowedRanges: string[],
+): boolean {
+	if (!ip || allowedRanges.length === 0) return false;
+
+	try {
+		const addr = ipaddr.process(ip);
+		for (const rangeStr of allowedRanges) {
+			try {
+				if (rangeStr.includes("/")) {
+					const range = ipaddr.parseCIDR(rangeStr);
+					if (addr.match(range)) return true;
+				} else {
+					const rangeAddr = ipaddr.process(rangeStr);
+					if (addr.toString() === rangeAddr.toString()) return true;
+				}
+			} catch (_e) {}
+		}
+	} catch (_e) {
+		// Failed to process input IP
+		return false;
+	}
+	return false;
+}

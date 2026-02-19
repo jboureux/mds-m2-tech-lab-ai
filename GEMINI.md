@@ -19,6 +19,11 @@ MDS is an internal school social network designed for students and staff. It fea
 - **Moderation**: Local AI (**TensorFlow.js**) + `bad-words` blocklist
 - **Quality**: **Biome.js** (Linting/Formatting) + **Vitest** (Testing)
 
+### 🐋 Container-First Mandate
+
+- **ISO Environment**: **NEVER** execute installation commands (`pnpm install`, `pnpm add`, etc.) or environment-modifying commands directly on the host machine.
+- **Execution**: All such commands **MUST** be executed inside the Docker container (via `task sh` or `docker compose exec`) to ensure the project's architecture remains consistent and ISO between development and production environments.
+
 ### Workspace Structure
 
 The project uses a **pnpm workspace** architecture:

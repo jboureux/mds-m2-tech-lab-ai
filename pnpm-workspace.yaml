@@ -1,2 +1,9 @@
 packages:
-  - 'apps/*'
+  - apps/*
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - prisma
+ignoredBuiltDependencies:
+  - esbuild
+  - msw
+  - sharp

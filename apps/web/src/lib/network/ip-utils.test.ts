@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getClientIp } from "./ip-utils";
+import { getClientIp, isIpInAllowedRanges } from "./ip-utils";
 
 describe("ip-utils", () => {
 	describe("getClientIp", () => {
@@ -103,6 +103,48 @@ describe("ip-utils", () => {
 				trustedProxies: ["fd00::/8"],
 			};
 			expect(getClientIp(headers, config)).toBe("2001:db8::1");
+		});
+	});
+
+	describe("isIpInAllowedRanges", () => {
+		it("should return false for empty IP or ranges", () => {
+			expect(isIpInAllowedRanges("", ["192.168.1.0/24"])).toBe(false);
+			expect(isIpInAllowedRanges("1.2.3.4", [])).toBe(false);
+		});
+
+		it("should match exact IP address", () => {
+			expect(isIpInAllowedRanges("192.168.1.1", ["192.168.1.1"])).toBe(true);
+			expect(isIpInAllowedRanges("192.168.1.2", ["192.168.1.1"])).toBe(false);
+		});
+
+		it("should match within CIDR range", () => {
+			const ranges = ["192.168.1.0/24", "10.0.0.0/8"];
+			expect(isIpInAllowedRanges("192.168.1.50", ranges)).toBe(true);
+			expect(isIpInAllowedRanges("10.5.5.5", ranges)).toBe(true);
+			expect(isIpInAllowedRanges("172.16.0.1", ranges)).toBe(false);
+		});
+
+		it("should match IPv6 CIDR range", () => {
+			const ranges = ["2001:db8::/32"];
+			expect(isIpInAllowedRanges("2001:db8::1", ranges)).toBe(true);
+			expect(isIpInAllowedRanges("2001:db9::1", ranges)).toBe(false);
+		});
+
+		it("should handle mixed IPv4 and IPv6", () => {
+			const ranges = ["192.168.1.0/24", "2001:db8::/32"];
+			expect(isIpInAllowedRanges("192.168.1.1", ranges)).toBe(true);
+			expect(isIpInAllowedRanges("2001:db8::1", ranges)).toBe(true);
+		});
+
+		it("should handle invalid CIDR ranges gracefully", () => {
+			expect(
+				isIpInAllowedRanges("1.2.3.4", ["invalid-cidr", "1.2.3.0/24"]),
+			).toBe(true);
+			expect(isIpInAllowedRanges("1.2.3.4", ["invalid-cidr"])).toBe(false);
+		});
+
+		it("should handle invalid IP address gracefully", () => {
+			expect(isIpInAllowedRanges("not-an-ip", ["1.2.3.0/24"])).toBe(false);
 		});
 	});
 });
