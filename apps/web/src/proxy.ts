@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getClientIp, isIpInAllowedRanges } from "@/lib/network/ip-utils";
 
 // In-memory cache for CIDR ranges
@@ -30,7 +30,7 @@ async function getAllowedRanges(origin: string) {
 			cachedAllowedRanges = await response.json();
 			lastCacheUpdate = now;
 		}
-		
+
 		return cachedAllowedRanges || [];
 	} catch (error) {
 		// Log error but don't crash the proxy
