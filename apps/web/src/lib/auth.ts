@@ -4,6 +4,7 @@ import { APIError } from "better-auth/api";
 import { magicLink } from "better-auth/plugins";
 import db from "./prisma";
 import { resend } from "./resend";
+import { getRuntimeConfig } from "./runtime-config";
 
 export const auth = betterAuth({
 	database: prismaAdapter(db, {
@@ -57,5 +58,5 @@ export const auth = betterAuth({
 		}),
 	],
 	// Base URL for better-auth
-	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+	baseURL: getRuntimeConfig("BETTER_AUTH_URL") || "http://localhost:3000",
 });
