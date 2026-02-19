@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -51,7 +52,37 @@ const adminNavItems = [
 	},
 ];
 
+/**
+ * AppSidebar wrapper to ensure it only renders on the client.
+ * This prevents hook-related errors during SSR/hydration.
+ */
 export function AppSidebar() {
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) {
+		// Render a simplified version or nothing during SSR to avoid hydration mismatch
+		// and prevent 'useRef' errors from Better Auth hooks.
+		return (
+			<Sidebar collapsible="icon" className="border-r">
+				<SidebarHeader className="h-16 flex items-center justify-center border-b">
+					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+						<LayoutDashboard className="h-5 w-5 text-zinc-400" />
+					</div>
+				</SidebarHeader>
+				<SidebarContent />
+				<SidebarFooter className="border-t p-2" />
+			</Sidebar>
+		);
+	}
+
+	return <AppSidebarContent />;
+}
+
+function AppSidebarContent() {
 	const { data: session } = useSession();
 	const pathname = usePathname();
 	const router = useRouter();
