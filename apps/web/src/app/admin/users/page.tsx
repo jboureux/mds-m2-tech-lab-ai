@@ -1,7 +1,19 @@
+import {
+	ArrowUpRight,
+	Calendar,
+	Filter,
+	Mail,
+	MoreHorizontal,
+	Search,
+	UserCheck,
+	UserPlus,
+	Users,
+} from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ImportUsersDialog } from "@/components/admin/import-users-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,6 +21,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
 	Table,
 	TableBody,
@@ -42,130 +55,256 @@ export default async function AdminUsersPage() {
 	}
 
 	// Fetch current users and pre-registered records for the initial render
-	const [users, preRegistered] = await Promise.all([
-		db.user.findMany({
-			orderBy: { createdAt: "desc" },
-			take: 20,
-		}),
-		db.preRegisteredUser.findMany({
-			orderBy: { createdAt: "desc" },
-			take: 20,
-		}),
-	]);
+	const [users, preRegistered, totalUsers, totalPreRegistered] =
+		await Promise.all([
+			db.user.findMany({
+				orderBy: { createdAt: "desc" },
+				take: 10,
+			}),
+			db.preRegisteredUser.findMany({
+				orderBy: { createdAt: "desc" },
+				take: 10,
+			}),
+			db.user.count(),
+			db.preRegisteredUser.count(),
+		]);
 
 	return (
-		<div className="container mx-auto py-12 px-4 space-y-10 max-w-7xl">
+		<div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
 			{/* Page Header */}
-			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-				<div className="space-y-1">
-					<h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
+			<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+				<div className="space-y-1.5">
+					<div className="flex items-center gap-2 text-[#FACC15] font-bold text-xs uppercase tracking-[0.2em]">
+						<Users className="h-3 w-3" />
+						Identity & Access
+					</div>
+					<h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 lg:text-5xl">
 						User Management
 					</h1>
-					<p className="text-muted-foreground text-lg">
-						Review active accounts and pre-register new members to the network.
+					<p className="text-muted-foreground text-lg max-w-2xl">
+						Maintain the academic integrity of the network by authorizing and
+						reviewing member access.
 					</p>
 				</div>
-				<ImportUsersDialog />
+				<div className="flex gap-3">
+					<Button
+						variant="outline"
+						className="hidden md:flex gap-2 border-zinc-200 dark:border-zinc-800 shadow-sm"
+					>
+						<Filter className="h-4 w-4" />
+						Filters
+					</Button>
+					<ImportUsersDialog />
+				</div>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-				{/* Recent Users Card */}
-				<Card className="shadow-sm border-muted">
-					<CardHeader className="bg-muted/10">
-						<CardTitle>Active Network Users</CardTitle>
-						<CardDescription>
-							List of accounts that have successfully logged in.
+			{/* Stats Overview */}
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+				<StatsCard
+					title="Active Members"
+					value={totalUsers}
+					description="Verified accounts on the network"
+					icon={UserCheck}
+					trend="+12% from last month"
+					color="emerald"
+				/>
+				<StatsCard
+					title="Authorized Registry"
+					value={totalPreRegistered}
+					description="Emails pending first login"
+					icon={UserPlus}
+					trend="5 added today"
+					color="blue"
+				/>
+				<StatsCard
+					title="Total Identity Pool"
+					value={totalUsers + totalPreRegistered}
+					description="Maximum authorized capacity"
+					icon={Users}
+					trend="98% utilization"
+					color="amber"
+				/>
+			</div>
+
+			{/* Main Content Areas */}
+			<div className="grid grid-cols-1 2xl:grid-cols-5 gap-8">
+				{/* Recent Users Table */}
+				<Card className="2xl:col-span-3 shadow-xl border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden bg-white dark:bg-zinc-950">
+					<CardHeader className="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/30 dark:bg-zinc-900/20 py-6 px-8">
+						<div className="flex items-center justify-between">
+							<div className="space-y-1">
+								<CardTitle className="text-xl font-bold tracking-tight">
+									Active Network Users
+								</CardTitle>
+								<CardDescription className="text-sm">
+									Recently joined and active scholars.
+								</CardDescription>
+							</div>
+							<div className="relative w-64 hidden sm:block">
+								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+								<Input
+									placeholder="Search by name or email..."
+									className="pl-9 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-9 text-xs"
+								/>
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent className="p-0">
+						<div className="overflow-x-auto">
+							<Table>
+								<TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/30">
+									<TableRow className="hover:bg-transparent border-b border-zinc-100 dark:border-zinc-900">
+										<TableHead className="py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+											User Profile
+										</TableHead>
+										<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+											Role
+										</TableHead>
+										<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+											Status
+										</TableHead>
+										<TableHead className="text-right py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+											Join Date
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{users.map((user) => (
+										<TableRow
+											key={user.id}
+											className="group border-b border-zinc-50 dark:border-zinc-900 transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20"
+										>
+											<TableCell className="py-4 px-8">
+												<div className="flex items-center gap-3">
+													<div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[#FACC15] text-xs font-bold shadow-sm">
+														{user.name?.[0].toUpperCase() || "A"}
+													</div>
+													<div className="flex flex-col">
+														<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm group-hover:text-primary transition-colors">
+															{user.name || "Anonymous"}
+														</span>
+														<span className="text-[11px] text-zinc-500 font-medium flex items-center gap-1">
+															<Mail className="h-2.5 w-2.5" />
+															{user.email}
+														</span>
+													</div>
+												</div>
+											</TableCell>
+											<TableCell>
+												<Badge
+													variant="outline"
+													className={cn(
+														"capitalize font-bold text-[10px] px-2 py-0 border shadow-none",
+														user.role === "ADMIN"
+															? "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30"
+															: "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700",
+													)}
+												>
+													{user.role.toLowerCase()}
+												</Badge>
+											</TableCell>
+											<TableCell>
+												<div className="flex items-center gap-1.5">
+													<div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+													<span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+														Active
+													</span>
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-4 px-8">
+												<span className="text-[11px] font-medium text-zinc-500 flex items-center justify-end gap-1.5">
+													<Calendar className="h-3 w-3" />
+													{new Date(user.createdAt).toLocaleDateString(
+														undefined,
+														{ day: "numeric", month: "short" },
+													)}
+												</span>
+											</TableCell>
+										</TableRow>
+									))}
+									{users.length === 0 && (
+										<TableRow>
+											<TableCell
+												colSpan={4}
+												className="text-center py-16 text-zinc-400 italic"
+											>
+												No active scholars found in the registry.
+											</TableCell>
+										</TableRow>
+									)}
+								</TableBody>
+							</Table>
+						</div>
+						<div className="py-4 px-8 border-t border-zinc-50 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/10 flex justify-between items-center">
+							<span className="text-[11px] font-medium text-zinc-400">
+								Showing {users.length} of {totalUsers} active users
+							</span>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="text-[11px] font-bold hover:bg-transparent hover:text-primary gap-1"
+							>
+								View All Registry <ArrowUpRight className="h-3 w-3" />
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Pre-registered Pool Card */}
+				<Card className="2xl:col-span-2 shadow-xl border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden bg-white dark:bg-zinc-950">
+					<CardHeader className="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/30 dark:bg-zinc-900/20 py-6 px-8">
+						<CardTitle className="text-xl font-bold tracking-tight">
+							Authorization Pool
+						</CardTitle>
+						<CardDescription className="text-sm">
+							Members eligible to claim their identity.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="pt-6">
+					<CardContent className="p-0">
 						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>User</TableHead>
-									<TableHead>Role</TableHead>
-									<TableHead className="text-right">Joined</TableHead>
+							<TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/30">
+								<TableRow className="hover:bg-transparent border-b border-zinc-100 dark:border-zinc-900">
+									<TableHead className="py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+										Credential
+									</TableHead>
+									<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+										Target Role
+									</TableHead>
+									<TableHead className="text-right py-4 px-8"></TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{users.map((user) => (
-									<TableRow key={user.id} className="group">
-										<TableCell>
+								{preRegistered.map((user) => (
+									<TableRow
+										key={user.id}
+										className="group border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors"
+									>
+										<TableCell className="py-4 px-8">
 											<div className="flex flex-col">
-												<span className="font-semibold text-sm">
-													{user.name || "Anonymous"}
+												<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+													{user.name || "N/A"}
 												</span>
-												<span className="text-xs text-muted-foreground">
+												<span className="text-[11px] text-zinc-500 font-medium">
 													{user.email}
 												</span>
 											</div>
 										</TableCell>
 										<TableCell>
 											<Badge
-												variant={
-													user.role === "ADMIN" ? "destructive" : "secondary"
-												}
-												className="capitalize"
+												variant="outline"
+												className="capitalize font-bold text-[9px] px-2 py-0 border-zinc-200 dark:border-zinc-800 shadow-none text-zinc-500 dark:text-zinc-400"
 											>
 												{user.role.toLowerCase()}
 											</Badge>
 										</TableCell>
-										<TableCell className="text-right text-xs text-muted-foreground">
-											{new Date(user.createdAt).toLocaleDateString()}
-										</TableCell>
-									</TableRow>
-								))}
-								{users.length === 0 && (
-									<TableRow>
-										<TableCell
-											colSpan={3}
-											className="text-center py-8 text-muted-foreground"
-										>
-											No active users found.
-										</TableCell>
-									</TableRow>
-								)}
-							</TableBody>
-						</Table>
-					</CardContent>
-				</Card>
-
-				{/* Pre-registered Users Card */}
-				<Card className="shadow-sm border-muted">
-					<CardHeader className="bg-muted/10">
-						<CardTitle>Pre-registered Registry</CardTitle>
-						<CardDescription>
-							Authorized members who can access the network.
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="pt-6">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Authorized Identity</TableHead>
-									<TableHead>Role</TableHead>
-									<TableHead className="text-right">Imported</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{preRegistered.map((user) => (
-									<TableRow key={user.id} className="group">
-										<TableCell>
-											<div className="flex flex-col">
-												<span className="font-semibold text-sm">
-													{user.name || "N/A"}
-												</span>
-												<span className="text-xs text-muted-foreground">
-													{user.email}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell>
-											<Badge variant="outline" className="capitalize">
-												{user.role.toLowerCase()}
-											</Badge>
-										</TableCell>
-										<TableCell className="text-right text-xs text-muted-foreground">
-											{new Date(user.createdAt).toLocaleDateString()}
+										<TableCell className="text-right py-4 px-8">
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg"
+											>
+												<MoreHorizontal className="h-4 w-4" />
+											</Button>
 										</TableCell>
 									</TableRow>
 								))}
@@ -173,18 +312,81 @@ export default async function AdminUsersPage() {
 									<TableRow>
 										<TableCell
 											colSpan={3}
-											className="text-center py-8 text-muted-foreground"
+											className="text-center py-12 text-zinc-400 italic px-8"
 										>
-											Registry is empty. Use the <strong>Import</strong> utility
-											to authorize members.
+											Registry is empty. Use the{" "}
+											<strong className="text-zinc-600 dark:text-zinc-300">
+												Import Utility
+											</strong>{" "}
+											to authorize new identities.
 										</TableCell>
 									</TableRow>
 								)}
 							</TableBody>
 						</Table>
+						<div className="py-4 px-8 border-t border-zinc-50 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/10 flex justify-center">
+							<Button
+								variant="ghost"
+								size="sm"
+								className="text-[11px] font-bold text-zinc-400 hover:bg-transparent hover:text-zinc-900 dark:hover:text-zinc-100 uppercase tracking-widest"
+							>
+								Manage Pool
+							</Button>
+						</div>
 					</CardContent>
 				</Card>
 			</div>
 		</div>
+	);
+}
+
+function StatsCard({
+	title,
+	value,
+	description,
+	icon: Icon,
+	trend,
+	color,
+}: {
+	title: string;
+	value: number;
+	description: string;
+	icon: React.ElementType;
+	trend: string;
+	color: "blue" | "emerald" | "amber";
+}) {
+	const colorMap = {
+		blue: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900/30",
+		emerald:
+			"text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/30",
+		amber:
+			"text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-900/30",
+	};
+
+	return (
+		<Card className="shadow-sm border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 group hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+				<CardTitle className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+					{title}
+				</CardTitle>
+				<div className={cn("p-2 rounded-lg border", colorMap[color])}>
+					<Icon className="h-4 w-4" />
+				</div>
+			</CardHeader>
+			<CardContent>
+				<div className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+					{value}
+				</div>
+				<p className="text-[11px] text-zinc-500 font-medium mt-1">
+					{description}
+				</p>
+				<div className="mt-4 pt-4 border-t border-zinc-50 dark:border-zinc-900 flex items-center justify-between">
+					<span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+						{trend}
+					</span>
+					<div className="h-1.5 w-1.5 rounded-full bg-[#FACC15] animate-pulse" />
+				</div>
+			</CardContent>
+		</Card>
 	);
 }

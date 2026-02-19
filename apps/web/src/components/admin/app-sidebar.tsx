@@ -2,9 +2,11 @@
 
 import {
 	ChevronUp,
-	LayoutDashboard,
+	Globe,
 	LogOut,
 	Network,
+	School,
+	Settings,
 	ShieldCheck,
 	Users,
 } from "lucide-react";
@@ -33,6 +35,7 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { signOut, useSession } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 const adminNavItems = [
 	{
@@ -54,7 +57,6 @@ const adminNavItems = [
 
 /**
  * AppSidebar wrapper to ensure it only renders on the client.
- * This prevents hook-related errors during SSR/hydration.
  */
 export function AppSidebar() {
 	const [mounted, setMounted] = useState(false);
@@ -64,17 +66,18 @@ export function AppSidebar() {
 	}, []);
 
 	if (!mounted) {
-		// Render a simplified version or nothing during SSR to avoid hydration mismatch
-		// and prevent 'useRef' errors from Better Auth hooks.
 		return (
-			<Sidebar collapsible="icon" className="border-r">
-				<SidebarHeader className="h-16 flex items-center justify-center border-b">
-					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-						<LayoutDashboard className="h-5 w-5 text-zinc-400" />
+			<Sidebar
+				collapsible="icon"
+				className="border-r border-zinc-200 dark:border-zinc-800"
+			>
+				<SidebarHeader className="h-16 flex items-center justify-center border-b border-zinc-100 dark:border-zinc-800">
+					<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
+						<School className="h-5 w-5 text-zinc-400" />
 					</div>
 				</SidebarHeader>
 				<SidebarContent />
-				<SidebarFooter className="border-t p-2" />
+				<SidebarFooter className="border-t border-zinc-100 dark:border-zinc-800 p-2" />
 			</Sidebar>
 		);
 	}
@@ -86,6 +89,11 @@ function AppSidebarContent() {
 	const { data: session } = useSession();
 	const pathname = usePathname();
 	const router = useRouter();
+
+	// Access network location from headers isn't direct here,
+	// but we can assume it might be passed or fetched.
+	// For now, let's use a dummy state or wait for implementation.
+	const networkLocation = "on-campus"; // This should ideally come from a context/provider
 
 	const handleSignOut = async () => {
 		await signOut({
@@ -107,33 +115,56 @@ function AppSidebarContent() {
 		: "U";
 
 	return (
-		<Sidebar collapsible="icon" className="border-r">
-			<SidebarHeader className="h-16 flex items-center justify-center border-b">
-				<Link href="/" className="flex items-center gap-2 px-2">
-					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-						<LayoutDashboard className="h-5 w-5" />
+		<Sidebar
+			collapsible="icon"
+			className="border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50"
+		>
+			<SidebarHeader className="h-16 flex items-center justify-center border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+				<Link href="/" className="flex items-center gap-3 px-2 group">
+					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F172A] text-[#FACC15] shadow-lg transition-transform group-hover:scale-105 active:scale-95">
+						<School className="h-5 w-5" />
 					</div>
-					<span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
-						MDS Admin
-					</span>
+					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
+						<span className="font-bold text-sm tracking-tight text-zinc-900 dark:text-zinc-100">
+							MDS Admin
+						</span>
+						<span className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">
+							Internal Portal
+						</span>
+					</div>
 				</Link>
 			</SidebarHeader>
 
-			<SidebarContent>
+			<SidebarContent className="px-2 py-4">
 				<SidebarGroup>
-					<SidebarGroupLabel>Management</SidebarGroupLabel>
+					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+						Core Systems
+					</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{adminNavItems.map((item) => (
-								<SidebarMenuItem key={item.title}>
+								<SidebarMenuItem key={item.title} className="mb-1">
 									<SidebarMenuButton
 										asChild
 										tooltip={item.title}
 										isActive={pathname === item.url}
+										className={cn(
+											"transition-all duration-200 rounded-lg py-5 px-3",
+											pathname === item.url
+												? "bg-[#0F172A] text-white shadow-md hover:bg-[#1E293B] hover:text-white"
+												: "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50",
+										)}
 									>
-										<Link href={item.url}>
-											<item.icon />
-											<span>{item.title}</span>
+										<Link href={item.url} className="flex items-center gap-3">
+											<item.icon
+												className={cn(
+													"h-4.5 w-4.5",
+													pathname === item.url
+														? "text-[#FACC15]"
+														: "text-zinc-400",
+												)}
+											/>
+											<span className="font-medium text-sm">{item.title}</span>
 										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
@@ -141,63 +172,97 @@ function AppSidebarContent() {
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
+
+				{/* Network Status indicator in Sidebar */}
+				<div className="mt-auto px-4 py-4 group-data-[collapsible=icon]:hidden">
+					<div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm">
+						<div className="flex items-center justify-between mb-2">
+							<span className="text-[10px] font-bold uppercase text-zinc-400">
+								Network
+							</span>
+							{networkLocation === "on-campus" ? (
+								<School className="h-3 w-3 text-emerald-500" />
+							) : (
+								<Globe className="h-3 w-3 text-amber-500" />
+							)}
+						</div>
+						<div className="flex items-center gap-2">
+							<div
+								className={cn(
+									"h-2 w-2 rounded-full animate-pulse",
+									networkLocation === "on-campus"
+										? "bg-emerald-500"
+										: "bg-amber-500",
+								)}
+							/>
+							<span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 capitalize">
+								{networkLocation.replace("-", " ")}
+							</span>
+						</div>
+					</div>
+				</div>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t p-2">
+			<SidebarFooter className="border-t border-zinc-100 dark:border-zinc-800 p-3 bg-white dark:bg-zinc-950">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size="lg"
-									className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+									className="transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-xl"
 								>
-									<Avatar className="h-8 w-8 rounded-lg">
-										<AvatarFallback className="rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs">
+									<Avatar className="h-9 w-9 rounded-lg border-2 border-zinc-100 dark:border-zinc-800 shadow-sm">
+										<AvatarFallback className="rounded-lg bg-[#0F172A] text-[#FACC15] text-xs font-bold">
 											{userInitials}
 										</AvatarFallback>
 									</Avatar>
-									<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-										<span className="truncate font-semibold">
+									<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-1">
+										<span className="truncate font-bold text-zinc-900 dark:text-zinc-100">
 											{session?.user?.name || "Anonymous"}
 										</span>
-										<span className="truncate text-xs text-muted-foreground">
+										<span className="truncate text-[10px] text-zinc-500 font-medium">
 											{session?.user?.email}
 										</span>
 									</div>
-									<ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
+									<ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden text-zinc-400" />
 								</SidebarMenuButton>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
-								className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+								className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl p-2 shadow-2xl"
 								side="top"
 								align="end"
-								sideOffset={4}
+								sideOffset={8}
 							>
-								<DropdownMenuLabel className="p-0 font-normal">
-									<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-										<Avatar className="h-8 w-8 rounded-lg">
-											<AvatarFallback className="rounded-lg bg-zinc-100 dark:bg-zinc-800">
+								<DropdownMenuLabel className="px-2 py-2 font-normal">
+									<div className="flex items-center gap-3">
+										<Avatar className="h-9 w-9 rounded-lg">
+											<AvatarFallback className="rounded-lg bg-[#0F172A] text-[#FACC15] font-bold">
 												{userInitials}
 											</AvatarFallback>
 										</Avatar>
 										<div className="grid flex-1 text-left text-sm leading-tight">
-											<span className="truncate font-semibold">
+											<span className="truncate font-bold text-zinc-900 dark:text-zinc-100">
 												{session?.user?.name}
 											</span>
-											<span className="truncate text-xs text-muted-foreground">
-												{session?.user?.email}
+											<span className="truncate text-xs text-zinc-500 font-medium">
+												{session?.user?.role}
 											</span>
 										</div>
 									</div>
 								</DropdownMenuLabel>
-								<DropdownMenuSeparator />
+								<DropdownMenuSeparator className="my-2" />
+								<DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2">
+									<Settings className="h-4 w-4 text-zinc-400" />
+									<span className="font-medium">Account Settings</span>
+								</DropdownMenuItem>
+								<DropdownMenuSeparator className="my-2" />
 								<DropdownMenuItem
 									onClick={handleSignOut}
-									className="text-destructive focus:text-destructive cursor-pointer"
+									className="rounded-lg gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer py-2"
 								>
-									<LogOut className="mr-2 h-4 w-4" />
-									<span>Log out</span>
+									<LogOut className="h-4 w-4" />
+									<span className="font-bold">Log out</span>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
