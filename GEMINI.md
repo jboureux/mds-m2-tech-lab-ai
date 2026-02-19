@@ -43,6 +43,7 @@ Developer operations are orchestrated via a `Taskfile.yml`:
 - `task logs`: Follow container logs.
 - `task migrate:data`: Execute pending data migrations.
 - **shadcn/ui**: To add components, use `docker compose exec web pnpm --filter web exec shadcn add <component-name>`.
+- **Database Migration**: To apply schema changes, **NEVER** use `prisma db push`. Always use `docker compose exec web pnpm --filter web exec prisma migrate dev --name <migration-name>`.
 
 ## 🔐 Core Logic Mandates
 

@@ -26,9 +26,16 @@ import db from "@/lib/prisma";
  */
 export default async function AdminUsersPage() {
 	// Authentication & Authorization check
-	const session = await auth.api.getSession({
+	const sessionResponse = await auth.api.getSession({
 		headers: await headers(),
 	});
+
+	// Cast the user to include the role field for TypeScript safety if automatic inference fails
+	const session = sessionResponse as
+		| (typeof sessionResponse & {
+				user: { role: string };
+		  })
+		| null;
 
 	if (!session || session.user.role !== "ADMIN") {
 		redirect("/access-denied");

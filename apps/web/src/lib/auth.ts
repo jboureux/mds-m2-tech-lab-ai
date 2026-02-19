@@ -1,7 +1,7 @@
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
-import { magicLink } from "better-auth/plugins";
+import { admin, magicLink } from "better-auth/plugins";
 import db from "./prisma";
 import { resend } from "./resend";
 import { getRuntimeConfig } from "./runtime-config";
@@ -10,6 +10,15 @@ export const auth = betterAuth({
 	database: prismaAdapter(db, {
 		provider: "postgresql",
 	}),
+	user: {
+		additionalFields: {
+			role: {
+				type: "string",
+				input: false,
+				defaultValue: "USER",
+			},
+		},
+	},
 	databaseHooks: {
 		user: {
 			create: {
@@ -37,12 +46,26 @@ export const auth = betterAuth({
 		},
 	},
 	plugins: [
+		admin(),
 		magicLink({
 			sendMagicLink: async ({ email, token: _token, url }, _ctx) => {
+				// 1. Check if user is authorized (either already registered or pre-registered)
+				const [existingUser, preRegistered] = await Promise.all([
+					db.user.findUnique({ where: { email } }),
+					db.preRegisteredUser.findUnique({ where: { email } }),
+				]);
+
+				if (!existingUser && !preRegistered) {
+					// Throwing an APIError here will be caught by the client
+					// and prevent the email from being sent.
+					throw new APIError("BAD_REQUEST", {
+						message: "SIGNUP_DISABLED",
+					});
+				}
+
 				const { error } = await resend.emails.send({
 					from:
-						process.env.EMAIL_FROM ||
-						"My Digital Scoop <noreply@mydigitalscoop.com>",
+						process.env.RESEND_FROM_ADDRESS || "Test Mail <test@resend.dev>",
 					to: [email],
 					subject: "Sign in to My Digital Scoop",
 					html: `<p>Click the link below to sign in to your account:</p><p><a href="${url}">Sign in</a></p>`,
@@ -53,8 +76,9 @@ export const auth = betterAuth({
 					throw new Error("Failed to send magic link email");
 				}
 			},
-			// Disable self-signup via magic link - only existing users can sign in
-			disableSignUp: true,
+			// Must be false to allow pre-registered users to create their account on first login.
+			// Security is still enforced by databaseHooks.user.create.before and the check above.
+			disableSignUp: false,
 		}),
 	],
 	// Base URL for better-auth
