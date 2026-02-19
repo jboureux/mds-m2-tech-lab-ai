@@ -13,5 +13,12 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN pnpm config set store-dir /pnpm/store
 
-# Ensure dependencies are installed and then start the dev server
-CMD ["sh", "-c", "pnpm install && pnpm dev"]
+# Copy and set up the entrypoint script
+COPY docker/dev-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Use the entrypoint
+ENTRYPOINT ["entrypoint.sh"]
+
+# Default command to start the dev server
+CMD ["pnpm", "dev"]

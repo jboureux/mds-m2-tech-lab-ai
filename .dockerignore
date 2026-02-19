@@ -6,4 +6,5 @@ dist
 *.log
 .git
 .env*
-docker/
+# docker/ (allowed to include build scripts)
+!docker/prod-entrypoint.sh
