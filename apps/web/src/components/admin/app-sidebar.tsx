@@ -115,11 +115,11 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 	return (
 		<Sidebar
 			collapsible="icon"
-			className="border-r bg-zinc-50/50 dark:bg-zinc-900/50"
+			className="border-r bg-sidebar text-sidebar-foreground"
 		>
-			<SidebarHeader className="h-16 flex items-center justify-center border-b bg-background/50 backdrop-blur-sm">
+			<SidebarHeader className="h-16 flex items-center justify-center border-b bg-sidebar">
 				<Link href="/" className="flex items-center gap-3 px-2 group">
-					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 active:scale-95">
+					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105 active:scale-95">
 						<School className="h-5 w-5" />
 					</div>
 					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
@@ -148,7 +148,7 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 											"transition-all duration-200 rounded-lg py-5 px-3",
 											pathname === item.url
 												? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
-												: "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+												: "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 										)}
 									>
 										<Link href={item.url} className="flex items-center gap-3">
@@ -170,7 +170,7 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 				</SidebarGroup>
 
 				<div className="mt-auto px-4 py-4 group-data-[collapsible=icon]:hidden">
-					<div className="rounded-xl border bg-muted/30 p-3 shadow-inner">
+					<div className="rounded-xl border bg-muted/20 p-3 shadow-inner">
 						<div className="flex items-center justify-between mb-2">
 							<span className="text-[10px] font-bold uppercase text-muted-foreground/70">
 								Network Status
@@ -186,8 +186,8 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 								className={cn(
 									"h-2 w-2 rounded-full animate-pulse",
 									networkLocation === "on-campus"
-										? "bg-emerald-500"
-										: "bg-amber-500",
+										? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+										: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
 								)}
 							/>
 							<span className="text-[11px] font-bold text-foreground capitalize">
@@ -198,14 +198,14 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 				</div>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t p-3 bg-background/50">
+			<SidebarFooter className="border-t p-3 bg-sidebar">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size="lg"
-									className="transition-colors hover:bg-muted rounded-xl"
+									className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-xl"
 								>
 									<Avatar className="h-9 w-9 rounded-lg border shadow-sm">
 										<AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-bold">
@@ -237,7 +237,7 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 											</AvatarFallback>
 										</Avatar>
 										<div className="grid flex-1 text-left text-sm leading-tight">
-											<span className="truncate font-bold">
+											<span className="truncate font-bold text-foreground">
 												{session?.user?.name}
 											</span>
 											<span className="truncate text-xs text-muted-foreground font-medium">
