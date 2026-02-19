@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
 /**
  * Admin Users page showing signed-in users and pre-registered ones.
