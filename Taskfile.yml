@@ -23,14 +23,15 @@ tasks:
       - "{{.DOCKER_COMPOSE}} down"
 
   sh:
-    desc: Open a shell inside the app container
+    desc: Open a shell inside the app container (interactive)
     cmds:
       - "{{.DOCKER_COMPOSE}} exec web sh"
+    interactive: true
 
   logs:
-    desc: Follow container logs
+    desc: Follow container logs (optional filter: task logs -- web)
     cmds:
-      - "{{.DOCKER_COMPOSE}} logs -f"
+      - "{{.DOCKER_COMPOSE}} logs -f {{.CLI_ARGS}}"
 
   migrate:data:
     desc: Execute pending data migrations
