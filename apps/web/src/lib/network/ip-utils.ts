@@ -88,7 +88,7 @@ function normalizeIp(ip: string): string | null {
 	try {
 		const addr = ipaddr.process(cleanIp);
 		return addr.toString();
-	} catch (e) {
+	} catch (_e) {
 		return null;
 	}
 }
@@ -108,7 +108,7 @@ function isTrusted(ip: string, trustedProxies: string[]): boolean {
 				if (addr.toString() === proxyAddr.toString()) return true;
 			}
 		}
-	} catch (e) {
+	} catch (_e) {
 		// Ignore parsing errors for individual trusted proxies
 	}
 	return false;
