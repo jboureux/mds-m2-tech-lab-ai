@@ -67,17 +67,14 @@ export function AppSidebar() {
 
 	if (!mounted) {
 		return (
-			<Sidebar
-				collapsible="icon"
-				className="border-r border-zinc-200 dark:border-zinc-800"
-			>
-				<SidebarHeader className="h-16 flex items-center justify-center border-b border-zinc-100 dark:border-zinc-800">
-					<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-						<School className="h-5 w-5 text-zinc-400" />
+			<Sidebar collapsible="icon" className="border-r">
+				<SidebarHeader className="h-16 flex items-center justify-center border-b">
+					<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+						<School className="h-5 w-5 text-muted-foreground" />
 					</div>
 				</SidebarHeader>
 				<SidebarContent />
-				<SidebarFooter className="border-t border-zinc-100 dark:border-zinc-800 p-2" />
+				<SidebarFooter className="border-t p-2" />
 			</Sidebar>
 		);
 	}
@@ -90,10 +87,7 @@ function AppSidebarContent() {
 	const pathname = usePathname();
 	const router = useRouter();
 
-	// Access network location from headers isn't direct here,
-	// but we can assume it might be passed or fetched.
-	// For now, let's use a dummy state or wait for implementation.
-	const networkLocation = "on-campus"; // This should ideally come from a context/provider
+	const networkLocation = "on-campus";
 
 	const handleSignOut = async () => {
 		await signOut({
@@ -115,20 +109,15 @@ function AppSidebarContent() {
 		: "U";
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			className="border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50"
-		>
-			<SidebarHeader className="h-16 flex items-center justify-center border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+		<Sidebar collapsible="icon" className="border-r bg-sidebar">
+			<SidebarHeader className="h-16 flex items-center justify-center border-b bg-background">
 				<Link href="/" className="flex items-center gap-3 px-2 group">
-					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F172A] text-[#FACC15] shadow-lg transition-transform group-hover:scale-105 active:scale-95">
+					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105 active:scale-95">
 						<School className="h-5 w-5" />
 					</div>
 					<div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
-						<span className="font-bold text-sm tracking-tight text-zinc-900 dark:text-zinc-100">
-							MDS Admin
-						</span>
-						<span className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">
+						<span className="font-bold text-sm tracking-tight">MDS Admin</span>
+						<span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
 							Internal Portal
 						</span>
 					</div>
@@ -137,7 +126,7 @@ function AppSidebarContent() {
 
 			<SidebarContent className="px-2 py-4">
 				<SidebarGroup>
-					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
 						Core Systems
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -151,8 +140,8 @@ function AppSidebarContent() {
 										className={cn(
 											"transition-all duration-200 rounded-lg py-5 px-3",
 											pathname === item.url
-												? "bg-[#0F172A] text-white shadow-md hover:bg-[#1E293B] hover:text-white"
-												: "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50",
+												? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+												: "text-sidebar-foreground hover:bg-sidebar-accent/50",
 										)}
 									>
 										<Link href={item.url} className="flex items-center gap-3">
@@ -160,8 +149,8 @@ function AppSidebarContent() {
 												className={cn(
 													"h-4.5 w-4.5",
 													pathname === item.url
-														? "text-[#FACC15]"
-														: "text-zinc-400",
+														? "text-primary"
+														: "text-muted-foreground",
 												)}
 											/>
 											<span className="font-medium text-sm">{item.title}</span>
@@ -173,11 +162,10 @@ function AppSidebarContent() {
 					</SidebarGroupContent>
 				</SidebarGroup>
 
-				{/* Network Status indicator in Sidebar */}
 				<div className="mt-auto px-4 py-4 group-data-[collapsible=icon]:hidden">
-					<div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm">
+					<div className="rounded-xl border bg-card p-3 shadow-sm">
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-[10px] font-bold uppercase text-zinc-400">
+							<span className="text-[10px] font-bold uppercase text-muted-foreground">
 								Network
 							</span>
 							{networkLocation === "on-campus" ? (
@@ -195,7 +183,7 @@ function AppSidebarContent() {
 										: "bg-amber-500",
 								)}
 							/>
-							<span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 capitalize">
+							<span className="text-[11px] font-semibold text-foreground capitalize">
 								{networkLocation.replace("-", " ")}
 							</span>
 						</div>
@@ -203,29 +191,29 @@ function AppSidebarContent() {
 				</div>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t border-zinc-100 dark:border-zinc-800 p-3 bg-white dark:bg-zinc-950">
+			<SidebarFooter className="border-t p-3 bg-background">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size="lg"
-									className="transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-xl"
+									className="transition-colors hover:bg-accent rounded-xl"
 								>
-									<Avatar className="h-9 w-9 rounded-lg border-2 border-zinc-100 dark:border-zinc-800 shadow-sm">
-										<AvatarFallback className="rounded-lg bg-[#0F172A] text-[#FACC15] text-xs font-bold">
+									<Avatar className="h-9 w-9 rounded-lg border shadow-sm">
+										<AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-bold">
 											{userInitials}
 										</AvatarFallback>
 									</Avatar>
 									<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-1">
-										<span className="truncate font-bold text-zinc-900 dark:text-zinc-100">
+										<span className="truncate font-bold">
 											{session?.user?.name || "Anonymous"}
 										</span>
-										<span className="truncate text-[10px] text-zinc-500 font-medium">
+										<span className="truncate text-[10px] text-muted-foreground font-medium">
 											{session?.user?.email}
 										</span>
 									</div>
-									<ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden text-zinc-400" />
+									<ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden text-muted-foreground" />
 								</SidebarMenuButton>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
@@ -234,18 +222,18 @@ function AppSidebarContent() {
 								align="end"
 								sideOffset={8}
 							>
-								<DropdownMenuLabel className="px-2 py-2 font-normal">
-									<div className="flex items-center gap-3">
+								<DropdownMenuLabel className="p-0 font-normal">
+									<div className="flex items-center gap-3 px-1 py-1.5 text-left text-sm leading-tight">
 										<Avatar className="h-9 w-9 rounded-lg">
-											<AvatarFallback className="rounded-lg bg-[#0F172A] text-[#FACC15] font-bold">
+											<AvatarFallback className="rounded-lg bg-primary text-primary-foreground font-bold">
 												{userInitials}
 											</AvatarFallback>
 										</Avatar>
 										<div className="grid flex-1 text-left text-sm leading-tight">
-											<span className="truncate font-bold text-zinc-900 dark:text-zinc-100">
+											<span className="truncate font-bold">
 												{session?.user?.name}
 											</span>
-											<span className="truncate text-xs text-zinc-500 font-medium">
+											<span className="truncate text-xs text-muted-foreground font-medium">
 												{session?.user?.role}
 											</span>
 										</div>
@@ -253,7 +241,7 @@ function AppSidebarContent() {
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator className="my-2" />
 								<DropdownMenuItem className="rounded-lg gap-2 cursor-pointer py-2">
-									<Settings className="h-4 w-4 text-zinc-400" />
+									<Settings className="h-4 w-4 text-muted-foreground" />
 									<span className="font-medium">Account Settings</span>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator className="my-2" />

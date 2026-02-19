@@ -75,11 +75,11 @@ export default async function AdminUsersPage() {
 			{/* Page Header */}
 			<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
 				<div className="space-y-1.5">
-					<div className="flex items-center gap-2 text-[#FACC15] font-bold text-xs uppercase tracking-[0.2em]">
+					<div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em]">
 						<Users className="h-3 w-3" />
 						Identity & Access
 					</div>
-					<h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 lg:text-5xl">
+					<h1 className="text-4xl font-black tracking-tight lg:text-5xl">
 						User Management
 					</h1>
 					<p className="text-muted-foreground text-lg max-w-2xl">
@@ -88,10 +88,7 @@ export default async function AdminUsersPage() {
 					</p>
 				</div>
 				<div className="flex gap-3">
-					<Button
-						variant="outline"
-						className="hidden md:flex gap-2 border-zinc-200 dark:border-zinc-800 shadow-sm"
-					>
+					<Button variant="outline" className="hidden md:flex gap-2 shadow-sm">
 						<Filter className="h-4 w-4" />
 						Filters
 					</Button>
@@ -130,8 +127,8 @@ export default async function AdminUsersPage() {
 			{/* Main Content Areas */}
 			<div className="grid grid-cols-1 2xl:grid-cols-5 gap-8">
 				{/* Recent Users Table */}
-				<Card className="2xl:col-span-3 shadow-xl border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden bg-white dark:bg-zinc-950">
-					<CardHeader className="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/30 dark:bg-zinc-900/20 py-6 px-8">
+				<Card className="2xl:col-span-3 shadow-xl overflow-hidden">
+					<CardHeader className="border-b bg-muted/20 py-6 px-8">
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<CardTitle className="text-xl font-bold tracking-tight">
@@ -142,10 +139,10 @@ export default async function AdminUsersPage() {
 								</CardDescription>
 							</div>
 							<div className="relative w-64 hidden sm:block">
-								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 								<Input
 									placeholder="Search by name or email..."
-									className="pl-9 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-9 text-xs"
+									className="pl-9 bg-background h-9 text-xs"
 								/>
 							</div>
 						</div>
@@ -153,18 +150,18 @@ export default async function AdminUsersPage() {
 					<CardContent className="p-0">
 						<div className="overflow-x-auto">
 							<Table>
-								<TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/30">
-									<TableRow className="hover:bg-transparent border-b border-zinc-100 dark:border-zinc-900">
-										<TableHead className="py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+								<TableHeader className="bg-muted/30">
+									<TableRow className="hover:bg-transparent border-b">
+										<TableHead className="py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											User Profile
 										</TableHead>
-										<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+										<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											Role
 										</TableHead>
-										<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+										<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											Status
 										</TableHead>
-										<TableHead className="text-right py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+										<TableHead className="text-right py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											Join Date
 										</TableHead>
 									</TableRow>
@@ -173,18 +170,18 @@ export default async function AdminUsersPage() {
 									{users.map((user) => (
 										<TableRow
 											key={user.id}
-											className="group border-b border-zinc-50 dark:border-zinc-900 transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20"
+											className="group border-b transition-colors hover:bg-muted/20"
 										>
 											<TableCell className="py-4 px-8">
 												<div className="flex items-center gap-3">
-													<div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0F172A] text-[#FACC15] text-xs font-bold shadow-sm">
+													<div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-sm">
 														{user.name?.[0].toUpperCase() || "A"}
 													</div>
 													<div className="flex flex-col">
-														<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm group-hover:text-primary transition-colors">
+														<span className="font-bold text-sm group-hover:text-primary transition-colors">
 															{user.name || "Anonymous"}
 														</span>
-														<span className="text-[11px] text-zinc-500 font-medium flex items-center gap-1">
+														<span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
 															<Mail className="h-2.5 w-2.5" />
 															{user.email}
 														</span>
@@ -197,8 +194,8 @@ export default async function AdminUsersPage() {
 													className={cn(
 														"capitalize font-bold text-[10px] px-2 py-0 border shadow-none",
 														user.role === "ADMIN"
-															? "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30"
-															: "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700",
+															? "bg-destructive/10 text-destructive border-destructive/20"
+															: "bg-secondary text-secondary-foreground border-border",
 													)}
 												>
 													{user.role.toLowerCase()}
@@ -213,7 +210,7 @@ export default async function AdminUsersPage() {
 												</div>
 											</TableCell>
 											<TableCell className="text-right py-4 px-8">
-												<span className="text-[11px] font-medium text-zinc-500 flex items-center justify-end gap-1.5">
+												<span className="text-[11px] font-medium text-muted-foreground flex items-center justify-end gap-1.5">
 													<Calendar className="h-3 w-3" />
 													{new Date(user.createdAt).toLocaleDateString(
 														undefined,
@@ -227,7 +224,7 @@ export default async function AdminUsersPage() {
 										<TableRow>
 											<TableCell
 												colSpan={4}
-												className="text-center py-16 text-zinc-400 italic"
+												className="text-center py-16 text-muted-foreground italic"
 											>
 												No active scholars found in the registry.
 											</TableCell>
@@ -236,8 +233,8 @@ export default async function AdminUsersPage() {
 								</TableBody>
 							</Table>
 						</div>
-						<div className="py-4 px-8 border-t border-zinc-50 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/10 flex justify-between items-center">
-							<span className="text-[11px] font-medium text-zinc-400">
+						<div className="py-4 px-8 border-t bg-muted/10 flex justify-between items-center">
+							<span className="text-[11px] font-medium text-muted-foreground">
 								Showing {users.length} of {totalUsers} active users
 							</span>
 							<Button
@@ -252,8 +249,8 @@ export default async function AdminUsersPage() {
 				</Card>
 
 				{/* Pre-registered Pool Card */}
-				<Card className="2xl:col-span-2 shadow-xl border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden bg-white dark:bg-zinc-950">
-					<CardHeader className="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/30 dark:bg-zinc-900/20 py-6 px-8">
+				<Card className="2xl:col-span-2 shadow-xl overflow-hidden">
+					<CardHeader className="border-b bg-muted/20 py-6 px-8">
 						<CardTitle className="text-xl font-bold tracking-tight">
 							Authorization Pool
 						</CardTitle>
@@ -263,12 +260,12 @@ export default async function AdminUsersPage() {
 					</CardHeader>
 					<CardContent className="p-0">
 						<Table>
-							<TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/30">
-								<TableRow className="hover:bg-transparent border-b border-zinc-100 dark:border-zinc-900">
-									<TableHead className="py-4 px-8 font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+							<TableHeader className="bg-muted/30">
+								<TableRow className="hover:bg-transparent border-b">
+									<TableHead className="py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 										Credential
 									</TableHead>
-									<TableHead className="font-bold text-zinc-500 uppercase text-[10px] tracking-wider">
+									<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 										Target Role
 									</TableHead>
 									<TableHead className="text-right py-4 px-8"></TableHead>
@@ -278,14 +275,14 @@ export default async function AdminUsersPage() {
 								{preRegistered.map((user) => (
 									<TableRow
 										key={user.id}
-										className="group border-b border-zinc-50 dark:border-zinc-900 hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors"
+										className="group border-b hover:bg-muted/20 transition-colors"
 									>
 										<TableCell className="py-4 px-8">
 											<div className="flex flex-col">
-												<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+												<span className="font-bold text-sm">
 													{user.name || "N/A"}
 												</span>
-												<span className="text-[11px] text-zinc-500 font-medium">
+												<span className="text-[11px] text-muted-foreground font-medium">
 													{user.email}
 												</span>
 											</div>
@@ -293,7 +290,7 @@ export default async function AdminUsersPage() {
 										<TableCell>
 											<Badge
 												variant="outline"
-												className="capitalize font-bold text-[9px] px-2 py-0 border-zinc-200 dark:border-zinc-800 shadow-none text-zinc-500 dark:text-zinc-400"
+												className="capitalize font-bold text-[9px] px-2 py-0 shadow-none text-muted-foreground"
 											>
 												{user.role.toLowerCase()}
 											</Badge>
@@ -302,7 +299,7 @@ export default async function AdminUsersPage() {
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg"
+												className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
 											>
 												<MoreHorizontal className="h-4 w-4" />
 											</Button>
@@ -313,10 +310,10 @@ export default async function AdminUsersPage() {
 									<TableRow>
 										<TableCell
 											colSpan={3}
-											className="text-center py-12 text-zinc-400 italic px-8"
+											className="text-center py-12 text-muted-foreground italic px-8"
 										>
 											Registry is empty. Use the{" "}
-											<strong className="text-zinc-600 dark:text-zinc-300">
+											<strong className="text-foreground">
 												Import Utility
 											</strong>{" "}
 											to authorize new identities.
@@ -325,11 +322,11 @@ export default async function AdminUsersPage() {
 								)}
 							</TableBody>
 						</Table>
-						<div className="py-4 px-8 border-t border-zinc-50 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-900/10 flex justify-center">
+						<div className="py-4 px-8 border-t bg-muted/10 flex justify-center">
 							<Button
 								variant="ghost"
 								size="sm"
-								className="text-[11px] font-bold text-zinc-400 hover:bg-transparent hover:text-zinc-900 dark:hover:text-zinc-100 uppercase tracking-widest"
+								className="text-[11px] font-bold text-muted-foreground hover:bg-transparent hover:text-foreground uppercase tracking-widest"
 							>
 								Manage Pool
 							</Button>
@@ -365,9 +362,9 @@ function StatsCard({
 	};
 
 	return (
-		<Card className="shadow-sm border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 group hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+		<Card className="shadow-sm bg-card group hover:shadow-md transition-all duration-300 hover:-translate-y-1">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-				<CardTitle className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+				<CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
 					{title}
 				</CardTitle>
 				<div className={cn("p-2 rounded-lg border", colorMap[color])}>
@@ -375,17 +372,15 @@ function StatsCard({
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-					{value}
-				</div>
-				<p className="text-[11px] text-zinc-500 font-medium mt-1">
+				<div className="text-3xl font-black tracking-tight">{value}</div>
+				<p className="text-[11px] text-muted-foreground font-medium mt-1">
 					{description}
 				</p>
-				<div className="mt-4 pt-4 border-t border-zinc-50 dark:border-zinc-900 flex items-center justify-between">
-					<span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+				<div className="mt-4 pt-4 border-t flex items-center justify-between">
+					<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
 						{trend}
 					</span>
-					<div className="h-1.5 w-1.5 rounded-full bg-[#FACC15] animate-pulse" />
+					<div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
 				</div>
 			</CardContent>
 		</Card>
