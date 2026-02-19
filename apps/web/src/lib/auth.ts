@@ -28,7 +28,7 @@ export const auth = betterAuth({
 						data: {
 							...user,
 							role: preRegistered.role,
-							name: user.name || preRegistered.name,
+							name: user.name || preRegistered.name || undefined,
 						},
 					};
 				},
