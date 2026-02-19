@@ -42,6 +42,7 @@ Developer operations are orchestrated via a `Taskfile.yml`:
 - `task sh`: Open a shell inside the app container.
 - `task logs`: Follow container logs.
 - `task migrate:data`: Execute pending data migrations.
+- **shadcn/ui**: To add components, use `docker compose exec web pnpm --filter web exec shadcn add <component-name>`.
 
 ## 🔐 Core Logic Mandates
 
