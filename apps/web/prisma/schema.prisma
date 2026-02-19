@@ -62,6 +62,17 @@ model Account {
   @@map("account")
 }
 
+model PreRegisteredUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pre_registered_user")
+}
+
 model Session {
   id        String   @id @default(cuid())
   expiresAt DateTime
