@@ -1,29 +1,16 @@
 #!/bin/sh
 set -e
 
-# Wait for database if needed (db healthcheck is already in docker-compose, but let's be safe)
+# Wait for database if needed
 echo "⏳ Checking database connection..."
 
-# Install dependencies if node_modules is missing or package.json changed
+# Install dependencies
 echo "📦 Checking/Installing dependencies..."
 pnpm install
 
-# Force rebuild of native modules to ensure they match the container architecture (ARM64)
-echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp, prisma)..."
-# Clean up potential broken build artifacts that cause issues with bind mounts
-find node_modules/.pnpm -name "build" -type d -exec rm -rf {} + 2>/dev/null || true
-pnpm rebuild @tensorflow/tfjs-node sharp prisma @prisma/client || echo "⚠️ Rebuild partially failed."
-
-# Configure shared library path for TensorFlow
-if [ -d "/app/node_modules/@tensorflow/tfjs-node/deps/lib" ]; then
-  mkdir -p /etc/ld.so.conf.d
-  echo "/app/node_modules/@tensorflow/tfjs-node/deps/lib" > /etc/ld.so.conf.d/tensorflow.conf
-  ldconfig || echo "⚠️ ldconfig failed"
-fi
-
 # Generate Prisma Client
 echo "🏗️ Generating Prisma client..."
-pnpm --filter web exec prisma generate
+pnpm --filter web exec prisma generate || echo "⚠️ Prisma generation failed."
 
 # Execute migrations if the migrations folder exists, otherwise push the schema
 if [ -d "apps/web/prisma/migrations" ]; then

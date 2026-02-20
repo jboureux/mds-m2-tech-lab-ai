@@ -35,8 +35,9 @@ export async function getToxicityModel() {
 		try {
 			// Try to load the native node backend for performance
 			try {
+				console.log("[TOXICITY] Attempting to load native Node.js backend...");
 				// Use createRequire to safely load native modules in ESM environment
-				const { createRequire } = await import("module");
+				const { createRequire } = await import("node:module");
 				const require = createRequire(import.meta.url);
 				require("@tensorflow/tfjs-node");
 				console.log("[TOXICITY] Native Node.js backend loaded successfully.");
@@ -44,7 +45,10 @@ export async function getToxicityModel() {
 				console.warn(
 					"[TOXICITY] Native Node.js backend failed to load, falling back to CPU backend. Performance may be affected.",
 				);
-				console.error("[TOXICITY] Backend load error:", e);
+				// Log the error message for debugging, but don't re-throw
+				const errorMsg = e instanceof Error ? e.message : String(e);
+				console.log(`[TOXICITY] Backend load details: ${errorMsg}`);
+				
 				// Ensure CPU backend is used if native fails
 				if (!tf.getBackend()) {
 					await tf.setBackend("cpu");
