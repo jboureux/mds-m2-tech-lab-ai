@@ -7,7 +7,6 @@ import { CommentForm } from "@/components/social/comment-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
 import { useReplyStore } from "@/store/reply-store";
 
 interface CommentProps {
@@ -24,17 +23,23 @@ interface CommentProps {
 		};
 		replies?: CommentProps["comment"][];
 	};
+	currentUser?: {
+		name: string;
+		image?: string | null;
+	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
+	isStaff?: boolean;
 }
 
 export function Comment({
 	comment,
+	currentUser,
 	isAllowedToComment,
 	restrictionReason,
+	isStaff = false,
 }: CommentProps) {
 	const [mounted, setMounted] = React.useState(false);
-	const { data: session } = useSession();
 	const { replyingToId, setReplyingTo, cancelReply } = useReplyStore();
 
 	const isReplying = replyingToId === comment.id;
@@ -79,10 +84,22 @@ export function Comment({
 
 			<div className="text-sm pl-9 space-y-2">
 				{comment.isToxic ? (
-					<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
-						<ShieldAlert className="h-3 w-3 shrink-0" />
-						Content flagged.
-					</div>
+					isStaff ? (
+						<div className="space-y-2">
+							<div className="flex items-center gap-2 p-1.5 rounded bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase border border-amber-100 dark:border-amber-900/50">
+								<ShieldAlert className="h-3 w-3 shrink-0" />
+								Staff View: Toxic Comment
+							</div>
+							<p className="text-slate-700 dark:text-slate-300 italic opacity-80">
+								{comment.content}
+							</p>
+						</div>
+					) : (
+						<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
+							<ShieldAlert className="h-3 w-3 shrink-0" />
+							Content flagged.
+						</div>
+					)
 				) : (
 					<p className="text-slate-700 dark:text-slate-300">
 						{comment.content}
@@ -102,15 +119,12 @@ export function Comment({
 				</div>
 			</div>
 
-			{isReplying && session?.user && (
+			{isReplying && currentUser && (
 				<div className="pl-9">
 					<CommentForm
 						postId={comment.postId}
 						parentId={comment.id}
-						user={{
-							name: session.user.name,
-							image: session.user.image ?? null,
-						}}
+						user={currentUser}
 						isAllowedToComment={isAllowedToComment}
 						restrictionReason={restrictionReason}
 						onCancel={cancelReply}
@@ -125,8 +139,10 @@ export function Comment({
 						<Comment
 							key={reply.id}
 							comment={reply}
+							currentUser={currentUser}
 							isAllowedToComment={isAllowedToComment}
 							restrictionReason={restrictionReason}
+							isStaff={isStaff}
 						/>
 					))}
 				</div>

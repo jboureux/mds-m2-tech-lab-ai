@@ -32,6 +32,7 @@ export default async function PostPage({ params }: PostPageProps) {
 		include: {
 			author: {
 				select: {
+					id: true,
 					name: true,
 					image: true,
 					role: true,
@@ -115,7 +116,7 @@ export default async function PostPage({ params }: PostPageProps) {
 				</Button>
 
 				<article>
-					<PostCard post={post} />
+					<PostCard post={post} isStaff={isStaff} />
 				</article>
 
 				<section className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm space-y-6">
@@ -146,9 +147,14 @@ export default async function PostPage({ params }: PostPageProps) {
 							post.comments.map((comment) => (
 								<Comment
 									key={comment.id}
-									comment={comment}
+									comment={comment as any}
+									currentUser={{
+										name: session.user.name,
+										image: session.user.image ?? null,
+									}}
 									isAllowedToComment={isAllowed}
 									restrictionReason={reason}
+									isStaff={isStaff}
 								/>
 							))
 						)}

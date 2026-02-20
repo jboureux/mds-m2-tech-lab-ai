@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 import { PostCard } from "./post-card";
 
 interface Post {
@@ -14,6 +15,7 @@ interface Post {
 	isToxic: boolean;
 	createdAt: string | Date;
 	author: {
+		id: string;
 		name: string | null;
 		image: string | null;
 		role: string;
@@ -25,9 +27,10 @@ interface Post {
 
 interface PostFeedProps {
 	initialPosts: Post[];
+	isStaff?: boolean;
 }
 
-export function PostFeed({ initialPosts }: PostFeedProps) {
+export function PostFeed({ initialPosts, isStaff = false }: PostFeedProps) {
 	const { ref, inView } = useInView({
 		threshold: 0.1,
 		rootMargin: "400px", // Increased margin to trigger even earlier
@@ -153,7 +156,7 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 
 			<div className="grid gap-6">
 				{posts.map((post, index) => (
-					<PostCard key={`${post.id}-${index}`} post={post} />
+					<PostCard key={`${post.id}-${index}`} post={post} isStaff={isStaff} />
 				))}
 			</div>
 

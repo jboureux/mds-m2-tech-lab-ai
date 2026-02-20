@@ -17,7 +17,22 @@ export async function checkPostingPermission(
 
 	const h = await headers();
 	const networkLocation = h.get("x-network-location") || "off-campus";
-	const { role } = session.user as User & { role: string };
+	const { role, banned, banExpires } = session.user as User & {
+		role: string;
+		banned?: boolean;
+		banExpires?: string | Date | null;
+	};
+
+	// Check if user is banned
+	if (banned) {
+		const isBanActive = !banExpires || new Date(banExpires) > new Date();
+		if (isBanActive) {
+			return {
+				isAllowed: false,
+				reason: "Forbidden: Your account has been banned.",
+			};
+		}
+	}
 
 	// ADMIN, MODERATOR, and VIP can always post
 	if (role !== "USER") {

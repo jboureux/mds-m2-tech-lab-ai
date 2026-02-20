@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ interface PostCardProps {
 		isToxic: boolean;
 		createdAt: Date | string;
 		author: {
+			id: string;
 			name: string | null;
 			image: string | null;
 			role: string;
@@ -38,9 +40,10 @@ interface PostCardProps {
 			comments: number;
 		};
 	};
+	isStaff?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, isStaff = false }: PostCardProps) {
 	const [mounted, setMounted] = React.useState(false);
 	const [liked, setLiked] = React.useState(false);
 
@@ -94,26 +97,45 @@ export function PostCard({ post }: PostCardProps) {
 						</span>
 					</div>
 				</div>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-				>
-					<MoreVertical className="h-4 w-4" />
-				</Button>
+				{isStaff ? (
+					<ModerationActions post={post} />
+				) : (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+					>
+						<MoreVertical className="h-4 w-4" />
+					</Button>
+				)}
 			</CardHeader>
 
 			<CardContent className="space-y-3 px-4 pb-4">
 				{isFlagged ? (
-					<div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm italic shadow-inner">
-						<ShieldAlert className="h-5 w-5 shrink-0" />
-						<div className="space-y-1">
-							<p className="font-bold not-italic">Hidden for moderation</p>
-							<p className="text-xs opacity-80">
-								This content has been flagged by our AI moderation system.
+					isStaff ? (
+						<div className="space-y-4">
+							<div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 text-[11px] font-bold uppercase tracking-tight shadow-sm">
+								<ShieldAlert className="h-4 w-4 shrink-0" />
+								<span>
+									Staff View: This post is flagged but visible to you for
+									review.
+								</span>
+							</div>
+							<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
+								{post.content}
 							</p>
 						</div>
-					</div>
+					) : (
+						<div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm italic shadow-inner">
+							<ShieldAlert className="h-5 w-5 shrink-0" />
+							<div className="space-y-1">
+								<p className="font-bold not-italic">Hidden for moderation</p>
+								<p className="text-xs opacity-80">
+									This content has been flagged by our AI moderation system.
+								</p>
+							</div>
+						</div>
+					)
 				) : (
 					<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
 						{post.content}

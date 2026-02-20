@@ -87,6 +87,7 @@ export async function GET(req: Request) {
 			include: {
 				author: {
 					select: {
+						id: true,
 						name: true,
 						image: true,
 						role: true,
