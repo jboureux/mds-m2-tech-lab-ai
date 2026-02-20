@@ -11,6 +11,7 @@ import {
 	User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type * as React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,11 +28,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { authClient, signOut, useSession } from "@/lib/auth-client";
+import { authClient, signOut } from "@/lib/auth-client";
 
-export function ProfileForm({ user: initialUser }: { user: User }) {
-	const { data: session } = useSession();
-	const user = (session?.user as User) || initialUser;
+export function ProfileForm({ user }: { user: User }) {
 	const router = useRouter();
 
 	const isStandardMember = user.role === "USER";
