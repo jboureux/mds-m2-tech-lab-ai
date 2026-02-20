@@ -29,6 +29,7 @@ export default async function Home() {
 		include: {
 			author: {
 				select: {
+					id: true,
 					name: true,
 					image: true,
 					role: true,

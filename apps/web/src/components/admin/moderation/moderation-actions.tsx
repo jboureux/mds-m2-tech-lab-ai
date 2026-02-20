@@ -96,7 +96,7 @@ export function ModerationActions({ post }: { post: Post }) {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						reason: banReason || "Violation of community guidelines",
-						durationInDays: parseInt(banDuration, 10),
+						durationInDays: Number.parseInt(banDuration, 10) || 0,
 					}),
 				},
 			);

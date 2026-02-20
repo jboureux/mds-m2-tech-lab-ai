@@ -28,11 +28,10 @@ export async function POST(
 		const { reason, durationInDays } = body;
 
 		let banExpires = null;
-		if (durationInDays) {
+		const days = Number.parseInt(durationInDays, 10);
+		if (!Number.isNaN(days) && days > 0) {
 			const now = new Date();
-			banExpires = new Date(
-				now.getTime() + durationInDays * 24 * 60 * 60 * 1000,
-			);
+			banExpires = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 		}
 
 		const user = await db.user.update({

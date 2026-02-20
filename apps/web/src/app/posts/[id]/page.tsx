@@ -32,6 +32,7 @@ export default async function PostPage({ params }: PostPageProps) {
 		include: {
 			author: {
 				select: {
+					id: true,
 					name: true,
 					image: true,
 					role: true,

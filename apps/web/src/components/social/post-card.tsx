@@ -32,6 +32,7 @@ interface PostCardProps {
 		isToxic: boolean;
 		createdAt: Date | string;
 		author: {
+			id: string;
 			name: string | null;
 			image: string | null;
 			role: string;

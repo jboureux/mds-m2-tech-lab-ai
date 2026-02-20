@@ -14,6 +14,7 @@ interface Post {
 	isToxic: boolean;
 	createdAt: string | Date;
 	author: {
+		id: string;
 		name: string | null;
 		image: string | null;
 		role: string;

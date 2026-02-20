@@ -71,7 +71,10 @@ describe("API: GET /api/admin/moderation/posts", () => {
 		expect(data).toEqual(mockPosts);
 		expect(db.post.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
-				where: { status: "FLAGGED" },
+				where: {
+					OR: [{ status: "FLAGGED" }, { isToxic: true }],
+					NOT: { status: "REMOVED" },
+				},
 			}),
 		);
 	});
