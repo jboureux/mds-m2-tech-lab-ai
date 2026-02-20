@@ -98,14 +98,14 @@ async function main() {
 			data: {
 				title: faker.lorem.sentence(),
 				content: faker.lorem.paragraphs(2),
-				published: true,
 				status: faker.helpers.arrayElement([
-					PostStatus.APPROVED,
-					PostStatus.APPROVED,
-					PostStatus.APPROVED,
+					PostStatus.PUBLISHED,
+					PostStatus.PUBLISHED,
+					PostStatus.PUBLISHED,
 					PostStatus.PENDING,
 					PostStatus.FLAGGED,
 				]),
+				isToxic: faker.datatype.boolean({ probability: 0.1 }),
 				authorId: author.id,
 			},
 		});
@@ -114,18 +114,36 @@ async function main() {
 	console.log(`📝 Seeded ${posts.length} posts.`);
 
 	// Seed Comments
+	const comments = [];
 	for (let i = 0; i < 30; i++) {
 		const author = faker.helpers.arrayElement(allUsers);
 		const post = faker.helpers.arrayElement(posts);
-		await prisma.comment.create({
+		const comment = await prisma.comment.create({
 			data: {
 				content: faker.lorem.sentence(),
+				isToxic: faker.datatype.boolean({ probability: 0.05 }),
 				postId: post.id,
 				authorId: author.id,
 			},
 		});
+		comments.push(comment);
 	}
-	console.log("💬 Seeded comments.");
+
+	// Seed some nested comments (Replies)
+	for (let i = 0; i < 15; i++) {
+		const author = faker.helpers.arrayElement(allUsers);
+		const parentComment = faker.helpers.arrayElement(comments);
+		await prisma.comment.create({
+			data: {
+				content: faker.lorem.sentence(),
+				isToxic: faker.datatype.boolean({ probability: 0.05 }),
+				postId: parentComment.postId,
+				authorId: author.id,
+				parentId: parentComment.id,
+			},
+		});
+	}
+	console.log("💬 Seeded comments and replies.");
 
 	console.log("✅ Seeding completed!");
 }
