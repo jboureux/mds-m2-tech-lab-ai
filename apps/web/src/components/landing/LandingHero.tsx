@@ -8,76 +8,89 @@ import { Button } from "@/components/ui/button";
 
 export function LandingHero() {
 	return (
-		<section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden">
-			{/* Background Glow */}
-			<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-primary/20 blur-[120px] rounded-full -z-10 opacity-50 dark:opacity-30" />
-
-			<div className="container px-4 mx-auto text-center relative z-10">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="flex justify-center mb-6"
-				>
-					<Badge
-						variant="outline"
-						className="px-4 py-1.5 border-primary/20 bg-primary/5 backdrop-blur-md text-primary font-medium flex items-center gap-2 rounded-full animate-in fade-in slide-in-from-bottom-3 duration-1000"
+		<section className="relative pt-24 pb-20 md:pt-40 md:pb-32 overflow-hidden">
+			<div className="container px-4 mx-auto relative z-10">
+				<div className="max-w-4xl mx-auto text-center">
+					<motion.div
+						initial={{ opacity: 0, scale: 0.9 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ duration: 0.8, ease: "easeOut" }}
+						className="flex justify-center mb-8"
 					>
-						<Sparkles className="h-3.5 w-3.5" />
-						<span>The internal school network is live</span>
-					</Badge>
-				</motion.div>
+						<Badge
+							variant="outline"
+							className="px-6 py-2 border-primary/20 bg-primary/5 backdrop-blur-xl text-primary font-mono tracking-widest text-[10px] uppercase rounded-full shadow-[0_0_20px_rgba(59,130,246,0.1)]"
+						>
+							<Sparkles className="h-3 w-3 mr-2 animate-pulse" />
+							<span>School Social. Reimagined.</span>
+						</Badge>
+					</motion.div>
 
-				<motion.h1
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.1 }}
-					className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70"
-				>
-					The Scoop <br className="hidden md:block" />
-					<span className="text-primary">Just Got Digital.</span>
-				</motion.h1>
-
-				<motion.p
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.2 }}
-					className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed"
-				>
-					The exclusive space for students and staff to share, connect, and stay
-					updated. Smart, safe, and strictly on-campus when it matters.
-				</motion.p>
-
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.3 }}
-					className="flex flex-col sm:flex-row items-center justify-center gap-4"
-				>
-					<Button
-						asChild
-						size="lg"
-						className="rounded-full px-8 h-14 text-lg font-bold shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 group"
+					<motion.div
+						initial={{ opacity: 0, y: 30 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
 					>
-						<Link href="/login" className="flex items-center gap-2">
-							Enter the Scoop
-							<ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+						<h1 className="text-6xl md:text-8xl lg:text-9xl font-serif italic font-light tracking-tighter leading-[0.9] mb-12">
+							The{" "}
+							<span className="font-sans font-black not-italic tracking-[-0.05em] text-primary">
+								Scoop
+							</span>{" "}
+							<br />
+							<span className="opacity-50">Just Got</span> <br />
+							Digital.
+						</h1>
+					</motion.div>
+
+					<motion.p
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ duration: 1.5, delay: 0.5 }}
+						className="max-w-xl mx-auto text-lg md:text-xl text-muted-foreground/80 font-medium mb-16 leading-relaxed"
+					>
+						A private ecosystem where academia meets the future. Your school's
+						heartbeat, localized and localized.
+					</motion.p>
+
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.8, delay: 0.8 }}
+						className="flex flex-col sm:flex-row items-center justify-center gap-6"
+					>
+						<Button
+							asChild
+							size="lg"
+							className="rounded-full px-10 h-16 text-lg font-bold bg-primary hover:bg-primary/90 shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:shadow-[0_0_60px_rgba(59,130,246,0.3)] transition-all duration-500 group"
+						>
+							<Link href="/login" className="flex items-center gap-3">
+								Join the Network
+								<ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-500" />
+							</Link>
+						</Button>
+						<Link
+							href="#features"
+							className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors py-4 px-2"
+						>
+							Explore Logic
 						</Link>
-					</Button>
-					<Button
-						asChild
-						variant="ghost"
-						size="lg"
-						className="rounded-full px-8 h-14 text-lg font-medium hover:bg-primary/5"
-					>
-						<Link href="#features">Learn More</Link>
-					</Button>
-				</motion.div>
+					</motion.div>
+				</div>
 			</div>
 
-			{/* Decorative Elements */}
-			<div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-64 h-64 border border-primary/10 rounded-full blur-3xl -z-10" />
-			<div className="absolute right-0 top-1/4 translate-x-1/2 w-96 h-96 border border-primary/5 rounded-full blur-3xl -z-10" />
+			{/* Sculptural Background Element */}
+			<motion.div
+				animate={{
+					rotate: [0, 5, 0],
+					scale: [1, 1.05, 1],
+				}}
+				transition={{
+					duration: 10,
+					repeat: Infinity,
+					ease: "easeInOut",
+				}}
+				className="absolute -right-20 top-20 w-[500px] h-[500px] border border-primary/5 rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%] pointer-events-none -z-10"
+			/>
 		</section>
 	);
 }

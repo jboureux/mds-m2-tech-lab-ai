@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Lock, ShieldCheck, Wifi } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { GraduationCap, Lock, ShieldCheck, Wifi } from "lucide-react";
+import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -14,101 +15,99 @@ import { cn } from "@/lib/utils";
 
 const features = [
 	{
-		title: "Network-Aware Access",
+		title: "Contextual Logic",
 		description:
-			"Your physical presence matters. Post only when you're on-campus. Read-only from home.",
-		icon: <Wifi className="h-8 w-8 text-primary" />,
-		badge: "Location-Smart",
+			"Your school's borders are digital. Post only on-campus, read anywhere. Simple, physical, secure.",
+		icon: <Wifi className="h-6 w-6" />,
+		badge: "Spatial",
 		className: "md:col-span-2 md:row-span-1",
 		delay: 0.1,
 	},
 	{
-		title: "AI Moderation",
+		title: "Algorithmic Integrity",
 		description:
-			"A safe, respectful environment powered by real-time TensorFlow.js toxicity detection.",
-		icon: <ShieldCheck className="h-8 w-8 text-primary" />,
-		badge: "AI Guarded",
+			"A safe, respectful environment powered by our localized TensorFlow.js toxicity engine.",
+		icon: <ShieldCheck className="h-6 w-6" />,
+		badge: "Moderated",
 		className: "md:col-span-1 md:row-span-2",
 		delay: 0.2,
 	},
 	{
-		title: "Closed Community",
+		title: "Pure Community",
 		description:
-			"Exclusive to your school. No outsiders, no bots. Just your genuine community.",
-		icon: <Users className="h-8 w-8 text-primary" />,
-		badge: "Private",
+			"An exclusive hub. Verified students and staff only. Zero bots, pure interaction.",
+		icon: <GraduationCap className="h-6 w-6" />,
+		badge: "Verified",
 		className: "md:col-span-1 md:row-span-1",
 		delay: 0.3,
 	},
 	{
-		title: "Physical Safety",
+		title: "Physical Layer",
 		description:
-			"Digital presence, physical impact. We prioritize real-world school safety above all.",
-		icon: <Lock className="h-8 w-8 text-primary" />,
-		badge: "Secure",
+			"Bridging digital connection with real-world presence. Security that stays within walls.",
+		icon: <Lock className="h-6 w-6" />,
+		badge: "Hardened",
 		className: "md:col-span-1 md:row-span-1",
 		delay: 0.4,
 	},
 ];
 
-function Users({ className }: { className?: string }) {
-	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			className={className}
-			role="img"
-			aria-labelledby="users-icon-title"
-		>
-			<title id="users-icon-title">Users Icon</title>
-			<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-			<circle cx="9" cy="7" r="4" />
-			<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-			<path d="M16 3.13a4 4 0 0 1 0 7.75" />
-		</svg>
-	);
-}
-
 export function FeatureBento() {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const { scrollYProgress } = useScroll({
+		target: containerRef,
+		offset: ["start end", "end start"],
+	});
+
+	const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
+
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
+		<div
+			ref={containerRef}
+			className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr"
+		>
 			{features.map((feature) => (
 				<motion.div
 					key={feature.title}
-					initial={{ opacity: 0, y: 20 }}
+					style={{ y: feature.className.includes("row-span-2") ? 0 : y }}
+					initial={{ opacity: 0, y: 40 }}
 					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.5, delay: feature.delay }}
+					viewport={{ once: true, margin: "-100px" }}
+					transition={{ duration: 0.8, delay: feature.delay }}
 					className={cn("flex flex-col", feature.className)}
 				>
-					<Card className="flex-1 flex flex-col overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm hover:shadow-xl transition-all duration-500 group">
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<div className="p-2 bg-primary/5 rounded-lg group-hover:scale-110 transition-transform duration-500">
+					<Card className="flex-1 flex flex-col overflow-hidden border-primary/5 bg-zinc-900/40 backdrop-blur-3xl hover:bg-zinc-900/60 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-primary/10 transition-all duration-700 group cursor-default">
+						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+							<div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors duration-500">
 								{feature.icon}
 							</div>
 							<Badge
-								variant="secondary"
-								className="font-mono text-[10px] tracking-tighter uppercase opacity-80 group-hover:opacity-100 transition-opacity"
+								variant="outline"
+								className="font-mono text-[9px] tracking-widest uppercase opacity-40 group-hover:opacity-100 border-primary/20 transition-all duration-500"
 							>
 								{feature.badge}
 							</Badge>
 						</CardHeader>
 						<CardContent className="mt-4 flex flex-col flex-1">
-							<CardTitle className="text-xl font-bold tracking-tight mb-2 group-hover:text-primary transition-colors">
+							<CardTitle className="text-2xl font-serif italic font-light tracking-tight mb-4 group-hover:text-primary transition-colors duration-500">
 								{feature.title}
 							</CardTitle>
-							<CardDescription className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+							<CardDescription className="text-sm text-muted-foreground/70 leading-relaxed font-medium">
 								{feature.description}
 							</CardDescription>
-							<div className="mt-auto pt-6 flex justify-end">
-								<div className="w-8 h-1 bg-primary/10 rounded-full group-hover:w-full transition-all duration-700" />
+
+							<div className="mt-auto pt-10">
+								<div className="flex gap-1.5 overflow-hidden">
+									{[1, 2, 3].map((i) => (
+										<motion.div
+											key={i}
+											initial={{ x: -20, opacity: 0 }}
+											whileInView={{ x: 0, opacity: 1 }}
+											transition={{ delay: 0.5 + i * 0.1 }}
+											className="h-[2px] w-6 bg-primary/20 rounded-full"
+										/>
+									))}
+								</div>
 							</div>
 						</CardContent>
 					</Card>

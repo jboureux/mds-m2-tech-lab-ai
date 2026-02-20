@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 export default async function FeedPage() {
 	const session = await auth.api.getSession({
@@ -18,7 +18,8 @@ export default async function FeedPage() {
 					Your School Scoop
 				</h1>
 				<p className="text-xl text-muted-foreground">
-					Stay tuned for the latest scoop from your school community. This area is only accessible to students and staff.
+					Stay tuned for the latest scoop from your school community. This area
+					is only accessible to students and staff.
 				</p>
 				<div className="pt-10 flex items-center justify-center gap-4">
 					<div className="h-10 w-48 bg-muted animate-pulse rounded-lg" />
