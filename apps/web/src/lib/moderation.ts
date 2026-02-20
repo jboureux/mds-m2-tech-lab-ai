@@ -56,13 +56,8 @@ export async function checkAndFlagPost(
 	postId: string,
 	content: string,
 ): Promise<void> {
+	console.log(`[MODERATION] Starting async scan for post ${postId}...`);
 	try {
-		// Dynamic import to avoid circular dependencies if any,
-		// and to keep the initial bundle size smaller if this file is used on client (though it shouldn't be).
-		// Actually, toxicity.ts is server-side only due to tfjs-node usage (if we had it) or just large dependencies.
-		// But here it's fine to import at top level, but for safety in this tool call I'll import at top.
-		// Wait, I can't easily add import at top with this replace tool unless I replace the whole file or matching header.
-		// I will replace the whole file to add the import safely.
 		const { checkToxicity } = await import("@/lib/toxicity");
 		const isToxic = await checkToxicity(content);
 
@@ -76,6 +71,7 @@ export async function checkAndFlagPost(
 				},
 			});
 		}
+		console.log(`[MODERATION] Async scan completed for post ${postId}.`);
 	} catch (error) {
 		console.error(`[MODERATION] Failed to process post ${postId}:`, error);
 	}

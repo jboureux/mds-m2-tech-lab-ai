@@ -1,4 +1,3 @@
-import "@tensorflow/tfjs-node";
 import * as tf from "@tensorflow/tfjs";
 import * as toxicity from "@tensorflow-models/toxicity";
 
@@ -13,9 +12,24 @@ let modelPromise: Promise<toxicity.ToxicityClassifier> | null = null;
  */
 export async function getToxicityModel() {
 	if (!modelPromise) {
-		console.log("[TOXICITY] Initializing model with native node backend...");
+		console.log("[TOXICITY] Initializing model...");
 		try {
-			// Ensure we are ready (native backend should be registered by the import)
+			// Try to load the native node backend for performance
+			try {
+				// We use a dynamic import and require-style check to avoid crash if not found
+				await import("@tensorflow/tfjs-node");
+				console.log("[TOXICITY] Native Node.js backend loaded successfully.");
+			} catch (e) {
+				console.warn(
+					"[TOXICITY] Native Node.js backend failed to load, falling back to CPU backend. Performance may be affected.",
+				);
+				console.error("[TOXICITY] Backend load error:", e);
+				// Ensure CPU backend is used if native fails
+				if (!tf.getBackend()) {
+					await tf.setBackend("cpu");
+				}
+			}
+
 			await tf.ready();
 			console.log(`[TOXICITY] Using backend: ${tf.getBackend()}`);
 
@@ -42,18 +56,25 @@ export async function checkToxicity(content: string): Promise<boolean> {
 
 	try {
 		const model = await getToxicityModel();
+		console.log(`[TOXICITY] Scanning content: "${content.substring(0, 50)}${content.length > 50 ? "..." : ""}"`);
 		const predictions = await model.classify([content]);
 
-		// prediction structure:
-		// {
-		//   label: string,
-		//   results: [{ match: boolean, probabilities: Float32Array }]
-		// }
-		// match is true if probability > threshold (which we set in load)
+		const results = predictions.map((p) => ({
+			label: p.label,
+			match: p.results[0].match,
+			probability: (p.results[0].probabilities[1] * 100).toFixed(2),
+		}));
 
-		return predictions.some((prediction) =>
-			prediction.results.some((result) => result.match === true),
-		);
+		const toxicResults = results.filter((r) => r.match);
+		
+		if (toxicResults.length > 0) {
+			console.log(`[TOXICITY] 🚩 TOXIC content detected! Matches: ${toxicResults.map(r => `${r.label} (${r.probability}%)`).join(", ")}`);
+		} else {
+			const topProb = Math.max(...results.map(r => parseFloat(r.probability)));
+			console.log(`[TOXICITY] ✅ Content safe. (Max probability: ${topProb}%)`);
+		}
+
+		return toxicResults.length > 0;
 	} catch (error) {
 		console.error("[TOXICITY] Classification failed:", error);
 		// Fail open (allow post) or closed (block post)?
