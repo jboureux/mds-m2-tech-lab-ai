@@ -102,8 +102,7 @@ describe("API: POST /api/admin/users", () => {
 		const mockUser = {
 			id: "1",
 			email: "newuser@example.com",
-			firstName: "New",
-			lastName: "User",
+			name: "New User",
 			role: Role.MODERATOR,
 		};
 		// biome-ignore lint/suspicious/noExplicitAny: Mocking return value
@@ -113,8 +112,7 @@ describe("API: POST /api/admin/users", () => {
 			method: "POST",
 			body: JSON.stringify({
 				email: "newuser@example.com",
-				firstName: "New",
-				lastName: "User",
+				name: "New User",
 				role: "MODERATOR",
 			}),
 		});
@@ -126,8 +124,7 @@ describe("API: POST /api/admin/users", () => {
 		expect(data.user).toEqual(mockUser);
 		expect(preRegisterUser).toHaveBeenCalledWith({
 			email: "newuser@example.com",
-			firstName: "New",
-			lastName: "User",
+			name: "New User",
 			role: Role.MODERATOR,
 		});
 	});

@@ -17,16 +17,6 @@ export const auth = betterAuth({
 				input: false,
 				defaultValue: "USER",
 			},
-			firstName: {
-				type: "string",
-				input: true,
-				required: false,
-			},
-			lastName: {
-				type: "string",
-				input: true,
-				required: false,
-			},
 		},
 	},
 	databaseHooks: {
@@ -48,8 +38,7 @@ export const auth = betterAuth({
 						data: {
 							...user,
 							role: preRegistered.role,
-							firstName: user.firstName || preRegistered.firstName || undefined,
-							lastName: user.lastName || preRegistered.lastName || undefined,
+							name: user.name || preRegistered.name || undefined,
 						},
 					};
 				},

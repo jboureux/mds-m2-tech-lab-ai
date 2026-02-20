@@ -1,6 +1,6 @@
+import { Role } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Role } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { preRegisterUser } from "@/lib/user-management";
 
@@ -12,8 +12,7 @@ import { preRegisterUser } from "@/lib/user-management";
  * Body schema:
  * {
  *   "email": "string" (required, valid email),
- *   "firstName": "string" (optional),
- *   "lastName": "string" (optional),
+ *   "name": "string" (optional),
  *   "role": "ADMIN" | "MODERATOR" | "VIP" | "USER" (optional, defaults to USER)
  * }
  */
@@ -40,7 +39,7 @@ export async function POST(req: Request) {
 
 		// 2. Parse request body
 		const body = await req.json();
-		const { email, firstName, lastName, role } = body;
+		const { email, name, role } = body;
 
 		// 3. Simple input validation
 		if (!email || !email.includes("@")) {
@@ -66,8 +65,7 @@ export async function POST(req: Request) {
 		// 4. Manually pre-register the user
 		const result = await preRegisterUser({
 			email,
-			firstName,
-			lastName,
+			name,
 			role: validatedRole,
 		});
 
