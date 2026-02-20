@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { PostStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, MoreVertical, ShieldAlert } from "lucide-react";
+import Link from "next/link";
 
 interface PostCardProps {
 	post: {
@@ -74,9 +75,11 @@ export function PostCard({ post }: PostCardProps) {
 				)}
 			</CardContent>
 			<CardFooter className="border-t pt-3 pb-3">
-				<Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-					<MessageSquare className="h-4 w-4" />
-					<span className="text-xs font-medium">{post._count?.comments || 0} Comments</span>
+				<Button variant="ghost" size="sm" asChild className="gap-2 text-muted-foreground">
+					<Link href={`/posts/${post.id}`}>
+						<MessageSquare className="h-4 w-4" />
+						<span className="text-xs font-medium">{post._count?.comments || 0} Comments</span>
+					</Link>
 				</Button>
 			</CardFooter>
 		</Card>
