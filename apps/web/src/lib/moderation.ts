@@ -54,6 +54,10 @@ export async function checkToxicity(content: string): Promise<boolean> {
 
 	try {
 		const predictions = await model.classify([content]);
+		console.log(
+			"[MODERATION] Toxicity predictions:",
+			JSON.stringify(predictions, null, 2),
+		);
 		// Check if any prediction is a match (true)
 		return predictions.some((prediction) =>
 			prediction.results.some((result) => result.match),
