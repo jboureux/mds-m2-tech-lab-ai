@@ -33,13 +33,10 @@ export function Markdown({ content, className }: MarkdownProps) {
 			<ReactMarkdown
 				rehypePlugins={[rehypeRaw, [rehypeSanitize, schema]]}
 				components={{
-					code({
-						node,
-						inline,
-						className: codeClassName,
-						children,
-						...props
-					}: any) {
+					code: (
+						// biome-ignore lint/suspicious/noExplicitAny: react-markdown component props are complex
+						{ node, inline, className: codeClassName, children, ...props }: any,
+					) => {
 						const match = /language-(\w+)/.exec(codeClassName || "");
 						return !inline && match ? (
 							<div className="rounded-lg overflow-hidden my-4 shadow-sm border dark:border-zinc-800">

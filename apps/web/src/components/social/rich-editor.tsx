@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -63,11 +62,11 @@ export function RichEditor({
 						class: "rounded-md bg-zinc-900 text-zinc-100 p-4 font-mono text-sm",
 					},
 				},
-			}),
-			Link.configure({
-				openOnClick: false,
-				HTMLAttributes: {
-					class: "text-blue-600 dark:text-blue-400 underline cursor-pointer",
+				link: {
+					openOnClick: false,
+					HTMLAttributes: {
+						class: "text-blue-600 dark:text-blue-400 underline cursor-pointer",
+					},
 				},
 			}),
 			Placeholder.configure({
@@ -96,21 +95,51 @@ export function RichEditor({
 
 		const textarea = textareaRef.current;
 		const start = textarea.selectionStart;
-		const before = content.substring(0, start);
-		const after = content.substring(start);
+		const end = textarea.selectionEnd;
 
-		// Robust detection using simple string matching
+		const before = content.substring(0, start);
+		const after = content.substring(end);
+		const selected = content.substring(start, end);
+
+		// More robust detection: check if cursor is strictly between delimiters
 		const isWrapped = (delim: string) => {
-			return before.includes(delim) && after.includes(delim);
+			// If selection already includes delimiters at both ends
+			if (
+				selected.length >= delim.length * 2 &&
+				selected.startsWith(delim) &&
+				selected.endsWith(delim)
+			) {
+				return true;
+			}
+
+			const lastOpen = before.lastIndexOf(delim);
+			if (lastOpen === -1) return false;
+
+			const nextClose = after.indexOf(delim);
+			if (nextClose === -1) return false;
+
+			// Check if there are other instances of the delimiter between the potential matches and the cursor
+			const inBetweenBefore = before.substring(lastOpen + delim.length);
+			const inBetweenAfter = after.substring(0, nextClose);
+
+			return (
+				!inBetweenBefore.includes(delim) && !inBetweenAfter.includes(delim)
+			);
 		};
 
 		const styles = {
+			codeBlock: isWrapped("```"),
 			bold: isWrapped("**") || isWrapped("__"),
 			italic: isWrapped("*") || isWrapped("_"),
 			code: isWrapped("`"),
-			codeBlock: isWrapped("```"),
 			link: isWrapped("[") && isWrapped("]"),
 		};
+
+		// If codeBlock is active, code is also technically "wrapped" by backticks,
+		// but we want to show only codeBlock as active for clarity
+		if (styles.codeBlock) {
+			styles.code = false;
+		}
 
 		setMdActiveStyles(styles);
 	}, [content]);
@@ -153,9 +182,11 @@ export function RichEditor({
 					break;
 				case "code":
 					formattedText = `\`${selectedText || "code text"}\``;
+					cursorOffset = selectedText ? 0 : -1;
 					break;
 				case "codeBlock":
 					formattedText = `\n\`\`\`javascript\n${selectedText || "code"}\n\`\`\`\n`;
+					cursorOffset = selectedText ? 0 : -5;
 					break;
 				case "link":
 					formattedText = `[${selectedText || "link text"}](https://)`;
@@ -179,6 +210,7 @@ export function RichEditor({
 			// Tiptap commands
 			switch (type) {
 				case "bold":
+					console.log("Toggling bold");
 					editor.chain().focus().toggleBold().run();
 					break;
 				case "italic":
@@ -302,8 +334,7 @@ function ToolbarButton({
 }: {
 	active?: boolean;
 	onClick: () => void;
-	// biome-ignore lint/suspicious/noExplicitAny: lucide icon type
-	icon: any;
+	icon: React.ElementType;
 	tooltip: string;
 	disabled?: boolean;
 }) {
@@ -317,7 +348,7 @@ function ToolbarButton({
 						size="icon"
 						className={`h-8 w-8 transition-all ${
 							active
-								? "bg-slate-200 dark:bg-zinc-700 text-blue-600 shadow-inner"
+								? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 shadow-inner hover:bg-blue-200 dark:hover:bg-blue-900/50"
 								: "text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-zinc-800"
 						}`}
 						onClick={onClick}
@@ -326,8 +357,11 @@ function ToolbarButton({
 						<Icon className="h-4 w-4" />
 					</Button>
 				</TooltipTrigger>
-				<TooltipContent className="text-[10px] font-black border-none bg-blue-600 text-white shadow-lg">
-					{tooltip}
+				<TooltipContent className="text-[10px] font-black border-none bg-blue-600 text-white shadow-lg flex items-center gap-2">
+					{active ? `Remove ${tooltip}` : tooltip}
+					{active && (
+						<span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+					)}
 				</TooltipContent>
 			</Tooltip>
 		</TooltipProvider>
