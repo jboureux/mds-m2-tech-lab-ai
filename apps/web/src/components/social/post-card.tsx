@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,13 +99,17 @@ export function PostCard({ post }: PostCardProps) {
 						</span>
 					</div>
 				</div>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-				>
-					<MoreVertical className="h-4 w-4" />
-				</Button>
+				{isStaff ? (
+					<ModerationActions post={post} />
+				) : (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+					>
+						<MoreVertical className="h-4 w-4" />
+					</Button>
+				)}
 			</CardHeader>
 
 			<CardContent className="space-y-3 px-4 pb-4">
