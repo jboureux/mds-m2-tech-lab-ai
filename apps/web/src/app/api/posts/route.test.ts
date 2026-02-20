@@ -13,6 +13,18 @@ vi.mock("@/lib/prisma", () => ({
 	},
 }));
 
+vi.mock("@/lib/auth", () => ({
+	auth: {
+		api: {
+			getSession: vi.fn(),
+		},
+	},
+}));
+
+vi.mock("@/lib/permissions", () => ({
+	checkPostingPermission: vi.fn(),
+}));
+
 describe("API: GET /api/posts", () => {
 	it("should return paginated posts", async () => {
 		const mockPosts = [
