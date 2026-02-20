@@ -47,3 +47,36 @@ export async function cleanContent(content: string): Promise<string> {
 export function _resetFilter() {
 	filter = null;
 }
+
+/**
+ * Asynchronously checks a post for toxicity and updates its status if flagged.
+ * This is intended to be fire-and-forget.
+ */
+export async function checkAndFlagPost(
+	postId: string,
+	content: string,
+): Promise<void> {
+	try {
+		// Dynamic import to avoid circular dependencies if any,
+		// and to keep the initial bundle size smaller if this file is used on client (though it shouldn't be).
+		// Actually, toxicity.ts is server-side only due to tfjs-node usage (if we had it) or just large dependencies.
+		// But here it's fine to import at top level, but for safety in this tool call I'll import at top.
+		// Wait, I can't easily add import at top with this replace tool unless I replace the whole file or matching header.
+		// I will replace the whole file to add the import safely.
+		const { checkToxicity } = await import("@/lib/toxicity");
+		const isToxic = await checkToxicity(content);
+
+		if (isToxic) {
+			console.log(`[MODERATION] Post ${postId} FLAGGED for toxicity.`);
+			await db.post.update({
+				where: { id: postId },
+				data: {
+					isToxic: true,
+					status: "FLAGGED",
+				},
+			});
+		}
+	} catch (error) {
+		console.error(`[MODERATION] Failed to process post ${postId}:`, error);
+	}
+}

@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { validateContent } from "@/lib/moderation";
+import { checkAndFlagPost, validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
 
@@ -47,6 +47,10 @@ export async function POST(req: Request) {
 				status: "PUBLISHED", // Default to published for now, will add moderation later
 			},
 		});
+
+		// Async toxicity check (fire-and-forget)
+		// We don't await this to keep the response fast
+		void checkAndFlagPost(post.id, content);
 
 		return NextResponse.json(post);
 	} catch (error) {
