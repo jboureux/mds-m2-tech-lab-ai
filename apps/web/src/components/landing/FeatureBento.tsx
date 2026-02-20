@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { GraduationCap, Lock, ShieldCheck, Wifi } from "lucide-react";
-import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -53,30 +52,18 @@ const features = [
 ];
 
 export function FeatureBento() {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const { scrollYProgress } = useScroll({
-		target: containerRef,
-		offset: ["start end", "end start"],
-	});
-
-	const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
-
 	return (
-		<div
-			ref={containerRef}
-			className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr"
-		>
+		<div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-fr">
 			{features.map((feature) => (
 				<motion.div
 					key={feature.title}
-					style={{ y: feature.className.includes("row-span-2") ? 0 : y }}
-					initial={{ opacity: 0, y: 40 }}
+					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true, margin: "-100px" }}
 					transition={{ duration: 0.8, delay: feature.delay }}
 					className={cn("flex flex-col", feature.className)}
 				>
-					<Card className="flex-1 flex flex-col overflow-hidden border-black/5 dark:border-primary/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl hover:bg-white/60 dark:hover:bg-zinc-900/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-primary/10 transition-all duration-700 group cursor-default">
+					<Card className="flex-1 flex flex-col overflow-hidden border-black/5 dark:border-primary/5 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl hover:bg-white/60 dark:hover:bg-zinc-900/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-700 group cursor-default">
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
 							<div className="p-3 bg-primary/5 dark:bg-primary/10 rounded-2xl group-hover:bg-primary/10 dark:group-hover:bg-primary/20 transition-colors duration-500">
 								{feature.icon}
