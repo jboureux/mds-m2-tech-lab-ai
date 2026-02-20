@@ -1,12 +1,15 @@
-import { Comment } from "@/components/social/comment";
-import { PostCard } from "@/components/social/post-card";
-import { auth } from "@/lib/auth";
-import db from "@/lib/prisma";
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { Comment } from "@/components/social/comment";
+import { CommentForm } from "@/components/social/comment-form";
+import { SocialHeader } from "@/components/social/header";
+import { PostCard } from "@/components/social/post-card";
 import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth";
+import { checkPostingPermission } from "@/lib/permissions";
+import db from "@/lib/prisma";
 
 interface PostPageProps {
 	params: Promise<{
@@ -87,25 +90,25 @@ export default async function PostPage({ params }: PostPageProps) {
 
 	// Security check: only author or admin/mod can see non-published posts
 	const isAuthor = post.authorId === session.user.id;
-	const isStaff = ["ADMIN", "MODERATOR"].includes((session.user as any).role);
+	const isStaff = ["ADMIN", "MODERATOR"].includes(session.user.role as string);
 	if (post.status !== "PUBLISHED" && !isAuthor && !isStaff) {
 		notFound();
 	}
 
-	return (
-		<div className="flex min-h-screen flex-col bg-slate-50 dark:bg-black font-sans">
-			<header className="sticky top-0 z-40 w-full border-b bg-white/80 dark:bg-black/80 backdrop-blur-md">
-				<div className="container mx-auto flex h-16 items-center justify-between px-4 max-w-4xl">
-					<Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-						<div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">M</div>
-						<span className="text-xl font-bold tracking-tight">My Digital Scoop</span>
-					</Link>
-				</div>
-			</header>
+	const { isAllowed, reason } = await checkPostingPermission(session);
 
-			<main className="container mx-auto max-w-2xl px-4 py-8 space-y-8">
-				<Button variant="ghost" size="sm" asChild className="-ml-2 gap-2 text-muted-foreground">
-					<Link href="/">
+	return (
+		<div className="flex min-h-screen flex-col bg-[#F4F2EE] dark:bg-[#000000] font-sans">
+			<SocialHeader />
+
+			<main className="container mx-auto max-w-2xl px-4 py-8 space-y-6">
+				<Button
+					variant="ghost"
+					size="sm"
+					asChild
+					className="-ml-2 gap-2 text-muted-foreground hover:text-blue-600 transition-colors"
+				>
+					<Link href="/feed">
 						<ChevronLeft className="h-4 w-4" />
 						Back to Feed
 					</Link>
@@ -115,16 +118,30 @@ export default async function PostPage({ params }: PostPageProps) {
 					<PostCard post={post} />
 				</article>
 
-				<section className="space-y-6">
-					<div className="flex items-center justify-between border-b pb-4">
-						<h2 className="font-semibold text-lg">Discussion ({post._count.comments})</h2>
+				<section className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm space-y-6">
+					<div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
+						<h2 className="font-black text-lg">
+							Discussion ({post._count.comments})
+						</h2>
 					</div>
+
+					<CommentForm
+						postId={post.id}
+						user={{
+							name: session.user.name,
+							image: session.user.image ?? null,
+						}}
+						isAllowedToComment={isAllowed}
+						restrictionReason={reason}
+					/>
 
 					<div className="space-y-4">
 						{post.comments.length === 0 ? (
-							<p className="text-center py-10 text-muted-foreground italic text-sm">
-								No comments yet. Be the first to reply!
-							</p>
+							<div className="text-center py-10 bg-slate-50 dark:bg-zinc-800/50 rounded-xl border border-dashed">
+								<p className="text-muted-foreground italic text-sm font-medium">
+									No comments yet. Be the first to reply!
+								</p>
+							</div>
 						) : (
 							post.comments.map((comment) => (
 								<Comment key={comment.id} comment={comment as any} />

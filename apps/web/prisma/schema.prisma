@@ -105,7 +105,6 @@ model Verification {
 
 model Post {
   id        String     @id @default(cuid())
-  title     String
   content   String
   status    PostStatus @default(PENDING)
   isToxic   Boolean    @default(false)

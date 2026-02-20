@@ -20,7 +20,6 @@ describe("Social Schema Logic (Mocks)", () => {
 	it("should allow creating a post with isToxic and status", async () => {
 		const mockPost = {
 			id: "post-1",
-			title: "Hello World",
 			content: "This is a test post",
 			status: PostStatus.PENDING,
 			isToxic: false,
@@ -31,7 +30,6 @@ describe("Social Schema Logic (Mocks)", () => {
 
 		const result = await db.post.create({
 			data: {
-				title: "Hello World",
 				content: "This is a test post",
 				status: PostStatus.PENDING,
 				isToxic: false,

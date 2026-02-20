@@ -1,13 +1,14 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, SendHorizontal, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { SendHorizontal } from "lucide-react";
 
 interface PostEditorProps {
 	user: {
@@ -18,78 +19,142 @@ interface PostEditorProps {
 	restrictionReason?: string;
 }
 
-export function PostEditor({ user, isAllowedToPost, restrictionReason }: PostEditorProps) {
-	const [title, setTitle] = useState("");
+export function PostEditor({
+	user,
+	isAllowedToPost,
+	restrictionReason,
+}: PostEditorProps) {
 	const [content, setContent] = useState("");
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isExpanded, setIsExpanded] = useState(false);
+	const queryClient = useQueryClient();
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const mutation = useMutation({
+		mutationFn: async (newPost: { content: string }) => {
+			const response = await fetch("/api/posts", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(newPost),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || "Failed to create post");
+			}
+
+			return response.json();
+		},
+		onSuccess: () => {
+			toast.success("Scoop published successfully!");
+			setContent("");
+			setIsExpanded(false);
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+			// Also refresh the page if we're using server components for the feed
+			// window.location.reload(); // Or use router.refresh() if needed
+		},
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!isAllowedToPost || !title.trim() || !content.trim()) return;
-
-		setIsSubmitting(true);
-		// TODO: Implement API call
-		console.log("Submitting post:", { title, content });
-		
-		// Simulate delay
-		await new Promise(resolve => setTimeout(resolve, 1000));
-		
-		setTitle("");
-		setContent("");
-		setIsSubmitting(false);
+		if (!isAllowedToPost || !content.trim()) return;
+		mutation.mutate({ content });
 	};
 
-	return (
-		<Card className="w-full bg-slate-50/50 dark:bg-slate-900/50 border-dashed">
-			<CardContent className="pt-6 space-y-4">
-				<div className="flex items-center gap-3">
-					<Avatar className="h-8 w-8">
+	if (!isExpanded) {
+		return (
+			<Card
+				className="w-full bg-white dark:bg-zinc-900 border-none shadow-sm transition-all hover:shadow-md cursor-pointer group"
+				onClick={() => setIsExpanded(true)}
+			>
+				<CardContent className="p-4 flex items-center gap-4">
+					<Avatar className="h-12 w-12 border shadow-sm ring-2 ring-blue-600/5">
 						<AvatarImage src={user.image || ""} alt={user.name || ""} />
 						<AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
 					</Avatar>
-					<span className="text-sm font-medium">What's on your mind, {user.name}?</span>
+					<div className="flex-1 bg-slate-50 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 border hover:bg-slate-100 dark:hover:bg-zinc-700/80 rounded-full h-12 flex items-center px-6 transition-all">
+						<span className="text-slate-500 dark:text-zinc-400 font-medium text-sm">
+							Start a scoop, {user.name?.split(" ")[0]}...
+						</span>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	return (
+		<Card className="w-full bg-white dark:bg-zinc-900 border-none shadow-lg animate-in fade-in zoom-in duration-200">
+			<CardContent className="pt-6 space-y-4">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Avatar className="h-10 w-10 border shadow-sm ring-2 ring-blue-600/5">
+							<AvatarImage src={user.image || ""} alt={user.name || ""} />
+							<AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-col">
+							<span className="text-sm font-bold leading-tight">
+								{user.name}
+							</span>
+							<span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+								Public Post
+							</span>
+						</div>
+					</div>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 rounded-full"
+						onClick={() => setIsExpanded(false)}
+					>
+						<X className="h-4 w-4" />
+					</Button>
 				</div>
 
-				<form id="post-form" onSubmit={handleSubmit} className="space-y-3">
-					<div className="space-y-1">
-						<Label htmlFor="title" className="sr-only">Title</Label>
-						<Input 
-							id="title"
-							placeholder="Post title" 
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							disabled={!isAllowedToPost || isSubmitting}
-							className="bg-background"
-						/>
-					</div>
-					<div className="space-y-1">
-						<Label htmlFor="content" className="sr-only">Content</Label>
-						<Textarea 
+				<form id="post-form" onSubmit={handleSubmit} className="space-y-4">
+					<div className="space-y-2">
+						<Label
+							htmlFor="content"
+							className="text-xs font-bold text-muted-foreground uppercase px-1"
+						>
+							Share something
+						</Label>
+						<Textarea
 							id="content"
-							placeholder="Share something with the school..." 
+							placeholder="What's happening in school?"
 							value={content}
 							onChange={(e) => setContent(e.target.value)}
-							disabled={!isAllowedToPost || isSubmitting}
-							className="min-h-[100px] resize-none bg-background"
+							disabled={!isAllowedToPost || mutation.isPending}
+							className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
+							autoFocus
 						/>
 					</div>
 				</form>
 
 				{!isAllowedToPost && restrictionReason && (
-					<div className="p-3 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-700 dark:text-amber-400">
-						{restrictionReason}
+					<div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3">
+						<span className="text-xl">⚠️</span>
+						<p className="text-xs text-amber-800 dark:text-amber-400 font-medium leading-relaxed">
+							{restrictionReason}
+						</p>
 					</div>
 				)}
 			</CardContent>
-			<CardFooter className="flex justify-end pb-6">
-				<Button 
-					type="submit" 
+			<CardFooter className="flex justify-end items-center p-6 pt-2 border-t mt-4">
+				<Button
+					type="submit"
 					form="post-form"
-					disabled={!isAllowedToPost || !title.trim() || !content.trim() || isSubmitting}
-					className="gap-2"
+					disabled={!isAllowedToPost || !content.trim() || mutation.isPending}
+					className="gap-2 px-8 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
 				>
-					{isSubmitting ? "Posting..." : "Post"}
-					<SendHorizontal className="h-4 w-4" />
+					{mutation.isPending ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						"Post Scoop"
+					)}
+					{!mutation.isPending && <SendHorizontal className="h-4 w-4" />}
 				</Button>
 			</CardFooter>
 		</Card>
