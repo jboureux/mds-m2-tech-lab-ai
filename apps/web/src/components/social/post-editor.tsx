@@ -1,38 +1,14 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-	Bold,
-	Code,
-	Eye,
-	EyeOff,
-	Italic,
-	Link as LinkIcon,
-	Loader2,
-	Palette,
-	SendHorizontal,
-	X,
-} from "lucide-react";
-import { useRef, useState } from "react";
+import { Loader2, SendHorizontal, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Markdown } from "@/components/social/markdown";
+import { RichEditor } from "@/components/social/rich-editor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface PostEditorProps {
 	user: {
@@ -50,73 +26,7 @@ export function PostEditor({
 }: PostEditorProps) {
 	const [content, setContent] = useState("");
 	const [isExpanded, setIsExpanded] = useState(false);
-	const [isPreview, setIsPreview] = useState(false);
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const queryClient = useQueryClient();
-
-	const handleFormat = (type: string, value?: string) => {
-		if (!textareaRef.current) return;
-
-		const textarea = textareaRef.current;
-		const start = textarea.selectionStart;
-		const end = textarea.selectionEnd;
-		const selectedText = content.substring(start, end);
-
-		let formattedText = "";
-		let cursorOffset = 0;
-
-		switch (type) {
-			case "bold":
-				formattedText = `**${selectedText || "bold text"}**`;
-				cursorOffset = selectedText ? 0 : -2;
-				break;
-			case "italic":
-				formattedText = `*${selectedText || "italic text"}*`;
-				cursorOffset = selectedText ? 0 : -1;
-				break;
-			case "code":
-				if (selectedText.includes("\n")) {
-					formattedText = `\n\`\`\`javascript\n${selectedText || "code"}\n\`\`\`\n`;
-				} else {
-					formattedText = `\`${selectedText || "code"}\``;
-				}
-				break;
-			case "link":
-				formattedText = `[${selectedText || "link text"}](https://)`;
-				cursorOffset = -1;
-				break;
-			case "color":
-				formattedText = `<span style="color: ${value}">${
-					selectedText || "colored text"
-				}</span>`;
-				break;
-			default:
-				return;
-		}
-
-		const newContent =
-			content.substring(0, start) + formattedText + content.substring(end);
-
-		setContent(newContent);
-
-		// Reset focus and selection
-		setTimeout(() => {
-			textarea.focus();
-			if (!selectedText) {
-				const newPos = start + formattedText.length + cursorOffset;
-				textarea.setSelectionRange(newPos, newPos);
-			}
-		}, 0);
-	};
-
-	const colors = [
-		{ name: "Red", value: "#ef4444" },
-		{ name: "Blue", value: "#3b82f6" },
-		{ name: "Green", value: "#22c55e" },
-		{ name: "Amber", value: "#f59e0b" },
-		{ name: "Purple", value: "#a855f7" },
-		{ name: "Pink", value: "#ec4899" },
-	];
 
 	const mutation = useMutation({
 		mutationFn: async (newPost: { content: string }) => {
@@ -140,8 +50,6 @@ export function PostEditor({
 			setContent("");
 			setIsExpanded(false);
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
-			// Also refresh the page if we're using server components for the feed
-			// window.location.reload(); // Or use router.refresh() if needed
 		},
 		onError: (error: Error) => {
 			toast.error(error.message);
@@ -176,7 +84,7 @@ export function PostEditor({
 	}
 
 	return (
-		<Card className="w-full bg-white dark:bg-zinc-900 border-none shadow-lg animate-in fade-in zoom-in duration-200">
+		<Card className="w-full bg-white dark:bg-zinc-900 border-none shadow-lg animate-in fade-in zoom-in duration-200 text-slate-900 dark:text-zinc-100">
 			<CardContent className="pt-6 space-y-4">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
@@ -205,159 +113,18 @@ export function PostEditor({
 
 				<form id="post-form" onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<div className="flex items-center justify-between px-1">
-							<Label
-								htmlFor="content"
-								className="text-xs font-bold text-muted-foreground uppercase"
-							>
-								Share something
-							</Label>
-							<div className="flex items-center gap-3">
-								<span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-									Markdown supported
-								</span>
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									className="h-6 px-2 text-[10px] gap-1 font-bold"
-									onClick={() => setIsPreview(!isPreview)}
-								>
-									{isPreview ? (
-										<>
-											<EyeOff className="h-3 w-3" /> Edit
-										</>
-									) : (
-										<>
-											<Eye className="h-3 w-3" /> Preview
-										</>
-									)}
-								</Button>
-							</div>
-						</div>
-						{isPreview ? (
-							<div className="min-h-[150px] p-3 rounded-md bg-slate-50 dark:bg-zinc-800 border-none prose dark:prose-invert max-w-none">
-								<Markdown
-									content={content || "*Nothing to preview yet...*"}
-									className="text-base"
-								/>
-							</div>
-						) : (
-							<>
-								<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-zinc-800/50 p-1 rounded-lg border dark:border-zinc-800">
-									<TooltipProvider>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													onClick={() => handleFormat("bold")}
-													disabled={isPreview}
-												>
-													<Bold className="h-4 w-4" />
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Bold (**) </TooltipContent>
-										</Tooltip>
+						<Label
+							htmlFor="content"
+							className="text-xs font-bold text-muted-foreground uppercase px-1"
+						>
+							Share something
+						</Label>
 
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													onClick={() => handleFormat("italic")}
-													disabled={isPreview}
-												>
-													<Italic className="h-4 w-4" />
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Italic (*)</TooltipContent>
-										</Tooltip>
-
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													onClick={() => handleFormat("code")}
-													disabled={isPreview}
-												>
-													<Code className="h-4 w-4" />
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Code Block</TooltipContent>
-										</Tooltip>
-
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													onClick={() => handleFormat("link")}
-													disabled={isPreview}
-												>
-													<LinkIcon className="h-4 w-4" />
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Link</TooltipContent>
-										</Tooltip>
-
-										<DropdownMenu>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<DropdownMenuTrigger asChild>
-														<Button
-															type="button"
-															variant="ghost"
-															size="icon"
-															className="h-8 w-8"
-															disabled={isPreview}
-														>
-															<Palette className="h-4 w-4" />
-														</Button>
-													</DropdownMenuTrigger>
-												</TooltipTrigger>
-												<TooltipContent>Text Color</TooltipContent>
-											</Tooltip>
-											<DropdownMenuContent align="start" className="w-40">
-												{colors.map((color) => (
-													<DropdownMenuItem
-														key={color.name}
-														className="flex items-center gap-2 cursor-pointer"
-														onClick={() => handleFormat("color", color.value)}
-													>
-														<div
-															className="h-3 w-3 rounded-full"
-															style={{ backgroundColor: color.value }}
-														/>
-														<span>{color.name}</span>
-													</DropdownMenuItem>
-												))}
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</TooltipProvider>
-								</div>
-
-								<Textarea
-									id="content"
-									ref={textareaRef}
-									placeholder="What's happening in school?"
-									value={content}
-									onChange={(e) => setContent(e.target.value)}
-									disabled={!isAllowedToPost || mutation.isPending}
-									className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
-									autoFocus
-								/>
-							</>
-						)}
+						<RichEditor
+							content={content}
+							onChange={setContent}
+							disabled={!isAllowedToPost || mutation.isPending}
+						/>
 					</div>
 				</form>
 
