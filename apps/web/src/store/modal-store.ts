@@ -1,35 +1,32 @@
+import type { ReactNode } from "react";
 import { create } from "zustand";
-
-/**
- * Modal types available in the application.
- */
-export type ModalType = "create-user" | "import-users";
-
-/**
- * Data associated with specific modals.
- */
-// biome-ignore lint/complexity/noBannedTypes: Placeholder for future data
-type ModalData = {};
 
 /**
  * Zustand store state for global modal management.
  */
 interface ModalStore {
-	type: ModalType | null;
-	data: ModalData;
+	title: string | null;
+	description: string | null;
+	body: ReactNode | null;
 	isOpen: boolean;
-	onOpen: (type: ModalType, data?: ModalData) => void;
+	onOpen: (params: {
+		title: string;
+		description: string;
+		body: ReactNode;
+	}) => void;
 	onClose: () => void;
 }
 
 /**
- * Global store for managing shadcn/ui Dialogs across the application.
- * This allows opening any modal from any component without prop drilling.
+ * Global store for managing a single dynamic shadcn/ui Dialog.
  */
 export const useModalStore = create<ModalStore>((set) => ({
-	type: null,
-	data: {},
+	title: null,
+	description: null,
+	body: null,
 	isOpen: false,
-	onOpen: (type, data = {}) => set({ isOpen: true, type, data }),
-	onClose: () => set({ type: null, isOpen: false }),
+	onOpen: ({ title, description, body }) =>
+		set({ isOpen: true, title, description, body }),
+	onClose: () =>
+		set({ isOpen: false, title: null, description: null, body: null }),
 }));
