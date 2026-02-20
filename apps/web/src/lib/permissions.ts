@@ -17,7 +17,7 @@ export async function checkPostingPermission(
 
 	const h = await headers();
 	const networkLocation = h.get("x-network-location") || "off-campus";
-	const { role } = session.user;
+	const { role } = session.user as any;
 
 	// ADMIN, MODERATOR, and VIP can always post
 	if (role !== "USER") {

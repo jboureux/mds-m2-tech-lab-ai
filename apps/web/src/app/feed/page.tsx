@@ -1,8 +1,15 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { AsidePanel } from "@/components/social/aside-panel";
+import { SocialHeader } from "@/components/social/header";
+import { PostEditor } from "@/components/social/post-editor";
+import { PostFeed } from "@/components/social/post-feed";
+import { SocialSidebar } from "@/components/social/sidebar";
 import { auth } from "@/lib/auth";
+import { checkPostingPermission } from "@/lib/permissions";
+import db from "@/lib/prisma";
 
-export default async function FeedPage() {
+export default async function Home() {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -11,21 +18,56 @@ export default async function FeedPage() {
 		redirect("/");
 	}
 
+	const posts = await db.post.findMany({
+		where: {
+			OR: [
+				{ status: "PUBLISHED" },
+				{ authorId: session.user.id }, // Users can see their own pending/flagged posts
+			],
+		},
+		include: {
+			author: {
+				select: {
+					name: true,
+					image: true,
+					role: true,
+				},
+			},
+			_count: {
+				select: {
+					comments: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	const { isAllowed, reason } = await checkPostingPermission(session);
+
 	return (
-		<main className="flex min-h-screen flex-col items-center justify-center p-24 bg-zinc-50 dark:bg-black text-foreground antialiased">
-			<div className="max-w-4xl w-full text-center space-y-6">
-				<h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-					Your School Scoop
-				</h1>
-				<p className="text-xl text-muted-foreground">
-					Stay tuned for the latest scoop from your school community. This area
-					is only accessible to students and staff.
-				</p>
-				<div className="pt-10 flex items-center justify-center gap-4">
-					<div className="h-10 w-48 bg-muted animate-pulse rounded-lg" />
-					<div className="h-10 w-48 bg-muted animate-pulse rounded-lg" />
-				</div>
+		<div className="flex min-h-screen flex-col bg-[#F4F2EE] dark:bg-[#000000] font-sans selection:bg-blue-100 dark:selection:bg-blue-900/40">
+			<SocialHeader />
+
+			<div className="container mx-auto max-w-7xl px-4 py-8 flex items-start gap-6 lg:gap-8">
+				<SocialSidebar />
+
+				<main className="flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
+					<PostEditor
+						user={{
+							name: session.user.name,
+							image: session.user.image ?? null,
+						}}
+						isAllowedToPost={isAllowed}
+						restrictionReason={reason}
+					/>
+
+					<PostFeed initialPosts={JSON.parse(JSON.stringify(posts))} />
+				</main>
+
+				<AsidePanel />
 			</div>
-		</main>
+		</div>
 	);
 }
