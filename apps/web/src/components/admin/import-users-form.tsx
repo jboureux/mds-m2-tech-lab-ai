@@ -84,6 +84,22 @@ export function ImportUsersForm() {
 
 	return (
 		<form onSubmit={handleSubmit} className="flex flex-col">
+			{/* Hidden "trap" inputs to prevent password managers from auto-filling */}
+			<input
+				type="text"
+				name="username-trap"
+				style={{ display: "none" }}
+				tabIndex={-1}
+				autoComplete="off"
+			/>
+			<input
+				type="password"
+				name="password-trap"
+				style={{ display: "none" }}
+				tabIndex={-1}
+				autoComplete="off"
+			/>
+
 			<div className="p-8 space-y-6">
 				<div className="space-y-4">
 					<Label

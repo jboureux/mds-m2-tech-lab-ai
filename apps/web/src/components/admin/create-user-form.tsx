@@ -76,6 +76,22 @@ export function CreateUserForm() {
 
 	return (
 		<form onSubmit={handleSubmit} className="flex flex-col">
+			{/* Hidden "trap" inputs to prevent password managers from auto-filling the email field as a login */}
+			<input
+				type="text"
+				name="username-trap"
+				style={{ display: "none" }}
+				tabIndex={-1}
+				autoComplete="off"
+			/>
+			<input
+				type="password"
+				name="password-trap"
+				style={{ display: "none" }}
+				tabIndex={-1}
+				autoComplete="off"
+			/>
+
 			<div className="p-8 space-y-6">
 				<div className="space-y-5">
 					{/* Email Field */}
@@ -91,11 +107,13 @@ export function CreateUserForm() {
 							<Input
 								id="email"
 								type="email"
+								name="user_auth_email_manual"
 								placeholder="student@school.edu"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								required
 								disabled={mutation.isPending}
+								autoComplete="off"
 								className="pl-10 h-12 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-medium"
 							/>
 						</div>
