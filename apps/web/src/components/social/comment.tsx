@@ -79,10 +79,23 @@ export function Comment({
 
 			<div className="text-sm pl-9 space-y-2">
 				{comment.isToxic ? (
-					<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
-						<ShieldAlert className="h-3 w-3 shrink-0" />
-						Content flagged.
-					</div>
+					session?.user?.role === "ADMIN" ||
+					session?.user?.role === "MODERATOR" ? (
+						<div className="space-y-2">
+							<div className="flex items-center gap-2 p-1.5 rounded bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase border border-amber-100 dark:border-amber-900/50">
+								<ShieldAlert className="h-3 w-3 shrink-0" />
+								Staff View: Toxic Comment
+							</div>
+							<p className="text-slate-700 dark:text-slate-300 italic opacity-80">
+								{comment.content}
+							</p>
+						</div>
+					) : (
+						<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
+							<ShieldAlert className="h-3 w-3 shrink-0" />
+							Content flagged.
+						</div>
+					)
 				) : (
 					<p className="text-slate-700 dark:text-slate-300">
 						{comment.content}

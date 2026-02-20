@@ -10,6 +10,15 @@ export const authClient = createAuthClient({
 			role: {
 				type: "string",
 			},
+			banned: {
+				type: "boolean",
+			},
+			banReason: {
+				type: "string",
+			},
+			banExpires: {
+				type: "date",
+			},
 		},
 	},
 });

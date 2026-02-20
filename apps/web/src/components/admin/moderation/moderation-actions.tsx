@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, ExternalLink, EyeOff, Gavel, Loader2, MoreHorizontal } from "lucide-react";
+import {
+	Check,
+	ExternalLink,
+	EyeOff,
+	Gavel,
+	Loader2,
+	MoreHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

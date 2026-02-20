@@ -21,6 +21,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/components/ui/card";
+import { useSession } from "@/lib/auth-client";
 
 interface PostCardProps {
 	post: {
@@ -41,6 +42,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+	const { data: session } = useSession();
 	const [mounted, setMounted] = React.useState(false);
 	const [liked, setLiked] = React.useState(false);
 
@@ -50,6 +52,8 @@ export function PostCard({ post }: PostCardProps) {
 
 	const isFlagged = post.status === "FLAGGED" || post.isToxic;
 	const isPending = post.status === "PENDING";
+	const isStaff =
+		session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR";
 
 	const createdAt =
 		typeof post.createdAt === "string"
@@ -105,15 +109,30 @@ export function PostCard({ post }: PostCardProps) {
 
 			<CardContent className="space-y-3 px-4 pb-4">
 				{isFlagged ? (
-					<div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm italic shadow-inner">
-						<ShieldAlert className="h-5 w-5 shrink-0" />
-						<div className="space-y-1">
-							<p className="font-bold not-italic">Hidden for moderation</p>
-							<p className="text-xs opacity-80">
-								This content has been flagged by our AI moderation system.
+					isStaff ? (
+						<div className="space-y-4">
+							<div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 text-[11px] font-bold uppercase tracking-tight shadow-sm">
+								<ShieldAlert className="h-4 w-4 shrink-0" />
+								<span>
+									Staff View: This post is flagged but visible to you for
+									review.
+								</span>
+							</div>
+							<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
+								{post.content}
 							</p>
 						</div>
-					</div>
+					) : (
+						<div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm italic shadow-inner">
+							<ShieldAlert className="h-5 w-5 shrink-0" />
+							<div className="space-y-1">
+								<p className="font-bold not-italic">Hidden for moderation</p>
+								<p className="text-xs opacity-80">
+									This content has been flagged by our AI moderation system.
+								</p>
+							</div>
+						</div>
+					)
 				) : (
 					<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
 						{post.content}
