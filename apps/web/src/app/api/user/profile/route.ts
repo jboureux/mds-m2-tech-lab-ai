@@ -1,9 +1,8 @@
+import type { User } from "better-auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
-import { slugify } from "@/lib/utils";
-import type { User } from "better-auth";
 
 export async function POST(req: Request) {
 	try {
@@ -18,7 +17,7 @@ export async function POST(req: Request) {
 		const body = await req.json();
 		const { bio } = body;
 
-		const user = session.user as User & { username?: string };
+		const _user = session.user as User & { username?: string };
 
 		// Data to update
 		const updateData: { bio?: string } = {};

@@ -255,14 +255,6 @@ export function ProfileForm({ user }: { user: User }) {
 										<p className="text-sm font-semibold">{user.role}</p>
 									</div>
 								</div>
-								<div className="space-y-1">
-									<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
-										Account ID
-									</p>
-									<p className="text-xs font-mono text-muted-foreground truncate">
-										{user.id}
-									</p>
-								</div>
 
 								{user.username && (
 									<div className="space-y-1">
