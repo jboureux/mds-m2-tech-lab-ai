@@ -1,7 +1,6 @@
 import {
 	ArrowUpRight,
 	Calendar,
-	Filter,
 	Mail,
 	MoreHorizontal,
 	Search,
@@ -11,7 +10,7 @@ import {
 } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ImportUsersDialog } from "@/components/admin/import-users-dialog";
+import { AdminUserActions } from "@/components/admin/admin-user-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,13 +86,7 @@ export default async function AdminUsersPage() {
 						reviewing member access.
 					</p>
 				</div>
-				<div className="flex gap-3">
-					<Button variant="outline" className="hidden md:flex gap-2 shadow-sm">
-						<Filter className="h-4 w-4" />
-						Filters
-					</Button>
-					<ImportUsersDialog />
-				</div>
+				<AdminUserActions />
 			</div>
 
 			{/* Stats Overview */}

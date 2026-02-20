@@ -8,33 +8,36 @@ import {
 	FileIcon,
 	FileText,
 	Loader2Icon,
-	UploadIcon,
 	X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useModal } from "@/hooks/use-modal";
 import { cn } from "@/lib/utils";
+import { useModalStore } from "@/store/modal-store";
 
 /**
  * Enhanced Dialog component for bulk user import via CSV.
+ * Uses the global Modal Store for management.
  */
 export function ImportUsersDialog() {
+	const { isOpen, onClose, type } = useModalStore();
+	const isModalOpen = isOpen && type === "import-users";
+
 	const [file, setFile] = useState<File | null>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const queryClient = useQueryClient();
 	const router = useRouter();
-
-	const { Modal, openModal, closeModal } = useModal({
-		title: "Identity Authorization Utility",
-		description:
-			"Pre-register members by importing a structured CSV file. This will grant immediate access permissions based on assigned roles.",
-		className: "sm:max-w-[500px] border-none shadow-2xl p-0 overflow-hidden",
-	});
 
 	const mutation = useMutation({
 		mutationFn: async (fileToUpload: File) => {
@@ -60,7 +63,7 @@ export function ImportUsersDialog() {
 			setFile(null);
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			router.refresh();
-			closeModal();
+			onClose();
 		},
 		onError: (error: Error) => {
 			toast.error(error.message, {
@@ -88,22 +91,28 @@ export function ImportUsersDialog() {
 	};
 
 	return (
-		<>
-			<Button
-				onClick={openModal}
-				className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-lg active:scale-95 transition-all font-bold px-6"
-			>
-				<UploadIcon className="h-4 w-4" />
-				Batch Import
-			</Button>
+		<Dialog open={isModalOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-[500px] border-none shadow-2xl p-0 overflow-hidden bg-background">
+				<DialogHeader className="p-8 pb-0">
+					<div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+						<FileText className="h-3.5 w-3.5" />
+						Batch Authorization
+					</div>
+					<DialogTitle className="text-3xl font-black tracking-tight">
+						Identity Pool Utility
+					</DialogTitle>
+					<DialogDescription className="text-muted-foreground font-medium pt-1">
+						Pre-register members by importing a structured CSV file. This will
+						grant immediate access permissions based on assigned roles.
+					</DialogDescription>
+				</DialogHeader>
 
-			<Modal>
 				<form onSubmit={handleSubmit} className="flex flex-col">
 					<div className="p-8 space-y-6">
 						<div className="space-y-4">
 							<Label
 								htmlFor="csv-file"
-								className="text-xs font-black uppercase tracking-widest text-muted-foreground"
+								className="text-xs font-black uppercase tracking-widest text-muted-foreground/70"
 							>
 								CSV Source File
 							</Label>
@@ -194,7 +203,7 @@ export function ImportUsersDialog() {
 						<Button
 							type="button"
 							variant="ghost"
-							onClick={closeModal}
+							onClick={onClose}
 							disabled={mutation.isPending}
 							className="font-bold text-xs text-muted-foreground hover:bg-transparent"
 						>
@@ -219,7 +228,7 @@ export function ImportUsersDialog() {
 						</Button>
 					</div>
 				</form>
-			</Modal>
-		</>
+			</DialogContent>
+		</Dialog>
 	);
 }

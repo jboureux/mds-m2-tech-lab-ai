@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { DebugPanel } from "@/components/debug/DebugPanel";
+import { ModalProvider } from "@/components/modal-provider";
 import { Providers } from "@/components/providers";
 import { RuntimeConfigProvider } from "@/components/runtime-config-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -37,6 +38,7 @@ export default async function RootLayout({
 				>
 					<Providers>
 						<RuntimeConfigProvider />
+						<ModalProvider />
 						{children}
 						{process.env.NODE_ENV === "development" && (
 							<DebugPanel
