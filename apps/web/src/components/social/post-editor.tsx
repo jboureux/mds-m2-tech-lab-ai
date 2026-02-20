@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, SendHorizontal, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, SendHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -26,6 +27,7 @@ export function PostEditor({
 }: PostEditorProps) {
 	const [content, setContent] = useState("");
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [isPreview, setIsPreview] = useState(false);
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
@@ -115,21 +117,54 @@ export function PostEditor({
 
 				<form id="post-form" onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<Label
-							htmlFor="content"
-							className="text-xs font-bold text-muted-foreground uppercase px-1"
-						>
-							Share something
-						</Label>
-						<Textarea
-							id="content"
-							placeholder="What's happening in school?"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
-							disabled={!isAllowedToPost || mutation.isPending}
-							className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
-							autoFocus
-						/>
+						<div className="flex items-center justify-between px-1">
+							<Label
+								htmlFor="content"
+								className="text-xs font-bold text-muted-foreground uppercase"
+							>
+								Share something
+							</Label>
+							<div className="flex items-center gap-3">
+								<span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+									Markdown supported
+								</span>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="h-6 px-2 text-[10px] gap-1 font-bold"
+									onClick={() => setIsPreview(!isPreview)}
+								>
+									{isPreview ? (
+										<>
+											<EyeOff className="h-3 w-3" /> Edit
+										</>
+									) : (
+										<>
+											<Eye className="h-3 w-3" /> Preview
+										</>
+									)}
+								</Button>
+							</div>
+						</div>
+						{isPreview ? (
+							<div className="min-h-[150px] p-3 rounded-md bg-slate-50 dark:bg-zinc-800 border-none prose dark:prose-invert max-w-none">
+								<Markdown
+									content={content || "*Nothing to preview yet...*"}
+									className="text-base"
+								/>
+							</div>
+						) : (
+							<Textarea
+								id="content"
+								placeholder="What's happening in school?"
+								value={content}
+								onChange={(e) => setContent(e.target.value)}
+								disabled={!isAllowedToPost || mutation.isPending}
+								className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
+								autoFocus
+							/>
+						)}
 					</div>
 				</form>
 

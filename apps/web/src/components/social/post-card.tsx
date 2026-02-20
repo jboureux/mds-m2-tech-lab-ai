@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { Markdown } from "@/components/social/markdown";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -130,9 +131,10 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 									review.
 								</span>
 							</div>
-							<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-								{post.content}
-							</p>
+							<Markdown
+								content={post.content}
+								className="text-sm text-slate-700 dark:text-zinc-300"
+							/>
 						</div>
 					) : (
 						<div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm italic shadow-inner">
@@ -146,9 +148,10 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 						</div>
 					)
 				) : (
-					<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-						{post.content}
-					</p>
+					<Markdown
+						content={post.content}
+						className="text-sm text-slate-700 dark:text-zinc-300"
+					/>
 				)}
 
 				{isPending && !isFlagged && (

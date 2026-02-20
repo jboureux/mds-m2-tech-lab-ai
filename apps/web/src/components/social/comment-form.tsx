@@ -77,6 +77,11 @@ export function CommentForm({
 				<AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
 			</Avatar>
 			<div className="flex-1 space-y-3">
+				<div className="flex items-center justify-between px-1">
+					<span className="text-[10px] text-muted-foreground font-medium">
+						Markdown supported
+					</span>
+				</div>
 				<form onSubmit={handleSubmit} className="relative group">
 					<Textarea
 						placeholder={
