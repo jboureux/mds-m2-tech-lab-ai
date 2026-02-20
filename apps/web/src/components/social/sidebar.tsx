@@ -1,10 +1,9 @@
-import { LayoutDashboard, ShieldAlert, User } from "lucide-react";
+import type { User } from "better-auth";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { auth } from "@/lib/auth";
+import { SidebarNav } from "./sidebar-nav";
 
 export async function SocialSidebar({
 	hideCard = false,
@@ -44,75 +43,7 @@ export async function SocialSidebar({
 				</Card>
 			)}
 
-			<nav className="flex flex-col gap-1">
-				<SidebarNavItem
-					href="/feed"
-					icon={LayoutDashboard}
-					label="Feed"
-					active
-				/>
-				<SidebarNavItem href={profileHref} icon={User} label="Profile" />
-				{user.role === "ADMIN" && (
-					<>
-						<Separator className="my-2" />
-						<SidebarNavItem
-							href="/admin/users"
-							icon={ShieldAlert}
-							label="Admin Panel"
-							variant="destructive"
-						/>
-					</>
-				)}
-			</nav>
+			<SidebarNav user={user} profileHref={profileHref} />
 		</div>
-	);
-}
-
-function SidebarNavItem({
-	href,
-	icon: Icon,
-	label,
-	active = false,
-	badge,
-	variant = "default",
-}: {
-	href: string;
-	icon: React.ElementType;
-	label: string;
-	active?: boolean;
-	badge?: number;
-	variant?: "default" | "destructive";
-}) {
-	return (
-		<Link
-			href={href}
-			className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors group ${
-				active
-					? "bg-blue-50 dark:bg-blue-900/20 text-blue-600"
-					: "hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100"
-			}`}
-		>
-			<div className="flex items-center gap-3">
-				<Icon
-					className={`h-5 w-5 ${
-						active
-							? "text-blue-600"
-							: variant === "destructive"
-								? "text-red-500"
-								: "text-slate-400 group-hover:text-slate-600"
-					}`}
-				/>
-				<span
-					className={`text-sm font-medium ${variant === "destructive" ? "text-red-500" : ""}`}
-				>
-					{label}
-				</span>
-			</div>
-			{badge && (
-				<span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">
-					{badge}
-				</span>
-			)}
-		</Link>
 	);
 }
