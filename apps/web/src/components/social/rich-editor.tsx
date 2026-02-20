@@ -204,43 +204,41 @@ export function RichEditor({
 		<div className="flex flex-col border dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 transition-all focus-within:ring-2 focus-within:ring-blue-600/20">
 			<div className="flex items-center justify-between p-1.5 border-b dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
 				<div className="flex items-center gap-0.5">
-					<TooltipProvider>
-						<ToolbarButton
-							active={isStyleActive("bold")}
-							onClick={() => handleFormat("bold")}
-							icon={Bold}
-							tooltip="Bold (**)"
-							disabled={disabled}
-						/>
-						<ToolbarButton
-							active={isStyleActive("italic")}
-							onClick={() => handleFormat("italic")}
-							icon={Italic}
-							tooltip="Italic (*)"
-							disabled={disabled}
-						/>
-						<ToolbarButton
-							active={isStyleActive("code")}
-							onClick={() => handleFormat("code")}
-							icon={Code}
-							tooltip="Inline Code (`)"
-							disabled={disabled}
-						/>
-						<ToolbarButton
-							active={isStyleActive("codeBlock")}
-							onClick={() => handleFormat("codeBlock")}
-							icon={FileCode}
-							tooltip="Code Block (```)"
-							disabled={disabled}
-						/>
-						<ToolbarButton
-							active={isStyleActive("link")}
-							onClick={() => handleFormat("link")}
-							icon={LinkIcon}
-							tooltip="Link"
-							disabled={disabled}
-						/>
-					</TooltipProvider>
+					<ToolbarButton
+						active={isStyleActive("bold")}
+						onClick={() => handleFormat("bold")}
+						icon={Bold}
+						tooltip="Bold (**)"
+						disabled={disabled}
+					/>
+					<ToolbarButton
+						active={isStyleActive("italic")}
+						onClick={() => handleFormat("italic")}
+						icon={Italic}
+						tooltip="Italic (*)"
+						disabled={disabled}
+					/>
+					<ToolbarButton
+						active={isStyleActive("code")}
+						onClick={() => handleFormat("code")}
+						icon={Code}
+						tooltip="Inline Code (`)"
+						disabled={disabled}
+					/>
+					<ToolbarButton
+						active={isStyleActive("codeBlock")}
+						onClick={() => handleFormat("codeBlock")}
+						icon={FileCode}
+						tooltip="Code Block (```)"
+						disabled={disabled}
+					/>
+					<ToolbarButton
+						active={isStyleActive("link")}
+						onClick={() => handleFormat("link")}
+						icon={LinkIcon}
+						tooltip="Link"
+						disabled={disabled}
+					/>
 				</div>
 
 				<Button
@@ -301,22 +299,28 @@ function ToolbarButton({
 	disabled?: boolean;
 }) {
 	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<Button
-					type="button"
-					variant={active ? "secondary" : "ghost"}
-					size="icon"
-					className="h-8 w-8 transition-all"
-					onClick={onClick}
-					disabled={disabled}
-				>
-					<Icon className={`h-4 w-4 ${active ? "text-blue-600" : ""}`} />
-				</Button>
-			</TooltipTrigger>
-			<TooltipContent className="text-[10px] font-bold">
-				{tooltip}
-			</TooltipContent>
-		</Tooltip>
+		<TooltipProvider delayDuration={300}>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className={`h-8 w-8 transition-all ${
+							active
+								? "bg-slate-200 dark:bg-zinc-700 text-blue-600 shadow-inner"
+								: "text-muted-foreground hover:text-foreground"
+						}`}
+						onClick={onClick}
+						disabled={disabled}
+					>
+						<Icon className="h-4 w-4" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent className="text-[10px] font-black border-none bg-blue-600 text-white">
+					{tooltip}
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
