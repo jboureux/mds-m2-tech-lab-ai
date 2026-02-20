@@ -9,10 +9,10 @@ echo "📦 Checking/Installing dependencies..."
 pnpm install
 
 # Force rebuild of native modules to ensure they match the container architecture (ARM64)
-echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp)..."
+echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp, prisma)..."
 # Clean up potential broken build artifacts that cause ENOENT errors with bind mounts
 find node_modules/.pnpm -name "build" -type d -exec rm -rf {} + 2>/dev/null || true
-pnpm rebuild @tensorflow/tfjs-node sharp || echo "⚠️ Native rebuild failed, falling back to CPU mode."
+pnpm rebuild @tensorflow/tfjs-node sharp prisma || echo "⚠️ Native rebuild failed, falling back to CPU mode."
 
 # Configure shared library path for TensorFlow
 if [ -d "/app/node_modules/@tensorflow/tfjs-node/deps/lib" ]; then
