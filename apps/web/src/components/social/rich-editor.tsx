@@ -31,6 +31,13 @@ interface RichEditorProps {
 	disabled?: boolean;
 }
 
+// Extension of Tiptap storage to include markdown support
+interface MarkdownStorage {
+	markdown: {
+		getMarkdown: () => string;
+	};
+}
+
 export function RichEditor({
 	content,
 	onChange,
@@ -77,7 +84,8 @@ export function RichEditor({
 			},
 		},
 		onUpdate: ({ editor }) => {
-			const markdown = (editor.storage.markdown as any).getMarkdown();
+			const storage = editor.storage as MarkdownStorage;
+			const markdown = storage.markdown.getMarkdown();
 			onChange(markdown);
 		},
 		editable: !disabled,
@@ -109,8 +117,11 @@ export function RichEditor({
 
 	// Sync content from parent
 	React.useEffect(() => {
-		if (editor && content !== (editor.storage.markdown as any).getMarkdown()) {
-			editor.commands.setContent(content, false);
+		if (editor) {
+			const storage = editor.storage as MarkdownStorage;
+			if (content !== storage.markdown.getMarkdown()) {
+				editor.commands.setContent(content, false);
+			}
 		}
 	}, [content, editor]);
 
@@ -192,7 +203,7 @@ export function RichEditor({
 
 	const isStyleActive = (type: string) => {
 		if (isMarkdownMode) {
-			return (mdActiveStyles as any)[type];
+			return (mdActiveStyles as Record<string, boolean>)[type];
 		}
 		if (type === "codeBlock") return editor.isActive("codeBlock");
 		return editor.isActive(type);
@@ -302,7 +313,7 @@ function ToolbarButton({
 				<TooltipTrigger asChild>
 					<Button
 						type="button"
-						variant={active ? "secondary" : "ghost"}
+						variant="ghost"
 						size="icon"
 						className={`h-8 w-8 transition-all ${
 							active
