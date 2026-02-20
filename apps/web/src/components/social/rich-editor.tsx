@@ -149,7 +149,7 @@ export function RichEditor({
 		if (editor) {
 			const storage = editor.storage as unknown as MarkdownStorage;
 			if (content !== storage.markdown.getMarkdown()) {
-				editor.commands.setContent(content, false);
+				editor.commands.setContent(content, { emitUpdate: false });
 			}
 		}
 	}, [content, editor]);
