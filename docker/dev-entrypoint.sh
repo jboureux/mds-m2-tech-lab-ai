@@ -10,8 +10,13 @@ echo "📦 Checking/Installing dependencies..."
 pnpm install
 
 # Force rebuild of native modules to ensure they match the container architecture
-echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp)..."
-pnpm rebuild @tensorflow/tfjs-node sharp
+# We use npm rebuild --build-from-source because pnpm rebuild sometimes restores incorrect binaries
+echo "🔧 Compiling native modules from source (@tensorflow/tfjs-node, sharp)..."
+npm rebuild @tensorflow/tfjs-node sharp --build-from-source
+
+# Configure shared library path for TensorFlow
+echo "/app/node_modules/@tensorflow/tfjs-node/deps/lib" > /etc/ld.so.conf.d/tensorflow.conf
+ldconfig
 
 # Generate Prisma Client
 echo "🏗️ Generating Prisma client..."

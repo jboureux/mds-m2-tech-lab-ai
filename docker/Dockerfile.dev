@@ -5,12 +5,13 @@ RUN corepack enable && corepack prepare pnpm@10.6.4 --activate
 
 WORKDIR /app
 
-# Install build dependencies for native modules (like TensorFlow)
+# Install build dependencies for native modules (like TensorFlow and Sharp)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     make \
     g++ \
     ca-certificates \
+    libvips-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set pnpm home and store

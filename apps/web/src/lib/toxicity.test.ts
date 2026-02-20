@@ -7,6 +7,15 @@ vi.mock("@tensorflow/tfjs-node", () => ({
 	default: {},
 }));
 
+// Mock @xenova/transformers
+vi.mock("@xenova/transformers", () => ({
+	pipeline: vi.fn().mockResolvedValue(() => [
+		{
+			translation_text: "Translated text",
+		},
+	]),
+}));
+
 // Mock @tensorflow-models/toxicity
 vi.mock("@tensorflow-models/toxicity", () => ({
 	load: vi.fn(),
@@ -48,7 +57,7 @@ describe("Toxicity Library", () => {
 
 		const result = await checkToxicity("This is toxic content");
 		expect(result).toBe(true);
-		expect(mockModel.classify).toHaveBeenCalledWith(["This is toxic content"]);
+		expect(mockModel.classify).toHaveBeenCalledWith(["Translated text"]);
 	});
 
 	it("should return false when content is safe", async () => {
@@ -66,6 +75,7 @@ describe("Toxicity Library", () => {
 
 		const result = await checkToxicity("This is safe content");
 		expect(result).toBe(false);
+		expect(mockModel.classify).toHaveBeenCalledWith(["Translated text"]);
 	});
 
 	it("should handle model loading errors gracefully", async () => {

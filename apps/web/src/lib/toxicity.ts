@@ -2,10 +2,29 @@ import * as tf from "@tensorflow/tfjs";
 import * as toxicity from "@tensorflow-models/toxicity";
 
 // Minimum confidence threshold for predictions
-const THRESHOLD = 0.8;
+const THRESHOLD = 0.5;
 
-// Shared promise to ensure model is loaded only once
+// Shared promises to ensure models are loaded only once
 let modelPromise: Promise<toxicity.ToxicityClassifier> | null = null;
+let translatorPromise: Promise<any> | null = null;
+
+/**
+ * Loads the translation pipeline.
+ */
+export async function getTranslator() {
+	if (!translatorPromise) {
+		console.log("[TOXICITY] Loading translation model (FR -> EN)...");
+		try {
+			const { pipeline } = await import("@xenova/transformers");
+			translatorPromise = pipeline("translation", "Xenova/opus-mt-fr-en");
+		} catch (error) {
+			console.error("[TOXICITY] Failed to load translation model:", error);
+			translatorPromise = null;
+			throw error;
+		}
+	}
+	return translatorPromise;
+}
 
 /**
  * Loads the toxicity model. Singleton pattern ensures it's loaded only once.
@@ -16,8 +35,10 @@ export async function getToxicityModel() {
 		try {
 			// Try to load the native node backend for performance
 			try {
-				// We use a dynamic import and require-style check to avoid crash if not found
-				await import("@tensorflow/tfjs-node");
+				// Use createRequire to safely load native modules in ESM environment
+				const { createRequire } = await import("module");
+				const require = createRequire(import.meta.url);
+				require("@tensorflow/tfjs-node");
 				console.log("[TOXICITY] Native Node.js backend loaded successfully.");
 			} catch (e) {
 				console.warn(
@@ -49,15 +70,34 @@ export async function getToxicityModel() {
 
 /**
  * Checks content for toxicity.
+ * Translates content to English if it looks like French (or just always for safety in this context).
  * Returns true if any label exceeds the threshold.
  */
 export async function checkToxicity(content: string): Promise<boolean> {
 	if (!content || !content.trim()) return false;
 
 	try {
+		let textToScan = content;
+
+		// Local Translation (Async)
+		try {
+			const translator = await getTranslator();
+			console.log("[TOXICITY] Translating content to English for better detection...");
+			const output = await translator(content, {
+				src_lang: "fra_Latn",
+				tgt_lang: "eng_Latn",
+			});
+			textToScan = output[0].translation_text;
+			console.log(`[TOXICITY] Translated text: "${textToScan}"`);
+		} catch (e) {
+			console.error("[TOXICITY] Translation failed, scanning original text:", e);
+		}
+
 		const model = await getToxicityModel();
-		console.log(`[TOXICITY] Scanning content: "${content.substring(0, 50)}${content.length > 50 ? "..." : ""}"`);
-		const predictions = await model.classify([content]);
+		console.log(
+			`[TOXICITY] Scanning content: "${textToScan.substring(0, 50)}${textToScan.length > 50 ? "..." : ""}"`,
+		);
+		const predictions = await model.classify([textToScan]);
 
 		const results = predictions.map((p) => ({
 			label: p.label,
@@ -66,11 +106,13 @@ export async function checkToxicity(content: string): Promise<boolean> {
 		}));
 
 		const toxicResults = results.filter((r) => r.match);
-		
+
 		if (toxicResults.length > 0) {
-			console.log(`[TOXICITY] 🚩 TOXIC content detected! Matches: ${toxicResults.map(r => `${r.label} (${r.probability}%)`).join(", ")}`);
+			console.log(
+				`[TOXICITY] 🚩 TOXIC content detected! Matches: ${toxicResults.map((r) => `${r.label} (${r.probability}%)`).join(", ")}`,
+			);
 		} else {
-			const topProb = Math.max(...results.map(r => parseFloat(r.probability)));
+			const topProb = Math.max(...results.map((r) => Number.parseFloat(r.probability)));
 			console.log(`[TOXICITY] ✅ Content safe. (Max probability: ${topProb}%)`);
 		}
 

@@ -1,10 +1,16 @@
-FROM node:22-alpine AS base
+FROM node:22-bookworm-slim AS base
 
 # Install pnpm and prepare the correct version
 RUN corepack enable && corepack prepare pnpm@10.6.4 --activate
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec1f273c090075833#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+# Install system dependencies for native modules (like TensorFlow and Sharp)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    ca-certificates \
+    libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 WORKDIR /app
@@ -56,6 +62,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 # Copy and setup production entrypoint
 COPY docker/prod-entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Configure shared library path for TensorFlow
+RUN mkdir -p /etc/ld.so.conf.d && \
+    echo "/app/node_modules/@tensorflow/tfjs-node/deps/lib" > /etc/ld.so.conf.d/tensorflow.conf && \
+    ldconfig
 
 # Use the entrypoint
 ENTRYPOINT ["entrypoint.sh"]
