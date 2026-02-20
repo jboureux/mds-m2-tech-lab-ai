@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 
 export function LandingHero() {
 	return (
-		<section className="relative pt-24 pb-20 md:pt-40 md:pb-32 overflow-hidden">
+		<section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-20 md:pt-0 md:pb-0 overflow-hidden">
 			<div className="container px-4 mx-auto relative z-10">
-				<div className="max-w-4xl mx-auto text-center">
+				<div className="max-w-5xl mx-auto text-center">
 					<motion.div
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
@@ -31,7 +31,7 @@ export function LandingHero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
 					>
-						<h1 className="text-6xl md:text-8xl lg:text-9xl font-serif italic font-light tracking-tighter leading-[0.9] mb-12">
+						<h1 className="text-6xl md:text-8xl lg:text-[10rem] font-serif italic font-light tracking-tighter leading-[0.85] mb-12">
 							The{" "}
 							<span className="font-sans font-black not-italic tracking-[-0.05em] text-primary">
 								Scoop
@@ -49,19 +49,19 @@ export function LandingHero() {
 						className="max-w-xl mx-auto text-lg md:text-xl text-muted-foreground/80 font-medium mb-16 leading-relaxed"
 					>
 						A private ecosystem where academia meets the future. Your school's
-						heartbeat, localized and localized.
+						heartbeat, localized and decentralized.
 					</motion.p>
 
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.8 }}
-						className="flex flex-col sm:flex-row items-center justify-center gap-6"
+						className="flex flex-col sm:flex-row items-center justify-center gap-8"
 					>
 						<Button
 							asChild
 							size="lg"
-							className="rounded-full px-10 h-16 text-lg font-bold bg-primary hover:bg-primary/90 shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:shadow-[0_0_60px_rgba(59,130,246,0.3)] transition-all duration-500 group"
+							className="rounded-full px-12 h-16 text-lg font-bold bg-primary hover:bg-primary/90 shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:shadow-[0_0_60px_rgba(59,130,246,0.3)] transition-all duration-500 group"
 						>
 							<Link href="/login" className="flex items-center gap-3">
 								Join the Network
@@ -70,7 +70,7 @@ export function LandingHero() {
 						</Button>
 						<Link
 							href="#features"
-							className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors py-4 px-2"
+							className="text-sm font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-colors py-4 px-2"
 						>
 							Explore Logic
 						</Link>
@@ -81,15 +81,15 @@ export function LandingHero() {
 			{/* Sculptural Background Element */}
 			<motion.div
 				animate={{
-					rotate: [0, 5, 0],
-					scale: [1, 1.05, 1],
+					rotate: [0, 10, 0],
+					scale: [1, 1.1, 1],
 				}}
 				transition={{
-					duration: 10,
+					duration: 20,
 					repeat: Infinity,
 					ease: "easeInOut",
 				}}
-				className="absolute -right-20 top-20 w-[500px] h-[500px] border border-primary/5 rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%] pointer-events-none -z-10"
+				className="absolute -right-40 top-1/4 w-[600px] h-[600px] border border-primary/10 rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%] pointer-events-none -z-10 blur-[1px]"
 			/>
 		</section>
 	);
