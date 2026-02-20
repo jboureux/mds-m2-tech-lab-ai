@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 import { PostCard } from "./post-card";
 
 interface Post {
@@ -30,7 +31,10 @@ interface PostFeedProps {
 }
 
 export function PostFeed({ initialPosts, isStaff = false }: PostFeedProps) {
-	const { ref, inView } = useInView();
+	const { ref, inView } = useInView({
+		threshold: 0.1,
+		rootMargin: "400px", // Increased margin to trigger even earlier
+	});
 
 	const {
 		data,
@@ -45,26 +49,44 @@ export function PostFeed({ initialPosts, isStaff = false }: PostFeedProps) {
 		queryKey: ["posts"],
 		queryFn: async ({ pageParam = null }) => {
 			const url = new URL("/api/posts", window.location.origin);
-			url.searchParams.set("limit", "10");
+			url.searchParams.set("limit", "20");
 			if (pageParam) url.searchParams.set("cursor", pageParam as string);
+
+			console.log(`[PostFeed] Fetching page with cursor: ${pageParam}`);
 			const response = await fetch(url.toString());
 			if (!response.ok) throw new Error("Failed to fetch posts");
-			return response.json();
+			const result = await response.json();
+			console.log(
+				`[PostFeed] Fetched ${result.items.length} items, nextCursor: ${result.nextCursor}`,
+			);
+			return result;
 		},
 		initialPageParam: null,
 		getNextPageParam: (lastPage) => lastPage.nextCursor,
-		refetchInterval: 60000, // Poll every 1 minute to keep feed fresh
+		initialData: {
+			pages: [
+				{
+					items: initialPosts,
+					nextCursor:
+						initialPosts.length === 20
+							? initialPosts[initialPosts.length - 1].id
+							: null,
+				},
+			],
+			pageParams: [null],
+		},
+		refetchInterval: 60000,
 		refetchOnWindowFocus: true,
 	});
 
 	React.useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
+			console.log("[PostFeed] inView triggered, fetching next page...");
 			fetchNextPage();
 		}
 	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-	// Use initialPosts only if data is not yet available
-	const posts = data?.pages.flatMap((page) => page.items) || initialPosts;
+	const posts = data?.pages.flatMap((page) => page.items) || [];
 
 	if (isError) {
 		return (
@@ -133,21 +155,28 @@ export function PostFeed({ initialPosts, isStaff = false }: PostFeedProps) {
 			</div>
 
 			<div className="grid gap-6">
-				{posts.map((post: PostFeedProps["initialPosts"][number]) => (
-					<PostCard key={post.id} post={post} isStaff={isStaff} />
+				{posts.map((post, index) => (
+					<PostCard key={`${post.id}-${index}`} post={post} isStaff={isStaff} />
 				))}
 			</div>
 
 			{/* Loading trigger for infinite scroll */}
 			<div ref={ref} className="py-10 text-center">
 				{isFetchingNextPage ? (
-					<Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto" />
+					<div className="flex flex-col items-center gap-2">
+						<Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto" />
+						<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+							Loading more...
+						</span>
+					</div>
 				) : hasNextPage ? (
-					<div className="h-10 w-full" />
+					<div className="h-20 w-full" />
 				) : (
-					<p className="text-xs text-muted-foreground font-medium italic">
-						You've reached the end of the scoop. Go make some news!
-					</p>
+					<div className="py-10 border-t border-dashed mt-10">
+						<p className="text-xs text-muted-foreground font-bold uppercase tracking-widest italic">
+							✨ You've reached the end of the scoop ✨
+						</p>
+					</div>
 				)}
 			</div>
 		</div>

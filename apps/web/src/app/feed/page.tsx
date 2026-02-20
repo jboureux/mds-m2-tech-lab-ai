@@ -25,7 +25,7 @@ export default async function Home() {
 				{ authorId: session.user.id }, // Users can see their own pending/flagged posts
 			],
 		},
-		take: 10,
+		take: 20,
 		include: {
 			author: {
 				select: {
@@ -41,9 +41,7 @@ export default async function Home() {
 				},
 			},
 		},
-		orderBy: {
-			createdAt: "desc",
-		},
+		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 	});
 
 	const { isAllowed, reason } = await checkPostingPermission(session);

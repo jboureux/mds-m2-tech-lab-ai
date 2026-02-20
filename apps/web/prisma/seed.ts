@@ -92,8 +92,10 @@ async function main() {
 	// Seed Posts
 	const allUsers = [admin, moderator, vip, ...users];
 	const posts = [];
-	for (let i = 0; i < 15; i++) {
+	const now = new Date();
+	for (let i = 0; i < 200; i++) {
 		const author = faker.helpers.arrayElement(allUsers);
+		const createdAt = new Date(now.getTime() - i * 1000 * 60 * 10); // Spaced by 10 minutes
 		const post = await prisma.post.create({
 			data: {
 				content: faker.lorem.paragraphs(2),
@@ -106,6 +108,7 @@ async function main() {
 				]),
 				isToxic: faker.datatype.boolean({ probability: 0.1 }),
 				authorId: author.id,
+				createdAt,
 			},
 		});
 		posts.push(post);
@@ -114,7 +117,7 @@ async function main() {
 
 	// Seed Comments
 	const comments = [];
-	for (let i = 0; i < 30; i++) {
+	for (let i = 0; i < 400; i++) {
 		const author = faker.helpers.arrayElement(allUsers);
 		const post = faker.helpers.arrayElement(posts);
 		const comment = await prisma.comment.create({
@@ -129,7 +132,7 @@ async function main() {
 	}
 
 	// Seed some nested comments (Replies)
-	for (let i = 0; i < 15; i++) {
+	for (let i = 0; i < 100; i++) {
 		const author = faker.helpers.arrayElement(allUsers);
 		const parentComment = faker.helpers.arrayElement(comments);
 		await prisma.comment.create({

@@ -5,7 +5,7 @@ import { LandingHero } from "@/components/landing/LandingHero";
 import { MeshBackground } from "@/components/landing/MeshBackground";
 import { auth } from "@/lib/auth";
 
-export default async function LandingPage() {
+export default async function Page() {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});

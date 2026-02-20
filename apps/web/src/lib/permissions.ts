@@ -17,7 +17,11 @@ export async function checkPostingPermission(
 
 	const h = await headers();
 	const networkLocation = h.get("x-network-location") || "off-campus";
-	const { role, banned, banExpires } = session.user as any;
+	const { role, banned, banExpires } = session.user as User & {
+		role: string;
+		banned?: boolean;
+		banExpires?: string | Date | null;
+	};
 
 	// Check if user is banned
 	if (banned) {
