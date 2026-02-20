@@ -91,19 +91,17 @@ export function RichEditor({
 		const before = content.substring(0, start);
 		const after = content.substring(start);
 
-		// Simple detection logic for common markdown patterns
+		// Robust detection using simple string matching
+		const isWrapped = (delim: string) => {
+			return before.includes(delim) && after.includes(delim);
+		};
+
 		const styles = {
-			bold:
-				(/\*\*$/.test(before) && /^\*\*/.test(after)) ||
-				(/\*\*.*$/.test(before) && /^.*\*\*/.test(after)),
-			italic:
-				(/\*$/.test(before) && /^\*/.test(after)) ||
-				(/\*.*$/.test(before) && /^.*\*/.test(after)),
-			code:
-				(/`$/.test(before) && /^`/.test(after)) ||
-				(/`.*$/.test(before) && /^.*`/.test(after)),
-			codeBlock: before.includes("```") && after.includes("```"),
-			link: /\[.*\]\(.*\)/.test(content.substring(start - 10, start + 10)),
+			bold: isWrapped("**") || isWrapped("__"),
+			italic: isWrapped("*") || isWrapped("_"),
+			code: isWrapped("`"),
+			codeBlock: isWrapped("```"),
+			link: isWrapped("[") && isWrapped("]"),
 		};
 
 		setMdActiveStyles(styles);
@@ -304,12 +302,12 @@ function ToolbarButton({
 				<TooltipTrigger asChild>
 					<Button
 						type="button"
-						variant="ghost"
+						variant={active ? "secondary" : "ghost"}
 						size="icon"
 						className={`h-8 w-8 transition-all ${
 							active
 								? "bg-slate-200 dark:bg-zinc-700 text-blue-600 shadow-inner"
-								: "text-muted-foreground hover:text-foreground"
+								: "text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-zinc-800"
 						}`}
 						onClick={onClick}
 						disabled={disabled}
@@ -317,7 +315,7 @@ function ToolbarButton({
 						<Icon className="h-4 w-4" />
 					</Button>
 				</TooltipTrigger>
-				<TooltipContent className="text-[10px] font-black border-none bg-blue-600 text-white">
+				<TooltipContent className="text-[10px] font-black border-none bg-blue-600 text-white shadow-lg">
 					{tooltip}
 				</TooltipContent>
 			</Tooltip>
