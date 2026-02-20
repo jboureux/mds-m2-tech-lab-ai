@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, ShieldAlert, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,7 +42,7 @@ export async function SocialSidebar() {
 					label="Feed"
 					active
 				/>
-				<SidebarNavItem href="/settings" icon={Settings} label="Settings" />
+				<SidebarNavItem href="/profile" icon={User} label="Profile" />
 				{user.role === "ADMIN" && (
 					<>
 						<Separator className="my-2" />

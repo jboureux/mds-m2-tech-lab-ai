@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,15 +38,17 @@ export async function SocialHeader() {
 				<div className="flex items-center gap-1 sm:gap-2">
 					<div className="h-6 w-px bg-slate-200 dark:bg-zinc-700 mx-1 hidden sm:block" />
 
-					<Button
-						variant="ghost"
-						className="p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
-					>
-						<Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-blue-600/30 transition-all">
-							<AvatarImage src={user.image || ""} />
-							<AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
-						</Avatar>
-					</Button>
+					<Link href="/profile">
+						<Button
+							variant="ghost"
+							className="p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+						>
+							<Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-blue-600/30 transition-all">
+								<AvatarImage src={user.image || ""} />
+								<AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+							</Avatar>
+						</Button>
+					</Link>
 				</div>
 			</div>
 		</header>
