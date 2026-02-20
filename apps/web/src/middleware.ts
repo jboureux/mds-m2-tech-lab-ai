@@ -1,23 +1,15 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getClientIp, isIpInAllowedRanges } from "@/lib/network/ip-utils";
-
-// In-memory cache for CIDR ranges
-let cachedAllowedRanges: string[] | null = null;
-let lastCacheUpdate = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+import { campusNetworkCache } from "@/lib/network/cidr-cache";
+import { getClientIp } from "@/lib/network/ip-utils";
 
 /**
- * Fetches allowed IP ranges via internal API with a simple in-memory cache.
- * Using fetch instead of direct Prisma because Middleware runs in Edge Runtime
- * where direct Prisma client initialization might fail or have overhead.
+ * Ensures allowed IP ranges are cached and fresh.
+ * Fetches via internal API to avoid Prisma overhead in Middleware.
  */
-async function getAllowedRanges(origin: string) {
-	const now = Date.now();
-
-	// Return cached value if it's still fresh
-	if (cachedAllowedRanges && now - lastCacheUpdate < CACHE_TTL) {
-		return cachedAllowedRanges;
+async function refreshAllowedRangesCache(origin: string) {
+	if (!campusNetworkCache.isExpired() && !campusNetworkCache.isEmpty()) {
+		return;
 	}
 
 	try {
@@ -30,17 +22,15 @@ async function getAllowedRanges(origin: string) {
 		} as RequestInit & { next: { revalidate: number; tags: string[] } });
 
 		if (response.ok) {
-			cachedAllowedRanges = await response.json();
-			lastCacheUpdate = now;
+			const ranges: string[] = await response.json();
+			campusNetworkCache.setRanges(ranges);
 		}
-
-		return cachedAllowedRanges || [];
 	} catch (error) {
 		// Log error but don't crash the middleware
-		console.error("[Middleware] Failed to fetch allowed IP ranges:", error);
-
-		// Return stale cache if available, otherwise empty list
-		return cachedAllowedRanges || [];
+		console.error(
+			"[Middleware] Failed to refresh allowed IP ranges cache:",
+			error,
+		);
 	}
 }
 
@@ -50,17 +40,17 @@ export default async function middleware(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	// 1. Detect Client IP using the utility from issue #15
+	// 1. Detect Client IP
 	const ip = getClientIp(request.headers);
 
 	let networkLocation: "on-campus" | "off-campus" = "off-campus";
 
 	if (ip) {
-		// 2. Fetch Allowed Ranges via internal API (with caching)
-		const allowedRanges = await getAllowedRanges(request.nextUrl.origin);
+		// 2. Ensure Allowed Ranges are cached (with TTL)
+		await refreshAllowedRangesCache(request.nextUrl.origin);
 
-		// 3. Verify IP against campus ranges
-		const isOnCampus = isIpInAllowedRanges(ip, allowedRanges);
+		// 3. Verify IP against campus ranges using the efficient pre-parsed cache
+		const isOnCampus = campusNetworkCache.check(ip);
 		networkLocation = isOnCampus ? "on-campus" : "off-campus";
 	}
 
