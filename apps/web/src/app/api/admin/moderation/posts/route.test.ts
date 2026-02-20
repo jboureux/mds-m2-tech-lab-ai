@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import db from "@/lib/prisma";
 import { GET } from "./route";
 
 // Mock dependencies
@@ -17,7 +17,7 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 vi.mock("@/lib/prisma", () => ({
-	prisma: {
+	default: {
 		post: {
 			findMany: vi.fn(),
 		},
@@ -62,14 +62,14 @@ describe("API: GET /api/admin/moderation/posts", () => {
 				author: { name: "User 1" },
 			},
 		];
-		vi.mocked(prisma.post.findMany).mockResolvedValue(mockPosts as any);
+		vi.mocked(db.post.findMany).mockResolvedValue(mockPosts as any);
 
 		const response = await GET(new Request("http://localhost"));
 		const data = await response.json();
 
 		expect(response.status).toBe(200);
 		expect(data).toEqual(mockPosts);
-		expect(prisma.post.findMany).toHaveBeenCalledWith(
+		expect(db.post.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { status: "FLAGGED" },
 			}),

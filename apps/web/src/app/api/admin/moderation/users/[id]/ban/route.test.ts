@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import db from "@/lib/prisma";
 import { POST } from "./route";
 
 // Mock dependencies
@@ -17,7 +17,7 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 vi.mock("@/lib/prisma", () => ({
-	prisma: {
+	default: {
 		user: {
 			update: vi.fn(),
 		},
@@ -32,7 +32,7 @@ describe("API: POST /api/admin/moderation/users/[id]/ban", () => {
 		} as any);
 
 		const mockUser = { id: "1", banned: true };
-		vi.mocked(prisma.user.update).mockResolvedValue(mockUser as any);
+		vi.mocked(db.user.update).mockResolvedValue(mockUser as any);
 
 		const req = new Request("http://localhost", {
 			method: "POST",
@@ -45,7 +45,7 @@ describe("API: POST /api/admin/moderation/users/[id]/ban", () => {
 
 		expect(response.status).toBe(200);
 		expect(data.message).toBe("User banned");
-		expect(prisma.user.update).toHaveBeenCalledWith(
+		expect(db.user.update).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { id: "1" },
 				data: expect.objectContaining({

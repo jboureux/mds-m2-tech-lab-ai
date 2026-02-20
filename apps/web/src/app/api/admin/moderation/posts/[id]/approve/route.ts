@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import db from "@/lib/prisma";
 
 export async function POST(
 	_req: Request,
@@ -24,7 +24,7 @@ export async function POST(
 			);
 		}
 
-		const post = await prisma.post.update({
+		const post = await db.post.update({
 			where: {
 				id,
 			},

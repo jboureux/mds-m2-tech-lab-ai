@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import db from "@/lib/prisma";
 
 export async function GET(_req: Request) {
 	try {
@@ -20,7 +20,7 @@ export async function GET(_req: Request) {
 			);
 		}
 
-		const flaggedPosts = await prisma.post.findMany({
+		const flaggedPosts = await db.post.findMany({
 			where: {
 				status: "FLAGGED",
 			},
