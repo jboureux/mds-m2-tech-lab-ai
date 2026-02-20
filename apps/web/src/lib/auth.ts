@@ -5,6 +5,7 @@ import { admin, magicLink } from "better-auth/plugins";
 import db from "./prisma";
 import { resend } from "./resend";
 import { getRuntimeConfig } from "./runtime-config";
+import { slugify } from "./utils";
 
 export const auth = betterAuth({
 	database: prismaAdapter(db, {
@@ -53,11 +54,32 @@ export const auth = betterAuth({
 						});
 					}
 
+					// Generate unique username
+					const baseName =
+						user.name || preRegistered.name || user.email.split("@")[0];
+					const baseUsername = slugify(baseName) || "user";
+					let username = baseUsername;
+					let counter = 1;
+					let exists = true;
+
+					while (exists) {
+						const existingUser = await db.user.findUnique({
+							where: { username },
+						});
+						if (existingUser) {
+							username = `${baseUsername}${counter}`;
+							counter++;
+						} else {
+							exists = false;
+						}
+					}
+
 					return {
 						data: {
 							...user,
 							role: preRegistered.role,
 							name: user.name || preRegistered.name || undefined,
+							username,
 						},
 					};
 				},
