@@ -45,15 +45,9 @@ export function ProfileForm({ user }: { user: User }) {
 
 		setIsUpdating(true);
 		try {
-			const updateData: { bio: string; name?: string; username?: string } = {
+			const updateData: { bio: string } = {
 				bio: bio,
 			};
-
-			// Only non-standard members can update their name and username
-			if (!isStandardMember) {
-				updateData.name = name;
-				updateData.username = username;
-			}
 
 			const response = await fetch("/api/user/profile", {
 				method: "POST",
@@ -70,13 +64,7 @@ export function ProfileForm({ user }: { user: User }) {
 			} else {
 				toast.success("Profile updated successfully");
 				setIsEditing(false);
-
-				// If username changed and we are on a profile page, redirect to new URL
-				if (result.user.username && result.user.username !== user.username) {
-					router.push(`/u/${result.user.username}`);
-				} else {
-					router.refresh();
-				}
+				router.refresh();
 			}
 		} catch (_err) {
 			toast.error("An error occurred while updating profile");
@@ -151,48 +139,44 @@ export function ProfileForm({ user }: { user: User }) {
 									htmlFor="name"
 									className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
 								>
-									Display Name
+									Name
 								</Label>
 								<div className="relative group">
 									<UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
 									<Input
 										id="name"
 										value={name}
-										onChange={(e) => setName(e.target.value)}
 										placeholder="Your Name"
-										disabled={isStandardMember}
-										className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl"
+										disabled
+										className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl opacity-70"
 									/>
-									{isStandardMember && (
-										<p className="text-[10px] text-muted-foreground mt-1 ml-1 italic">
-											Standard accounts cannot change their display name.
-										</p>
-									)}
 								</div>
 							</div>
 
-							{!isStandardMember && (
-								<div className="space-y-2">
-									<Label
-										htmlFor="username"
-										className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
-									>
-										Handle (@username)
-									</Label>
-									<div className="relative group">
-										<span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground font-bold flex items-center justify-center">
-											@
-										</span>
-										<Input
-											id="username"
-											value={username}
-											onChange={(e) => setUsername(e.target.value)}
-											placeholder="username"
-											className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl"
-										/>
-									</div>
+							<div className="space-y-2">
+								<Label
+									htmlFor="username"
+									className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
+								>
+									Username
+								</Label>
+								<div className="relative group">
+									<span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground font-bold flex items-center justify-center">
+										@
+									</span>
+									<Input
+										id="username"
+										value={username}
+										placeholder="username"
+										disabled
+										className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl opacity-70"
+									/>
 								</div>
-							)}
+								<p className="text-[10px] text-muted-foreground mt-1 ml-1 italic">
+									Personal information is managed by the institution and cannot
+									be changed here.
+								</p>
+							</div>
 
 							<div className="space-y-2">
 								<Label
@@ -283,7 +267,7 @@ export function ProfileForm({ user }: { user: User }) {
 								{user.username && (
 									<div className="space-y-1">
 										<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
-											Handle
+											Username
 										</p>
 										<p className="text-sm font-semibold text-blue-600">
 											@{user.username}
