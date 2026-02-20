@@ -243,118 +243,120 @@ export function PostEditor({
 								/>
 							</div>
 						) : (
-							<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-zinc-800/50 p-1 rounded-lg border dark:border-zinc-800">
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8"
-												onClick={() => handleFormat("bold")}
-												disabled={isPreview}
-											>
-												<Bold className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Bold (**) </TooltipContent>
-									</Tooltip>
-
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8"
-												onClick={() => handleFormat("italic")}
-												disabled={isPreview}
-											>
-												<Italic className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Italic (*)</TooltipContent>
-									</Tooltip>
-
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8"
-												onClick={() => handleFormat("code")}
-												disabled={isPreview}
-											>
-												<Code className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Code Block</TooltipContent>
-									</Tooltip>
-
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon"
-												className="h-8 w-8"
-												onClick={() => handleFormat("link")}
-												disabled={isPreview}
-											>
-												<LinkIcon className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Link</TooltipContent>
-									</Tooltip>
-
-									<DropdownMenu>
+							<>
+								<div className="flex items-center gap-1 bg-slate-100/50 dark:bg-zinc-800/50 p-1 rounded-lg border dark:border-zinc-800">
+									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<DropdownMenuTrigger asChild>
-													<Button
-														type="button"
-														variant="ghost"
-														size="icon"
-														className="h-8 w-8"
-														disabled={isPreview}
-													>
-														<Palette className="h-4 w-4" />
-													</Button>
-												</DropdownMenuTrigger>
-											</TooltipTrigger>
-											<TooltipContent>Text Color</TooltipContent>
-										</Tooltip>
-										<DropdownMenuContent align="start" className="w-40">
-											{colors.map((color) => (
-												<DropdownMenuItem
-													key={color.name}
-													className="flex items-center gap-2 cursor-pointer"
-													onClick={() => handleFormat("color", color.value)}
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8"
+													onClick={() => handleFormat("bold")}
+													disabled={isPreview}
 												>
-													<div
-														className="h-3 w-3 rounded-full"
-														style={{ backgroundColor: color.value }}
-													/>
-													<span>{color.name}</span>
-												</DropdownMenuItem>
-											))}
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</TooltipProvider>
-							</div>
+													<Bold className="h-4 w-4" />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>Bold (**) </TooltipContent>
+										</Tooltip>
 
-							<Textarea
-								id="content"
-								ref={textareaRef}
-								placeholder="What's happening in school?"
-								value={content}
-								onChange={(e) => setContent(e.target.value)}
-								disabled={!isAllowedToPost || mutation.isPending}
-								className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
-								autoFocus
-							/>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8"
+													onClick={() => handleFormat("italic")}
+													disabled={isPreview}
+												>
+													<Italic className="h-4 w-4" />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>Italic (*)</TooltipContent>
+										</Tooltip>
+
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8"
+													onClick={() => handleFormat("code")}
+													disabled={isPreview}
+												>
+													<Code className="h-4 w-4" />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>Code Block</TooltipContent>
+										</Tooltip>
+
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8"
+													onClick={() => handleFormat("link")}
+													disabled={isPreview}
+												>
+													<LinkIcon className="h-4 w-4" />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>Link</TooltipContent>
+										</Tooltip>
+
+										<DropdownMenu>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<DropdownMenuTrigger asChild>
+														<Button
+															type="button"
+															variant="ghost"
+															size="icon"
+															className="h-8 w-8"
+															disabled={isPreview}
+														>
+															<Palette className="h-4 w-4" />
+														</Button>
+													</DropdownMenuTrigger>
+												</TooltipTrigger>
+												<TooltipContent>Text Color</TooltipContent>
+											</Tooltip>
+											<DropdownMenuContent align="start" className="w-40">
+												{colors.map((color) => (
+													<DropdownMenuItem
+														key={color.name}
+														className="flex items-center gap-2 cursor-pointer"
+														onClick={() => handleFormat("color", color.value)}
+													>
+														<div
+															className="h-3 w-3 rounded-full"
+															style={{ backgroundColor: color.value }}
+														/>
+														<span>{color.name}</span>
+													</DropdownMenuItem>
+												))}
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</TooltipProvider>
+								</div>
+
+								<Textarea
+									id="content"
+									ref={textareaRef}
+									placeholder="What's happening in school?"
+									value={content}
+									onChange={(e) => setContent(e.target.value)}
+									disabled={!isAllowedToPost || mutation.isPending}
+									className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
+									autoFocus
+								/>
+							</>
 						)}
 					</div>
 				</form>
