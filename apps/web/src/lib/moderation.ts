@@ -1,7 +1,11 @@
+import * as toxicity from "@tensorflow-models/toxicity";
+import "@tensorflow/tfjs";
 import { Filter } from "bad-words";
 import db from "@/lib/prisma";
 
 let filter: Filter | null = null;
+let toxicityModel: toxicity.ToxicityClassifier | null = null;
+const TOXICITY_THRESHOLD = 0.8;
 
 /**
  * Initializes and returns the bad-words filter, adding custom banned words from the database.
@@ -20,6 +24,44 @@ async function getFilter() {
 		}
 	}
 	return filter;
+}
+
+/**
+ * Initializes and returns the toxicity model.
+ */
+export async function loadToxicityModel() {
+	if (toxicityModel) return toxicityModel;
+	try {
+		console.log("[MODERATION] Loading toxicity model...");
+		toxicityModel = await toxicity.load(TOXICITY_THRESHOLD, []);
+		console.log("[MODERATION] Toxicity model loaded.");
+		return toxicityModel;
+	} catch (error) {
+		console.error("[MODERATION] Failed to load toxicity model:", error);
+		return null;
+	}
+}
+
+/**
+ * Checks if the content is toxic using the TensorFlow.js model.
+ * Returns true if toxic, false otherwise.
+ */
+export async function checkToxicity(content: string): Promise<boolean> {
+	if (!content || !content.trim()) return false;
+
+	const model = await loadToxicityModel();
+	if (!model) return false;
+
+	try {
+		const predictions = await model.classify([content]);
+		// Check if any prediction is a match (true)
+		return predictions.some((prediction) =>
+			prediction.results.some((result) => result.match),
+		);
+	} catch (error) {
+		console.error("[MODERATION] Error checking toxicity:", error);
+		return false;
+	}
 }
 
 /**
@@ -46,4 +88,11 @@ export async function cleanContent(content: string): Promise<string> {
  */
 export function _resetFilter() {
 	filter = null;
+}
+
+/**
+ * Resets the toxicity model instance (primarily for testing).
+ */
+export function _resetToxicityModel() {
+	toxicityModel = null;
 }

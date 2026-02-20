@@ -1,5 +1,12 @@
+import * as toxicity from "@tensorflow-models/toxicity";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetFilter, cleanContent, validateContent } from "./moderation";
+import {
+	_resetFilter,
+	_resetToxicityModel,
+	checkToxicity,
+	cleanContent,
+	validateContent,
+} from "./moderation";
 import db from "./prisma";
 
 // Mock prisma
@@ -11,10 +18,16 @@ vi.mock("./prisma", () => ({
 	},
 }));
 
+// Mock toxicity
+vi.mock("@tensorflow-models/toxicity", () => ({
+	load: vi.fn(),
+}));
+
 describe("Moderation Library", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		_resetFilter(); // Ensure each test starts with a fresh filter
+		_resetToxicityModel(); // Ensure each test starts with a fresh toxicity model
 	});
 
 	it("should return true for clean content", async () => {
@@ -61,5 +74,43 @@ describe("Moderation Library", () => {
 		expect(await validateContent("")).toBe(true);
 		expect(await validateContent("   ")).toBe(true);
 		expect(await cleanContent("")).toBe("");
+	});
+
+	describe("Toxicity Analysis", () => {
+		it("should return false if toxicity model fails to load", async () => {
+			vi.mocked(toxicity.load).mockRejectedValue(new Error("Failed to load"));
+			const result = await checkToxicity("Some content");
+			expect(result).toBe(false);
+		});
+
+		it("should return true if content is toxic", async () => {
+			const mockModel = {
+				classify: vi.fn().mockResolvedValue([
+					{
+						label: "insult",
+						results: [{ match: true }],
+					},
+				]),
+			};
+			vi.mocked(toxicity.load).mockResolvedValue(mockModel as any);
+
+			const result = await checkToxicity("You are stupid");
+			expect(result).toBe(true);
+		});
+
+		it("should return false if content is safe", async () => {
+			const mockModel = {
+				classify: vi.fn().mockResolvedValue([
+					{
+						label: "insult",
+						results: [{ match: false }],
+					},
+				]),
+			};
+			vi.mocked(toxicity.load).mockResolvedValue(mockModel as any);
+
+			const result = await checkToxicity("Hello world");
+			expect(result).toBe(false);
+		});
 	});
 });
