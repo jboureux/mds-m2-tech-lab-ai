@@ -14,6 +14,38 @@ describe("checkPostingPermission", () => {
 		expect(result.reason).toBe("Unauthorized");
 	});
 
+	it("should return isAllowed: false if user is banned", async () => {
+		const session = {
+			user: { role: "ADMIN", banned: true, banExpires: null } as any,
+			session: {} as any,
+		};
+
+		(headers as any).mockResolvedValue(
+			new Map([["x-network-location", "on-campus"]]),
+		);
+
+		const result = await checkPostingPermission(session);
+		expect(result.isAllowed).toBe(false);
+		expect(result.reason).toContain("banned");
+	});
+
+	it("should return isAllowed: true if user ban has expired", async () => {
+		const expiredDate = new Date();
+		expiredDate.setDate(expiredDate.getDate() - 1); // Yesterday
+
+		const session = {
+			user: { role: "ADMIN", banned: true, banExpires: expiredDate } as any,
+			session: {} as any,
+		};
+
+		(headers as any).mockResolvedValue(
+			new Map([["x-network-location", "on-campus"]]),
+		);
+
+		const result = await checkPostingPermission(session);
+		expect(result.isAllowed).toBe(true);
+	});
+
 	it("should return isAllowed: true for ADMIN regardless of location", async () => {
 		const session = {
 			user: { role: "ADMIN" } as any,
