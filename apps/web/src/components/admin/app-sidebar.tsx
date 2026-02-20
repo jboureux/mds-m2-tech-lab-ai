@@ -1,8 +1,10 @@
 "use client";
 
 import {
+	ArrowLeft,
 	ChevronUp,
 	Globe,
+	LayoutGrid,
 	LogOut,
 	Network,
 	School,
@@ -132,6 +134,28 @@ function AppSidebarContent({ networkLocation }: { networkLocation: string }) {
 			</SidebarHeader>
 
 			<SidebarContent className="px-2 py-4">
+				<SidebarGroup>
+					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+						Application
+					</SidebarGroupLabel>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							<SidebarMenuItem className="mb-2">
+								<SidebarMenuButton
+									asChild
+									tooltip="Back to Feed"
+									className="transition-all duration-200 rounded-lg py-5 px-3 hover:bg-muted/50 text-foreground/80 hover:text-foreground"
+								>
+									<Link href="/feed" className="flex items-center gap-3">
+										<LayoutGrid className="h-4.5 w-4.5 text-primary" />
+										<span className="font-bold text-sm">Return to Feed</span>
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+
 				<SidebarGroup>
 					<SidebarGroupLabel className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
 						Core Systems
