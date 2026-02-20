@@ -29,7 +29,18 @@ async function getFilter() {
 export async function validateContent(content: string): Promise<boolean> {
 	if (!content || !content.trim()) return true;
 	const f = await getFilter();
-	return !f.isProfane(content);
+	const isProfane = f.isProfane(content);
+
+	if (isProfane) {
+		// Identify which words were detected
+		const words = content.split(/\s+/);
+		const detected = words.filter((word) => f.isProfane(word));
+		console.log(
+			`[MODERATION] 🚩 Banned words detected: ${Array.from(new Set(detected)).join(", ")}`,
+		);
+	}
+
+	return !isProfane;
 }
 
 /**
