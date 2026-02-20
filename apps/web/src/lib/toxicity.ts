@@ -1,3 +1,4 @@
+import "@tensorflow/tfjs-node";
 import * as tf from "@tensorflow/tfjs";
 import * as toxicity from "@tensorflow-models/toxicity";
 
@@ -12,13 +13,9 @@ let modelPromise: Promise<toxicity.ToxicityClassifier> | null = null;
  */
 export async function getToxicityModel() {
 	if (!modelPromise) {
-		console.log("[TOXICITY] Initializing model...");
+		console.log("[TOXICITY] Initializing model with native node backend...");
 		try {
-			// Ensure we have a backend (default to CPU in Node)
-			if (!tf.getBackend()) {
-				console.log("[TOXICITY] No backend found, setting to 'cpu'");
-				await tf.setBackend("cpu");
-			}
+			// Ensure we are ready (native backend should be registered by the import)
 			await tf.ready();
 			console.log(`[TOXICITY] Using backend: ${tf.getBackend()}`);
 

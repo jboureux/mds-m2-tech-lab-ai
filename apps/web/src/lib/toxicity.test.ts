@@ -2,6 +2,11 @@ import * as toxicity from "@tensorflow-models/toxicity";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { _resetModel, checkToxicity, getToxicityModel } from "./toxicity";
 
+// Mock @tensorflow/tfjs-node to avoid native module errors in unit tests
+vi.mock("@tensorflow/tfjs-node", () => ({
+	default: {},
+}));
+
 // Mock @tensorflow-models/toxicity
 vi.mock("@tensorflow-models/toxicity", () => ({
 	load: vi.fn(),
