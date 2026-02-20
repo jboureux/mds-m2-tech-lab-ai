@@ -146,10 +146,10 @@ export default async function AdminModerationPage() {
 									className="group border-b transition-colors hover:bg-muted/20"
 								>
 									<TableCell className="py-4 px-8 align-top">
-										<p className="text-sm font-medium line-clamp-3">
+										<p className="text-sm font-medium line-clamp-4 break-words whitespace-pre-wrap">
 											{post.content}
 										</p>
-										<span className="text-[10px] text-muted-foreground mt-1 block">
+										<span className="text-[10px] text-muted-foreground mt-2 block">
 											ID: {post.id} • {post.createdAt.toLocaleDateString()}
 										</span>
 									</TableCell>
