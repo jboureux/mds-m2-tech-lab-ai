@@ -40,10 +40,7 @@ export default async function Home() {
 				},
 			},
 		},
-		orderBy: [
-			{ createdAt: "desc" },
-			{ id: "desc" },
-		],
+		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 	});
 
 	const { isAllowed, reason } = await checkPostingPermission(session);

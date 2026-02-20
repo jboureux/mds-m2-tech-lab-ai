@@ -146,7 +146,7 @@ export default async function PostPage({ params }: PostPageProps) {
 							post.comments.map((comment) => (
 								<Comment
 									key={comment.id}
-									comment={comment as any}
+									comment={comment}
 									isAllowedToComment={isAllowed}
 									restrictionReason={reason}
 								/>

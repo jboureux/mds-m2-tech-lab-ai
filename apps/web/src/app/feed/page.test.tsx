@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import type { Session, User } from "better-auth";
 import { describe, expect, it, vi } from "vitest";
 import Page from "./page";
 
@@ -52,7 +53,7 @@ describe("Home Page", () => {
 
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			user: { name: "Test User", id: "1", role: "USER", image: null },
-		} as any);
+		} as unknown as { user: User; session: Session });
 		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
 		vi.mocked(db.post.findMany).mockResolvedValue([]);
 

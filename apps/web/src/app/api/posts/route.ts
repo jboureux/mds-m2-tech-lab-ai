@@ -70,8 +70,10 @@ export async function GET(req: Request) {
 			headers: await headers(),
 		});
 
-		console.log(`[API_POSTS_GET] Fetching posts for user ${session?.user.email || 'guest'} with limit ${limit} and cursor ${cursor}`);
-		
+		console.log(
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit} and cursor ${cursor}`,
+		);
+
 		const posts = await db.post.findMany({
 			where: {
 				OR: [
@@ -96,10 +98,7 @@ export async function GET(req: Request) {
 					},
 				},
 			},
-			orderBy: [
-				{ createdAt: "desc" },
-				{ id: "desc" },
-			],
+			orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 		});
 
 		console.log(`[API_POSTS_GET] Found ${posts.length} posts`);

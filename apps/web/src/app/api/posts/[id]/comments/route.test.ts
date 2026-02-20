@@ -1,3 +1,4 @@
+import type { Comment, Session, User } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
 import { checkPostingPermission } from "@/lib/permissions";
@@ -40,8 +41,10 @@ describe("POST /api/posts/[id]/comments", () => {
 	});
 
 	it("should create a threaded comment when parentId is provided", async () => {
-		const session = { user: { id: userId, name: "Test User" } };
-		vi.mocked(auth.api.getSession).mockResolvedValue(session as any);
+		const session = {
+			user: { id: userId, name: "Test User" },
+		} as unknown as { user: User; session: Session };
+		vi.mocked(auth.api.getSession).mockResolvedValue(session);
 		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
 		vi.mocked(db.bannedWord.findMany).mockResolvedValue([]);
 
@@ -49,8 +52,8 @@ describe("POST /api/posts/[id]/comments", () => {
 			id: "comment-456",
 			content: "Reply",
 			parentId: "parent-123",
-		};
-		vi.mocked(db.comment.create).mockResolvedValue(mockComment as any);
+		} as Comment;
+		vi.mocked(db.comment.create).mockResolvedValue(mockComment);
 
 		const req = new Request(`http://localhost/api/posts/${postId}/comments`, {
 			method: "POST",
@@ -84,8 +87,10 @@ describe("POST /api/posts/[id]/comments", () => {
 	});
 
 	it("should return 400 if content is missing", async () => {
-		const session = { user: { id: userId } };
-		vi.mocked(auth.api.getSession).mockResolvedValue(session as any);
+		const session = {
+			user: { id: userId },
+		} as unknown as { user: User; session: Session };
+		vi.mocked(auth.api.getSession).mockResolvedValue(session);
 		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
 
 		const req = new Request(`http://localhost/api/posts/${postId}/comments`, {

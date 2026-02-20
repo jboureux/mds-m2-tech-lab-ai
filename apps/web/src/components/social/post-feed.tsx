@@ -48,18 +48,28 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 			const url = new URL("/api/posts", window.location.origin);
 			url.searchParams.set("limit", "20");
 			if (pageParam) url.searchParams.set("cursor", pageParam as string);
-			
+
 			console.log(`[PostFeed] Fetching page with cursor: ${pageParam}`);
 			const response = await fetch(url.toString());
 			if (!response.ok) throw new Error("Failed to fetch posts");
 			const result = await response.json();
-			console.log(`[PostFeed] Fetched ${result.items.length} items, nextCursor: ${result.nextCursor}`);
+			console.log(
+				`[PostFeed] Fetched ${result.items.length} items, nextCursor: ${result.nextCursor}`,
+			);
 			return result;
 		},
 		initialPageParam: null,
 		getNextPageParam: (lastPage) => lastPage.nextCursor,
 		initialData: {
-			pages: [{ items: initialPosts, nextCursor: initialPosts.length === 20 ? initialPosts[initialPosts.length - 1].id : null }],
+			pages: [
+				{
+					items: initialPosts,
+					nextCursor:
+						initialPosts.length === 20
+							? initialPosts[initialPosts.length - 1].id
+							: null,
+				},
+			],
 			pageParams: [null],
 		},
 		refetchInterval: 60000,
@@ -152,7 +162,9 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 				{isFetchingNextPage ? (
 					<div className="flex flex-col items-center gap-2">
 						<Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto" />
-						<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loading more...</span>
+						<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+							Loading more...
+						</span>
 					</div>
 				) : hasNextPage ? (
 					<div className="h-20 w-full" />

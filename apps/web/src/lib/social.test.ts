@@ -1,4 +1,4 @@
-import { PostStatus } from "@prisma/client";
+import { type Comment, type Post, PostStatus } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import db from "./prisma";
 
@@ -24,9 +24,11 @@ describe("Social Schema Logic (Mocks)", () => {
 			status: PostStatus.PENDING,
 			isToxic: false,
 			authorId: "user-1",
-		};
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Post;
 
-		vi.mocked(db.post.create).mockResolvedValue(mockPost as any);
+		vi.mocked(db.post.create).mockResolvedValue(mockPost);
 
 		const result = await db.post.create({
 			data: {
@@ -54,9 +56,11 @@ describe("Social Schema Logic (Mocks)", () => {
 			authorId: "user-2",
 			parentId: "comment-1",
 			isToxic: false,
-		};
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		} as Comment;
 
-		vi.mocked(db.comment.create).mockResolvedValue(mockComment as any);
+		vi.mocked(db.comment.create).mockResolvedValue(mockComment);
 
 		const result = await db.comment.create({
 			data: {
