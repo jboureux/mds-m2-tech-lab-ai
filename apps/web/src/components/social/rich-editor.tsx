@@ -38,6 +38,15 @@ export function RichEditor({
 	disabled = false,
 }: RichEditorProps) {
 	const [isMarkdownMode, setIsMarkdownMode] = React.useState(false);
+	const [mdActiveStyles, setMdActiveStyles] = React.useState({
+		bold: false,
+		italic: false,
+		code: false,
+		codeBlock: false,
+		link: false,
+	});
+
+	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
 	const editor = useEditor({
 		extensions: [
@@ -68,14 +77,39 @@ export function RichEditor({
 			},
 		},
 		onUpdate: ({ editor }) => {
-			// Get markdown from tiptap
 			const markdown = (editor.storage.markdown as any).getMarkdown();
 			onChange(markdown);
 		},
 		editable: !disabled,
 	});
 
-	// Sync content from parent if needed (e.g., when changed in Markdown mode)
+	const checkMarkdownStyles = React.useCallback(() => {
+		if (!textareaRef.current) return;
+
+		const textarea = textareaRef.current;
+		const start = textarea.selectionStart;
+		const before = content.substring(0, start);
+		const after = content.substring(start);
+
+		// Simple detection logic for common markdown patterns
+		const styles = {
+			bold:
+				(/\*\*$/.test(before) && /^\*\*/.test(after)) ||
+				(/\*\*.*$/.test(before) && /^.*\*\*/.test(after)),
+			italic:
+				(/\*$/.test(before) && /^\*/.test(after)) ||
+				(/\*.*$/.test(before) && /^.*\*/.test(after)),
+			code:
+				(/`$/.test(before) && /^`/.test(after)) ||
+				(/`.*$/.test(before) && /^.*`/.test(after)),
+			codeBlock: before.includes("```") && after.includes("```"),
+			link: /\[.*\]\(.*\)/.test(content.substring(start - 10, start + 10)),
+		};
+
+		setMdActiveStyles(styles);
+	}, [content]);
+
+	// Sync content from parent
 	React.useEffect(() => {
 		if (editor && content !== (editor.storage.markdown as any).getMarkdown()) {
 			editor.commands.setContent(content, false);
@@ -90,51 +124,121 @@ export function RichEditor({
 		setIsMarkdownMode(!isMarkdownMode);
 	};
 
+	const handleFormat = (type: string) => {
+		if (isMarkdownMode && textareaRef.current) {
+			const textarea = textareaRef.current;
+			const start = textarea.selectionStart;
+			const end = textarea.selectionEnd;
+			const selectedText = content.substring(start, end);
+			let formattedText = "";
+			let cursorOffset = 0;
+
+			switch (type) {
+				case "bold":
+					formattedText = `**${selectedText || "bold text"}**`;
+					cursorOffset = selectedText ? 0 : -2;
+					break;
+				case "italic":
+					formattedText = `*${selectedText || "italic text"}*`;
+					cursorOffset = selectedText ? 0 : -1;
+					break;
+				case "code":
+					formattedText = `\`${selectedText || "code text"}\``;
+					break;
+				case "codeBlock":
+					formattedText = `\n\`\`\`javascript\n${selectedText || "code"}\n\`\`\`\n`;
+					break;
+				case "link":
+					formattedText = `[${selectedText || "link text"}](https://)`;
+					cursorOffset = -1;
+					break;
+			}
+
+			const newContent =
+				content.substring(0, start) + formattedText + content.substring(end);
+			onChange(newContent);
+
+			setTimeout(() => {
+				textarea.focus();
+				if (!selectedText) {
+					const newPos = start + formattedText.length + cursorOffset;
+					textarea.setSelectionRange(newPos, newPos);
+				}
+				checkMarkdownStyles();
+			}, 0);
+		} else {
+			// Tiptap commands
+			switch (type) {
+				case "bold":
+					editor.chain().focus().toggleBold().run();
+					break;
+				case "italic":
+					editor.chain().focus().toggleItalic().run();
+					break;
+				case "code":
+					editor.chain().focus().toggleCode().run();
+					break;
+				case "codeBlock":
+					editor.chain().focus().toggleCodeBlock().run();
+					break;
+				case "link": {
+					const url = window.prompt("Enter URL:");
+					if (url) {
+						editor.chain().focus().setLink({ href: url }).run();
+					}
+					break;
+				}
+			}
+		}
+	};
+
+	const isStyleActive = (type: string) => {
+		if (isMarkdownMode) {
+			return (mdActiveStyles as any)[type];
+		}
+		if (type === "codeBlock") return editor.isActive("codeBlock");
+		return editor.isActive(type);
+	};
+
 	return (
 		<div className="flex flex-col border dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 transition-all focus-within:ring-2 focus-within:ring-blue-600/20">
-			{/* Toolbar */}
 			<div className="flex items-center justify-between p-1.5 border-b dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/30">
 				<div className="flex items-center gap-0.5">
 					<TooltipProvider>
 						<ToolbarButton
-							active={editor.isActive("bold")}
-							onClick={() => editor.chain().focus().toggleBold().run()}
+							active={isStyleActive("bold")}
+							onClick={() => handleFormat("bold")}
 							icon={Bold}
 							tooltip="Bold (**)"
-							disabled={isMarkdownMode || disabled}
+							disabled={disabled}
 						/>
 						<ToolbarButton
-							active={editor.isActive("italic")}
-							onClick={() => editor.chain().focus().toggleItalic().run()}
+							active={isStyleActive("italic")}
+							onClick={() => handleFormat("italic")}
 							icon={Italic}
 							tooltip="Italic (*)"
-							disabled={isMarkdownMode || disabled}
+							disabled={disabled}
 						/>
 						<ToolbarButton
-							active={editor.isActive("code")}
-							onClick={() => editor.chain().focus().toggleCode().run()}
+							active={isStyleActive("code")}
+							onClick={() => handleFormat("code")}
 							icon={Code}
 							tooltip="Inline Code (`)"
-							disabled={isMarkdownMode || disabled}
+							disabled={disabled}
 						/>
 						<ToolbarButton
-							active={editor.isActive("codeBlock")}
-							onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+							active={isStyleActive("codeBlock")}
+							onClick={() => handleFormat("codeBlock")}
 							icon={FileCode}
 							tooltip="Code Block (```)"
-							disabled={isMarkdownMode || disabled}
+							disabled={disabled}
 						/>
 						<ToolbarButton
-							active={editor.isActive("link")}
-							onClick={() => {
-								const url = window.prompt("Enter URL:");
-								if (url) {
-									editor.chain().focus().setLink({ href: url }).run();
-								}
-							}}
+							active={isStyleActive("link")}
+							onClick={() => handleFormat("link")}
 							icon={LinkIcon}
 							tooltip="Link"
-							disabled={isMarkdownMode || disabled}
+							disabled={disabled}
 						/>
 					</TooltipProvider>
 				</div>
@@ -144,7 +248,7 @@ export function RichEditor({
 					variant="ghost"
 					size="sm"
 					onClick={toggleMode}
-					className="h-7 px-2 text-[10px] gap-1.5 font-bold uppercase tracking-wider"
+					className="h-7 px-2 text-[10px] gap-1.5 font-bold uppercase tracking-wider text-muted-foreground hover:text-blue-600"
 				>
 					{isMarkdownMode ? (
 						<>
@@ -158,12 +262,18 @@ export function RichEditor({
 				</Button>
 			</div>
 
-			{/* Editor Content */}
 			<div className="relative">
 				{isMarkdownMode ? (
 					<Textarea
+						ref={textareaRef}
 						value={content}
-						onChange={(e) => onChange(e.target.value)}
+						onChange={(e) => {
+							onChange(e.target.value);
+							setTimeout(checkMarkdownStyles, 0);
+						}}
+						onSelect={checkMarkdownStyles}
+						onKeyUp={checkMarkdownStyles}
+						onMouseUp={checkMarkdownStyles}
 						placeholder="Raw Markdown editing..."
 						disabled={disabled}
 						className="min-h-[150px] resize-none bg-transparent border-none focus-visible:ring-0 p-3 font-mono text-sm leading-relaxed"
@@ -185,6 +295,7 @@ function ToolbarButton({
 }: {
 	active?: boolean;
 	onClick: () => void;
+	// biome-ignore lint/suspicious/noExplicitAny: lucide icon type
 	icon: any;
 	tooltip: string;
 	disabled?: boolean;
@@ -203,7 +314,9 @@ function ToolbarButton({
 					<Icon className={`h-4 w-4 ${active ? "text-blue-600" : ""}`} />
 				</Button>
 			</TooltipTrigger>
-			<TooltipContent className="text-[10px]">{tooltip}</TooltipContent>
+			<TooltipContent className="text-[10px] font-bold">
+				{tooltip}
+			</TooltipContent>
 		</Tooltip>
 	);
 }
