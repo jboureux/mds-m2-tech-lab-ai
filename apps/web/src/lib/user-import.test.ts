@@ -24,7 +24,8 @@ Jane,Smith,jane@example.com,USER`;
 		const mockUpsert = vi.fn().mockImplementation((args) => ({
 			id: "test-cuid",
 			email: args.where.email,
-			name: args.create.name,
+			firstName: args.create.firstName,
+			lastName: args.create.lastName,
 			role: args.create.role,
 		}));
 
@@ -43,7 +44,8 @@ Jane,Smith,jane@example.com,USER`;
 
 		const result = (await importUsersFromCsv(csvContent)) as {
 			email: string;
-			name: string;
+			firstName: string;
+			lastName: string;
 			role: Role;
 		}[];
 
@@ -54,13 +56,15 @@ Jane,Smith,jane@example.com,USER`;
 
 		expect(result[0]).toMatchObject({
 			email: "john@example.com",
-			name: "John Doe",
+			firstName: "John",
+			lastName: "Doe",
 			role: Role.ADMIN,
 		});
 
 		expect(result[1]).toMatchObject({
 			email: "jane@example.com",
-			name: "Jane Smith",
+			firstName: "Jane",
+			lastName: "Smith",
 			role: Role.USER,
 		});
 	});
@@ -103,7 +107,8 @@ Jane,Smith`; // Missing columns
 
 		const mockUpsert = vi.fn().mockImplementation((args) => ({
 			email: args.where.email,
-			name: args.create.name,
+			firstName: args.create.firstName,
+			lastName: args.create.lastName,
 			role: args.create.role,
 		}));
 
@@ -121,14 +126,16 @@ Jane,Smith`; // Missing columns
 
 		const result = (await importUsersFromCsv(messyCsv)) as {
 			email: string;
-			name: string;
+			firstName: string;
+			lastName: string;
 			role: Role;
 		}[];
 
 		expect(result).toHaveLength(1);
 		expect(result[0]).toEqual({
 			email: "john@example.com",
-			name: "John Doe",
+			firstName: "John",
+			lastName: "Doe",
 			role: Role.ADMIN,
 		});
 	});

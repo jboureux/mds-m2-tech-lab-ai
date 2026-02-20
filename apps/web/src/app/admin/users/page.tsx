@@ -165,11 +165,13 @@ export default async function AdminUsersPage() {
 											<TableCell className="py-4 px-8">
 												<div className="flex items-center gap-3">
 													<div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-sm">
-														{user.name?.[0].toUpperCase() || "A"}
+														{(user.firstName?.[0] || user.email[0]).toUpperCase()}
 													</div>
 													<div className="flex flex-col">
 														<span className="font-bold text-sm group-hover:text-primary transition-colors">
-															{user.name || "Anonymous"}
+															{user.firstName || user.lastName
+																? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+																: "Anonymous"}
 														</span>
 														<span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
 															<Mail className="h-2.5 w-2.5" />
@@ -270,7 +272,9 @@ export default async function AdminUsersPage() {
 										<TableCell className="py-4 px-8">
 											<div className="flex flex-col">
 												<span className="font-bold text-sm">
-													{user.name || "N/A"}
+													{user.firstName || user.lastName
+														? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+														: "N/A"}
 												</span>
 												<span className="text-[11px] text-muted-foreground font-medium">
 													{user.email}

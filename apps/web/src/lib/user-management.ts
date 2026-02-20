@@ -1,4 +1,4 @@
-import type { Role } from "@prisma/client";
+import { type Role } from "@prisma/client";
 import db from "./prisma";
 
 /**
@@ -10,20 +10,23 @@ import db from "./prisma";
  */
 export async function preRegisterUser(data: {
 	email: string;
-	name?: string;
+	firstName?: string;
+	lastName?: string;
 	role?: Role;
 }) {
-	const { email, name, role = "USER" } = data;
+	const { email, firstName, lastName, role = "USER" } = data;
 
 	return await db.preRegisteredUser.upsert({
 		where: { email: email.toLowerCase() },
 		update: {
-			name,
+			firstName,
+			lastName,
 			role,
 		},
 		create: {
 			email: email.toLowerCase(),
-			name,
+			firstName,
+			lastName,
 			role,
 		},
 	});

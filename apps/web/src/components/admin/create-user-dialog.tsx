@@ -1,6 +1,5 @@
 "use client";
 
-import { Role } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	AlertCircle,
@@ -8,13 +7,15 @@ import {
 	CheckCircle2,
 	Loader2Icon,
 	Mail,
-	Shield,
 	User,
+	Shield,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
 	Dialog,
 	DialogContent,
@@ -22,9 +23,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useModalStore } from "@/store/modal-store";
+import { Role } from "@prisma/client";
 
 /**
  * Dialog for manual user creation (authorization).
@@ -34,7 +34,8 @@ export function CreateUserDialog() {
 	const isModalOpen = isOpen && type === "create-user";
 
 	const [email, setEmail] = useState("");
-	const [name, setName] = useState("");
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
 	const [role, setRole] = useState<string>("USER");
 
 	const queryClient = useQueryClient();
@@ -43,7 +44,8 @@ export function CreateUserDialog() {
 	const mutation = useMutation({
 		mutationFn: async (userData: {
 			email: string;
-			name: string;
+			firstName: string;
+			lastName: string;
 			role: string;
 		}) => {
 			const response = await fetch("/api/admin/users", {
@@ -64,7 +66,8 @@ export function CreateUserDialog() {
 				icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
 			});
 			setEmail("");
-			setName("");
+			setFirstName("");
+			setLastName("");
 			setRole("USER");
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			router.refresh();
@@ -79,7 +82,7 @@ export function CreateUserDialog() {
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
-		mutation.mutate({ email, name, role });
+		mutation.mutate({ email, firstName, lastName, role });
 	};
 
 	return (
@@ -125,25 +128,47 @@ export function CreateUserDialog() {
 								</div>
 							</div>
 
-							{/* Name Field */}
-							<div className="space-y-2">
-								<Label
-									htmlFor="name"
-									className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
-								>
-									Full Name
-								</Label>
-								<div className="relative group">
-									<User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-									<Input
-										id="name"
-										type="text"
-										placeholder="John Doe"
-										value={name}
-										onChange={(e) => setName(e.target.value)}
-										disabled={mutation.isPending}
-										className="pl-10 h-12 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-medium"
-									/>
+							{/* Name Fields */}
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-2">
+									<Label
+										htmlFor="firstName"
+										className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
+									>
+										First Name
+									</Label>
+									<div className="relative group">
+										<User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+										<Input
+											id="firstName"
+											type="text"
+											placeholder="John"
+											value={firstName}
+											onChange={(e) => setFirstName(e.target.value)}
+											disabled={mutation.isPending}
+											className="pl-10 h-12 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-medium"
+										/>
+									</div>
+								</div>
+								<div className="space-y-2">
+									<Label
+										htmlFor="lastName"
+										className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
+									>
+										Last Name
+									</Label>
+									<div className="relative group">
+										<User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+										<Input
+											id="lastName"
+											type="text"
+											placeholder="Doe"
+											value={lastName}
+											onChange={(e) => setLastName(e.target.value)}
+											disabled={mutation.isPending}
+											className="pl-10 h-12 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl font-medium"
+										/>
+									</div>
 								</div>
 							</div>
 
@@ -175,8 +200,7 @@ export function CreateUserDialog() {
 						{/* Info box */}
 						<div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4">
 							<p className="text-[11px] text-blue-700 dark:text-blue-400 leading-relaxed font-semibold">
-								Once authorized, the user will receive immediate access to post
-								content when on-campus.
+								Once authorized, the user will receive immediate access to post content when on-campus.
 							</p>
 						</div>
 					</div>

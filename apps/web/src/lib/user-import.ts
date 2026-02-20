@@ -22,20 +22,19 @@ export async function importUsersFromCsv(csvContent: string) {
 		const results = [];
 
 		for (const user of importedUsers) {
-			// Construct the full name from firstName and lastName
-			const fullName = `${user.firstName} ${user.lastName}`.trim();
-
 			// Use upsert to handle both new imports and updates to existing pre-registered emails.
 			// This matches the goal of pre-registering users to assign roles.
 			const preRegistered = await tx.preRegisteredUser.upsert({
 				where: { email: user.email },
 				update: {
-					name: fullName,
+					firstName: user.firstName,
+					lastName: user.lastName,
 					role: user.role,
 				},
 				create: {
 					email: user.email,
-					name: fullName,
+					firstName: user.firstName,
+					lastName: user.lastName,
 					role: user.role,
 				},
 			});
