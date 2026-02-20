@@ -9,6 +9,10 @@ echo "⏳ Checking database connection..."
 echo "📦 Checking/Installing dependencies..."
 pnpm install
 
+# Force rebuild of native modules to ensure they match the container architecture
+echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp)..."
+pnpm rebuild @tensorflow/tfjs-node sharp
+
 # Generate Prisma Client
 echo "🏗️ Generating Prisma client..."
 pnpm --filter web exec prisma generate
