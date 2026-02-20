@@ -31,13 +31,14 @@ export function LandingHero() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
 					>
-						<h1 className="text-5xl md:text-7xl lg:text-8xl font-serif italic font-light tracking-tighter leading-[0.95] mb-10">
+						<h1 className="text-5xl md:text-7xl lg:text-8xl font-serif italic font-light tracking-tighter leading-[0.95] mb-10 text-foreground">
 							The{" "}
 							<span className="font-sans font-black not-italic tracking-[-0.05em] text-primary">
 								Scoop
 							</span>{" "}
 							<br />
-							<span className="opacity-40">Just Got</span> <br />
+							<span className="opacity-30 dark:opacity-40">Just Got</span>{" "}
+							<br />
 							Digital.
 						</h1>
 					</motion.div>
@@ -46,7 +47,7 @@ export function LandingHero() {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ duration: 1.2, delay: 0.5 }}
-						className="max-w-lg mx-auto text-base md:text-lg text-muted-foreground/70 font-medium mb-12 leading-relaxed"
+						className="max-w-lg mx-auto text-base md:text-lg text-muted-foreground dark:text-muted-foreground/70 font-medium mb-12 leading-relaxed"
 					>
 						A localized ecosystem where academia meets the future. Your school's
 						heartbeat, decentralized and secure.
@@ -61,7 +62,7 @@ export function LandingHero() {
 						<Button
 							asChild
 							size="lg"
-							className="rounded-full px-10 h-14 text-base font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/10 transition-all duration-500 group"
+							className="rounded-full px-10 h-14 text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/10 transition-all duration-500 group"
 						>
 							<Link href="/login" className="flex items-center gap-3">
 								Enter the Network
@@ -70,7 +71,7 @@ export function LandingHero() {
 						</Button>
 						<Link
 							href="#features"
-							className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60 hover:text-primary transition-colors py-4 px-2"
+							className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-colors py-4 px-2"
 						>
 							View Protocol
 						</Link>
@@ -89,7 +90,7 @@ export function LandingHero() {
 					repeat: Infinity,
 					ease: "easeInOut",
 				}}
-				className="absolute -right-20 top-1/4 w-[500px] h-[500px] border border-primary/5 rounded-full pointer-events-none -z-10 blur-[2px]"
+				className="absolute -right-20 top-1/4 w-[500px] h-[500px] border border-black/5 dark:border-primary/5 rounded-full pointer-events-none -z-10 blur-[2px]"
 			/>
 		</section>
 	);

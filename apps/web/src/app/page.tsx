@@ -15,7 +15,7 @@ export default async function LandingPage() {
 	}
 
 	return (
-		<main className="relative min-h-screen bg-[#020617] text-foreground antialiased selection:bg-primary/20 selection:text-primary overflow-x-hidden">
+		<main className="relative min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary overflow-x-hidden">
 			<MeshBackground />
 
 			<div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
@@ -25,14 +25,14 @@ export default async function LandingPage() {
 					{/* Section Header */}
 					<div className="mb-24 space-y-8 relative">
 						<div className="absolute -left-10 top-0 w-[1px] h-32 bg-gradient-to-b from-primary/50 to-transparent" />
-						<h2 className="text-4xl md:text-6xl font-serif italic tracking-tighter leading-tight max-w-xl">
+						<h2 className="text-4xl md:text-6xl font-serif italic tracking-tighter leading-tight max-w-xl text-foreground">
 							Built on the{" "}
 							<span className="not-italic font-sans font-black text-primary">
 								Physical
 							</span>{" "}
 							Layer of Connection.
 						</h2>
-						<p className="text-lg md:text-xl text-muted-foreground/60 max-w-2xl font-medium">
+						<p className="text-lg md:text-xl text-muted-foreground dark:text-muted-foreground/60 max-w-2xl font-medium">
 							Experience a social network that respects your space, protects
 							your data, and prioritizes real-world community safety.
 						</p>
@@ -42,7 +42,7 @@ export default async function LandingPage() {
 				</section>
 			</div>
 
-			<footer className="relative z-10 w-full py-24 mt-20 bg-gradient-to-t from-zinc-950 to-transparent">
+			<footer className="relative z-10 w-full py-24 mt-20 bg-gradient-to-t from-zinc-50 dark:from-zinc-950 to-transparent">
 				<div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 border-t border-primary/5 pt-16 flex flex-col md:flex-row justify-between items-start gap-12">
 					<div className="space-y-6">
 						<span className="text-3xl font-black tracking-tighter text-primary">
