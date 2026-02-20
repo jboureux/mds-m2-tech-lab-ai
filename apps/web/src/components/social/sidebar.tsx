@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { auth } from "@/lib/auth";
+import type { User } from "better-auth";
 
 export async function SocialSidebar({
 	hideCard = false,
@@ -18,6 +19,9 @@ export async function SocialSidebar({
 	if (!session) return null;
 
 	const { user } = session;
+	const profileHref = (user as User & { username?: string }).username
+		? `/u/${(user as User & { username?: string }).username}`
+		: "/profile";
 
 	return (
 		<div className="hidden lg:flex flex-col gap-4 w-64 shrink-0 h-fit sticky top-20">
@@ -48,7 +52,7 @@ export async function SocialSidebar({
 					label="Feed"
 					active
 				/>
-				<SidebarNavItem href="/profile" icon={User} label="Profile" />
+				<SidebarNavItem href={profileHref} icon={User} label="Profile" />
 				{user.role === "ADMIN" && (
 					<>
 						<Separator className="my-2" />

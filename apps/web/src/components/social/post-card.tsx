@@ -33,6 +33,7 @@ interface PostCardProps {
 		author: {
 			id: string;
 			name: string | null;
+			username?: string | null;
 			image: string | null;
 			role: string;
 		};
@@ -59,23 +60,31 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 			? new Date(post.createdAt)
 			: post.createdAt;
 
+	const authorHref = post.author.username
+		? `/u/${post.author.username}`
+		: "/profile";
+
 	return (
 		<Card className="w-full border-none shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-zinc-900 group">
 			<CardHeader className="flex flex-row items-center space-y-0 gap-3 p-4">
-				<Avatar className="h-12 w-12 border shadow-sm ring-2 ring-blue-600/5 cursor-pointer">
-					<AvatarImage
-						src={post.author.image || ""}
-						alt={post.author.name || ""}
-					/>
-					<AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
-						{post.author.name?.charAt(0) || "U"}
-					</AvatarFallback>
-				</Avatar>
+				<Link href={authorHref}>
+					<Avatar className="h-12 w-12 border shadow-sm ring-2 ring-blue-600/5 cursor-pointer">
+						<AvatarImage
+							src={post.author.image || ""}
+							alt={post.author.name || ""}
+						/>
+						<AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
+							{post.author.name?.charAt(0) || "U"}
+						</AvatarFallback>
+					</Avatar>
+				</Link>
 				<div className="flex flex-col flex-1">
 					<div className="flex items-center gap-1.5 group/author cursor-pointer">
-						<span className="font-bold text-sm text-slate-900 dark:text-zinc-100 group-hover/author:text-blue-600 group-hover/author:underline transition-colors leading-tight">
-							{post.author.name}
-						</span>
+						<Link href={authorHref}>
+							<span className="font-bold text-sm text-slate-900 dark:text-zinc-100 group-hover/author:text-blue-600 group-hover/author:underline transition-colors leading-tight">
+								{post.author.name}
+							</span>
+						</Link>
 						{post.author.role !== "USER" && (
 							<Badge
 								variant="secondary"

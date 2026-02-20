@@ -36,6 +36,7 @@ export function ProfileForm({ user }: { user: User }) {
 	const isStandardMember = user.role === "USER";
 	const [isEditing, setIsEditing] = useState(false);
 	const [name, setName] = useState(user.name || "");
+	const [username, setUsername] = useState(user.username || "");
 	const [bio, setBio] = useState(user.bio || "");
 	const [isUpdating, setIsUpdating] = useState(false);
 
@@ -44,13 +45,14 @@ export function ProfileForm({ user }: { user: User }) {
 
 		setIsUpdating(true);
 		try {
-			const updateData: { bio: string; name?: string } = {
+			const updateData: { bio: string; name?: string; username?: string } = {
 				bio: bio,
 			};
 
-			// Only non-standard members can update their name
+			// Only non-standard members can update their name and username
 			if (!isStandardMember) {
 				updateData.name = name;
+				updateData.username = username;
 			}
 
 			const { error } = await authClient.user.update(updateData);
@@ -95,7 +97,14 @@ export function ProfileForm({ user }: { user: User }) {
 				<CardHeader className="pt-16 pb-4 px-8">
 					<div className="flex items-center justify-between">
 						<div>
-							<CardTitle className="text-2xl font-black">{user.name}</CardTitle>
+							<CardTitle className="text-2xl font-black flex items-center gap-2">
+								{user.name}
+								{user.username && (
+									<span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+										@{user.username}
+									</span>
+								)}
+							</CardTitle>
 							<CardDescription className="flex items-center gap-2 mt-1">
 								<Badge
 									variant="secondary"
@@ -148,6 +157,29 @@ export function ProfileForm({ user }: { user: User }) {
 								</div>
 							</div>
 
+							{!isStandardMember && (
+								<div className="space-y-2">
+									<Label
+										htmlFor="username"
+										className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
+									>
+										Handle (@username)
+									</Label>
+									<div className="relative group">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground font-bold flex items-center justify-center">
+											@
+										</span>
+										<Input
+											id="username"
+											value={username}
+											onChange={(e) => setUsername(e.target.value)}
+											placeholder="username"
+											className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl"
+										/>
+									</div>
+								</div>
+							)}
+
 							<div className="space-y-2">
 								<Label
 									htmlFor="bio"
@@ -174,6 +206,7 @@ export function ProfileForm({ user }: { user: User }) {
 									onClick={() => {
 										setIsEditing(false);
 										setName(user.name || "");
+										setUsername(user.username || "");
 										setBio(user.bio || "");
 									}}
 									className="text-xs font-bold"
@@ -232,6 +265,17 @@ export function ProfileForm({ user }: { user: User }) {
 										{user.id}
 									</p>
 								</div>
+
+								{user.username && (
+									<div className="space-y-1">
+										<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
+											Handle
+										</p>
+										<p className="text-sm font-semibold text-blue-600">
+											@{user.username}
+										</p>
+									</div>
+								)}
 
 								{isStandardMember && (
 									<div className="col-span-full mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">

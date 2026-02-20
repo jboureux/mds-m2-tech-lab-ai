@@ -17,6 +17,9 @@ export const auth = betterAuth({
 				input: false,
 				defaultValue: "USER",
 			},
+			username: {
+				type: "string",
+			},
 			bio: {
 				type: "string",
 			},

@@ -1,5 +1,6 @@
+import type { User } from "better-auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AsidePanel } from "@/components/social/aside-panel";
 import { SocialHeader } from "@/components/social/header";
 import { PostFeed } from "@/components/social/post-feed";
@@ -7,9 +8,13 @@ import { ProfileForm } from "@/components/social/profile-form";
 import { SocialSidebar } from "@/components/social/sidebar";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
-import type { User } from "better-auth";
 
-export default async function ProfilePage() {
+export default async function UserProfilePage({
+	params,
+}: {
+	params: Promise<{ username: string }>;
+}) {
+	const { username } = await params;
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -18,17 +23,24 @@ export default async function ProfilePage() {
 		redirect("/");
 	}
 
-	const user = session.user as User & { username?: string };
+	const user = await db.user.findUnique({
+		where: { username },
+	});
 
-	if (user.username) {
-		redirect(`/u/${user.username}`);
+	if (!user) {
+		return notFound();
 	}
 
-	// If no username, show the profile form to allow setting it
-	const posts = await db.post.findMany({
+	const isOwnProfile = session.user.id === user.id;
+	const isStaff =
+		session.user.role === "ADMIN" || session.user.role === "MODERATOR";
+
+	const initialPosts = await db.post.findMany({
 		where: {
-			authorId: session.user.id,
+			authorId: user.id,
+			status: isOwnProfile || isStaff ? undefined : "PUBLISHED",
 		},
+		take: 20,
 		include: {
 			author: {
 				select: {
@@ -48,9 +60,6 @@ export default async function ProfilePage() {
 		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 	});
 
-	const isStaff =
-		session.user.role === "ADMIN" || session.user.role === "MODERATOR";
-
 	return (
 		<div className="flex min-h-screen flex-col bg-[#F4F2EE] dark:bg-[#000000] font-sans selection:bg-blue-100 dark:selection:bg-blue-900/40">
 			<SocialHeader />
@@ -59,14 +68,16 @@ export default async function ProfilePage() {
 				<SocialSidebar hideCard />
 
 				<main className="flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
-					<ProfileForm user={session.user as User} />
+					<ProfileForm user={user as unknown as User} />
 
 					<div className="space-y-4">
-						<h2 className="text-xl font-black px-1">Your Scoops</h2>
+						<h2 className="text-xl font-black px-1">
+							{isOwnProfile ? "Your Scoops" : `${user.name}'s Scoops`}
+						</h2>
 						<PostFeed
-							initialPosts={JSON.parse(JSON.stringify(posts))}
+							initialPosts={JSON.parse(JSON.stringify(initialPosts))}
 							isStaff={isStaff}
-							authorId={session.user.id}
+							authorId={user.id}
 						/>
 					</div>
 				</main>

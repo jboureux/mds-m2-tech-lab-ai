@@ -10,6 +10,9 @@ export const authClient = createAuthClient({
 			role: {
 				type: "string",
 			},
+			username: {
+				type: "string",
+			},
 			bio: {
 				type: "string",
 			},
