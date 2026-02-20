@@ -62,13 +62,24 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
-	const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
+	const limit = Number.parseInt(searchParams.get("limit") || "20", 10);
 	const cursor = searchParams.get("cursor") || undefined;
 
 	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		console.log(
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit} and cursor ${cursor}`,
+		);
+
 		const posts = await db.post.findMany({
 			where: {
-				status: "PUBLISHED",
+				OR: [
+					{ status: "PUBLISHED" },
+					...(session ? [{ authorId: session.user.id }] : []),
+				],
 			},
 			take: limit,
 			skip: cursor ? 1 : 0,
@@ -87,10 +98,10 @@ export async function GET(req: Request) {
 					},
 				},
 			},
-			orderBy: {
-				createdAt: "desc",
-			},
+			orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 		});
+
+		console.log(`[API_POSTS_GET] Found ${posts.length} posts`);
 
 		const nextCursor =
 			posts.length === limit ? posts[posts.length - 1].id : null;

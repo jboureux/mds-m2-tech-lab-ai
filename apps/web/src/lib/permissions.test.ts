@@ -1,3 +1,4 @@
+import type { Session, User } from "better-auth";
 import { headers } from "next/headers";
 import { describe, expect, it, vi } from "vitest";
 import { checkPostingPermission } from "./permissions";
@@ -16,12 +17,12 @@ describe("checkPostingPermission", () => {
 
 	it("should return isAllowed: true for ADMIN regardless of location", async () => {
 		const session = {
-			user: { role: "ADMIN" } as any,
-			session: {} as any,
+			user: { role: "ADMIN" } as unknown as User,
+			session: {} as unknown as Session,
 		};
 
-		(headers as any).mockResolvedValue(
-			new Map([["x-network-location", "off-campus"]]),
+		vi.mocked(headers).mockResolvedValue(
+			new Headers({ "x-network-location": "off-campus" }),
 		);
 
 		const result = await checkPostingPermission(session);
@@ -30,12 +31,12 @@ describe("checkPostingPermission", () => {
 
 	it("should return isAllowed: true for VIP regardless of location", async () => {
 		const session = {
-			user: { role: "VIP" } as any,
-			session: {} as any,
+			user: { role: "VIP" } as unknown as User,
+			session: {} as unknown as Session,
 		};
 
-		(headers as any).mockResolvedValue(
-			new Map([["x-network-location", "off-campus"]]),
+		vi.mocked(headers).mockResolvedValue(
+			new Headers({ "x-network-location": "off-campus" }),
 		);
 
 		const result = await checkPostingPermission(session);
@@ -44,12 +45,12 @@ describe("checkPostingPermission", () => {
 
 	it("should return isAllowed: true for USER on-campus", async () => {
 		const session = {
-			user: { role: "USER" } as any,
-			session: {} as any,
+			user: { role: "USER" } as unknown as User,
+			session: {} as unknown as Session,
 		};
 
-		(headers as any).mockResolvedValue(
-			new Map([["x-network-location", "on-campus"]]),
+		vi.mocked(headers).mockResolvedValue(
+			new Headers({ "x-network-location": "on-campus" }),
 		);
 
 		const result = await checkPostingPermission(session);
@@ -58,12 +59,12 @@ describe("checkPostingPermission", () => {
 
 	it("should return isAllowed: false for USER off-campus", async () => {
 		const session = {
-			user: { role: "USER" } as any,
-			session: {} as any,
+			user: { role: "USER" } as unknown as User,
+			session: {} as unknown as Session,
 		};
 
-		(headers as any).mockResolvedValue(
-			new Map([["x-network-location", "off-campus"]]),
+		vi.mocked(headers).mockResolvedValue(
+			new Headers({ "x-network-location": "off-campus" }),
 		);
 
 		const result = await checkPostingPermission(session);
@@ -73,11 +74,11 @@ describe("checkPostingPermission", () => {
 
 	it("should default to off-campus if header is missing", async () => {
 		const session = {
-			user: { role: "USER" } as any,
-			session: {} as any,
+			user: { role: "USER" } as unknown as User,
+			session: {} as unknown as Session,
 		};
 
-		(headers as any).mockResolvedValue(new Map());
+		vi.mocked(headers).mockResolvedValue(new Headers());
 
 		const result = await checkPostingPermission(session);
 		expect(result.isAllowed).toBe(false);

@@ -1,3 +1,4 @@
+import type { AllowedIP, Session, User } from "@prisma/client";
 import { revalidateTag } from "next/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
@@ -42,31 +43,31 @@ describe("Admin Network API", () => {
 		user: {
 			role: "ADMIN",
 		},
-	};
+	} as unknown as { user: User; session: Session };
 
 	const mockUserSession = {
 		user: {
 			role: "USER",
 		},
-	};
+	} as unknown as { user: User; session: Session };
 
 	describe("GET", () => {
 		it("should return 401 if not authenticated", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(null);
 			const response = await GET();
 			expect(response.status).toBe(401);
 		});
 
 		it("should return 403 if not an admin", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockUserSession as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockUserSession);
 			const response = await GET();
 			expect(response.status).toBe(403);
 		});
 
 		it("should return ranges if admin", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
-			const mockRanges = [{ id: "1", cidr: "1.1.1.1/32" }];
-			vi.mocked(db.allowedIP.findMany).mockResolvedValue(mockRanges as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
+			const mockRanges = [{ id: "1", cidr: "1.1.1.1/32" }] as AllowedIP[];
+			vi.mocked(db.allowedIP.findMany).mockResolvedValue(mockRanges);
 
 			const response = await GET();
 			const data = await response.json();
@@ -78,12 +79,12 @@ describe("Admin Network API", () => {
 
 	describe("POST", () => {
 		it("should add a new CIDR range and invalidate cache", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
-			vi.mocked(db.allowedIP.findUnique).mockResolvedValue(null as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
+			vi.mocked(db.allowedIP.findUnique).mockResolvedValue(null);
 			vi.mocked(db.allowedIP.create).mockResolvedValue({
 				id: "2",
 				cidr: "192.168.1.0/24",
-			} as any);
+			} as AllowedIP);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -99,7 +100,7 @@ describe("Admin Network API", () => {
 		});
 
 		it("should return 400 for invalid CIDR", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -111,8 +112,10 @@ describe("Admin Network API", () => {
 		});
 
 		it("should return 409 if CIDR already exists", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
-			vi.mocked(db.allowedIP.findUnique).mockResolvedValue({ id: "1" } as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
+			vi.mocked(db.allowedIP.findUnique).mockResolvedValue({
+				id: "1",
+			} as AllowedIP);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -126,11 +129,11 @@ describe("Admin Network API", () => {
 
 	describe("DELETE", () => {
 		it("should remove a range and invalidate cache", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
 			vi.mocked(db.allowedIP.delete).mockResolvedValue({
 				id: "1",
 				cidr: "1.1.1.1/32",
-			} as any);
+			} as AllowedIP);
 
 			const req = new Request("http://localhost/api/admin/network?id=1", {
 				method: "DELETE",
@@ -146,7 +149,7 @@ describe("Admin Network API", () => {
 
 	describe("PATCH", () => {
 		it("should manually invalidate cache", async () => {
-			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession);
 
 			const response = await PATCH();
 			const _data = await response.json();
