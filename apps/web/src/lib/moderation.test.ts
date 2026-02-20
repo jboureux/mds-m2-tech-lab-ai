@@ -88,7 +88,7 @@ describe("Moderation Library", () => {
 				classify: vi.fn().mockResolvedValue([
 					{
 						label: "insult",
-						results: [{ match: true }],
+						results: [{ match: true, probabilities: { 0: 0.01, 1: 0.99 } }],
 					},
 				]),
 			};
@@ -103,7 +103,7 @@ describe("Moderation Library", () => {
 				classify: vi.fn().mockResolvedValue([
 					{
 						label: "insult",
-						results: [{ match: false }],
+						results: [{ match: false, probabilities: { 0: 0.99, 1: 0.01 } }],
 					},
 				]),
 			};
