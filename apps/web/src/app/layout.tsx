@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { DebugPanel } from "@/components/debug/DebugPanel";
@@ -11,6 +11,12 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({
 	subsets: ["latin"],
 	variable: "--font-sans",
+});
+
+const cormorant = Cormorant_Garamond({
+	subsets: ["latin"],
+	weight: ["300", "400", "500", "600", "700"],
+	variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +35,9 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${inter.variable} font-sans antialiased`}>
+			<body
+				className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
+			>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"

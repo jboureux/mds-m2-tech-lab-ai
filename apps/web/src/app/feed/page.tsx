@@ -15,7 +15,7 @@ export default async function Home() {
 	});
 
 	if (!session) {
-		redirect("/login");
+		redirect("/");
 	}
 
 	const posts = await db.post.findMany({
