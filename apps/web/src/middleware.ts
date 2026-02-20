@@ -33,15 +33,15 @@ async function getAllowedRanges(origin: string) {
 
 		return cachedAllowedRanges || [];
 	} catch (error) {
-		// Log error but don't crash the proxy
-		console.error("[Proxy] Failed to fetch allowed IP ranges:", error);
+		// Log error but don't crash the middleware
+		console.error("[Middleware] Failed to fetch allowed IP ranges:", error);
 
 		// Return stale cache if available, otherwise empty list
 		return cachedAllowedRanges || [];
 	}
 }
 
-export async function proxy(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
 	// Skip proxy logic for API network route to avoid infinite loop
 	if (request.nextUrl.pathname.startsWith("/api/network/allowed-ips")) {
 		return NextResponse.next();
