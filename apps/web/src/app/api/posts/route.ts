@@ -60,12 +60,19 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+	const { searchParams } = new URL(req.url);
+	const limit = Number.parseInt(searchParams.get("limit") || "10", 10);
+	const cursor = searchParams.get("cursor") || undefined;
+
 	try {
 		const posts = await db.post.findMany({
 			where: {
 				status: "PUBLISHED",
 			},
+			take: limit,
+			skip: cursor ? 1 : 0,
+			cursor: cursor ? { id: cursor } : undefined,
 			include: {
 				author: {
 					select: {
@@ -85,7 +92,13 @@ export async function GET() {
 			},
 		});
 
-		return NextResponse.json(posts);
+		const nextCursor =
+			posts.length === limit ? posts[posts.length - 1].id : null;
+
+		return NextResponse.json({
+			items: posts,
+			nextCursor,
+		});
 	} catch (error) {
 		console.error("[POSTS_GET]", error);
 		return NextResponse.json(
