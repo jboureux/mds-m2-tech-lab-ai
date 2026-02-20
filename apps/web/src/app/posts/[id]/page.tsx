@@ -148,6 +148,10 @@ export default async function PostPage({ params }: PostPageProps) {
 								<Comment
 									key={comment.id}
 									comment={comment as any}
+									currentUser={{
+										name: session.user.name,
+										image: session.user.image ?? null,
+									}}
 									isAllowedToComment={isAllowed}
 									restrictionReason={reason}
 									isStaff={isStaff}

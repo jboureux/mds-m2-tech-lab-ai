@@ -7,7 +7,6 @@ import { CommentForm } from "@/components/social/comment-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
 import { useReplyStore } from "@/store/reply-store";
 
 interface CommentProps {
@@ -24,6 +23,10 @@ interface CommentProps {
 		};
 		replies?: CommentProps["comment"][];
 	};
+	currentUser?: {
+		name: string;
+		image?: string | null;
+	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
 	isStaff?: boolean;
@@ -31,12 +34,12 @@ interface CommentProps {
 
 export function Comment({
 	comment,
+	currentUser,
 	isAllowedToComment,
 	restrictionReason,
 	isStaff = false,
 }: CommentProps) {
 	const [mounted, setMounted] = React.useState(false);
-	const { data: session } = useSession();
 	const { replyingToId, setReplyingTo, cancelReply } = useReplyStore();
 
 	const isReplying = replyingToId === comment.id;
@@ -116,15 +119,12 @@ export function Comment({
 				</div>
 			</div>
 
-			{isReplying && session?.user && (
+			{isReplying && currentUser && (
 				<div className="pl-9">
 					<CommentForm
 						postId={comment.postId}
 						parentId={comment.id}
-						user={{
-							name: session.user.name,
-							image: session.user.image ?? null,
-						}}
+						user={currentUser}
 						isAllowedToComment={isAllowedToComment}
 						restrictionReason={restrictionReason}
 						onCancel={cancelReply}
@@ -139,6 +139,7 @@ export function Comment({
 						<Comment
 							key={reply.id}
 							comment={reply}
+							currentUser={currentUser}
 							isAllowedToComment={isAllowedToComment}
 							restrictionReason={restrictionReason}
 							isStaff={isStaff}
