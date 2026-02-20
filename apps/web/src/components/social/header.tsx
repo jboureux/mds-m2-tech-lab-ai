@@ -1,9 +1,9 @@
+import type { User } from "better-auth";
 import { Search } from "lucide-react";
 import { headers } from "next/headers";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/auth";
+import { HeaderProfileLink } from "./header-profile-link";
 
 export async function SocialHeader() {
 	const session = await auth.api.getSession({
@@ -13,6 +13,9 @@ export async function SocialHeader() {
 	if (!session) return null;
 
 	const { user } = session;
+	const profileHref = (user as User & { username?: string }).username
+		? `/u/${(user as User & { username?: string }).username}`
+		: "/profile";
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-4 h-14 flex items-center shadow-sm">
@@ -37,45 +40,15 @@ export async function SocialHeader() {
 				<div className="flex items-center gap-1 sm:gap-2">
 					<div className="h-6 w-px bg-slate-200 dark:bg-zinc-700 mx-1 hidden sm:block" />
 
-					<Button
-						variant="ghost"
-						className="p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
-					>
-						<Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-blue-600/30 transition-all">
-							<AvatarImage src={user.image || ""} />
-							<AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
-						</Avatar>
-					</Button>
+					<HeaderProfileLink
+						profileHref={profileHref}
+						user={{
+							name: user.name,
+							image: user.image,
+						}}
+					/>
 				</div>
 			</div>
 		</header>
-	);
-}
-
-function _HeaderIconButton({
-	icon: Icon,
-	label,
-	active = false,
-}: {
-	icon: React.ElementType;
-	label: string;
-	active?: boolean;
-}) {
-	return (
-		<Button
-			variant="ghost"
-			size="icon"
-			className={`h-9 w-9 rounded-full relative group transition-all ${
-				active
-					? "text-blue-600 bg-blue-50 dark:bg-blue-900/20"
-					: "text-slate-500 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-zinc-800"
-			}`}
-			title={label}
-		>
-			<Icon className="h-5 w-5" />
-			{active && (
-				<span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full" />
-			)}
-		</Button>
 	);
 }

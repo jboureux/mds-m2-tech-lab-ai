@@ -11,6 +11,7 @@ import {
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminUserActions } from "@/components/admin/admin-user-actions";
+import { UserRowActions } from "@/components/admin/user-row-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +61,15 @@ export default async function AdminUsersPage() {
 			db.user.findMany({
 				orderBy: { createdAt: "desc" },
 				take: 10,
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					username: true,
+					bio: true,
+					role: true,
+					createdAt: true,
+				},
 			}),
 			db.preRegisteredUser.findMany({
 				orderBy: { createdAt: "desc" },
@@ -151,8 +161,11 @@ export default async function AdminUsersPage() {
 										<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											Status
 										</TableHead>
-										<TableHead className="text-right py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
+										<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
 											Join Date
+										</TableHead>
+										<TableHead className="text-right py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
+											Actions
 										</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -199,14 +212,17 @@ export default async function AdminUsersPage() {
 													</span>
 												</div>
 											</TableCell>
-											<TableCell className="text-right py-4 px-8">
-												<span className="text-[11px] font-medium text-muted-foreground flex items-center justify-end gap-1.5">
+											<TableCell>
+												<span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
 													<Calendar className="h-3 w-3" />
 													{new Date(user.createdAt).toLocaleDateString(
 														undefined,
 														{ day: "numeric", month: "short" },
 													)}
 												</span>
+											</TableCell>
+											<TableCell className="text-right py-4 px-8">
+												<UserRowActions user={user} />
 											</TableCell>
 										</TableRow>
 									))}

@@ -125,7 +125,7 @@ export function CreateUserForm() {
 							htmlFor="name"
 							className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
 						>
-							Full Name
+							Name
 						</Label>
 						<div className="relative group">
 							<User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />

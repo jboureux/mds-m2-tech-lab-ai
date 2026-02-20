@@ -62,6 +62,7 @@ export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
 	const limit = Number.parseInt(searchParams.get("limit") || "20", 10);
 	const cursor = searchParams.get("cursor") || undefined;
+	const authorId = searchParams.get("authorId") || undefined;
 
 	try {
 		const session = await auth.api.getSession({
@@ -69,16 +70,26 @@ export async function GET(req: Request) {
 		});
 
 		console.log(
-			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit} and cursor ${cursor}`,
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}`,
 		);
 
 		const posts = await db.post.findMany({
-			where: {
-				OR: [
-					{ status: "PUBLISHED" },
-					...(session ? [{ authorId: session.user.id }] : []),
-				],
-			},
+			where: authorId
+				? {
+						authorId,
+						status:
+							session?.user.id === authorId ||
+							session?.user.role === "ADMIN" ||
+							session?.user.role === "MODERATOR"
+								? undefined
+								: "PUBLISHED",
+					}
+				: {
+						OR: [
+							{ status: "PUBLISHED" },
+							...(session ? [{ authorId: session.user.id }] : []),
+						],
+					},
 			take: limit,
 			skip: cursor ? 1 : 0,
 			cursor: cursor ? { id: cursor } : undefined,
@@ -87,6 +98,7 @@ export async function GET(req: Request) {
 					select: {
 						id: true,
 						name: true,
+						username: true,
 						image: true,
 						role: true,
 					},

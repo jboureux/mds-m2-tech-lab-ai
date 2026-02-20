@@ -1,15 +1,15 @@
+import type { User } from "better-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AsidePanel } from "@/components/social/aside-panel";
 import { SocialHeader } from "@/components/social/header";
-import { PostEditor } from "@/components/social/post-editor";
 import { PostFeed } from "@/components/social/post-feed";
+import { ProfileForm } from "@/components/social/profile-form";
 import { SocialSidebar } from "@/components/social/sidebar";
 import { auth } from "@/lib/auth";
-import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
 
-export default async function Home() {
+export default async function ProfilePage() {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -18,14 +18,17 @@ export default async function Home() {
 		redirect("/");
 	}
 
+	const user = session.user as User & { username?: string };
+
+	if (user.username) {
+		redirect(`/u/${user.username}`);
+	}
+
+	// If no username, show the profile form to allow setting it
 	const posts = await db.post.findMany({
 		where: {
-			OR: [
-				{ status: "PUBLISHED" },
-				{ authorId: session.user.id }, // Users can see their own pending/flagged posts
-			],
+			authorId: session.user.id,
 		},
-		take: 20,
 		include: {
 			author: {
 				select: {
@@ -45,7 +48,6 @@ export default async function Home() {
 		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 	});
 
-	const { isAllowed, reason } = await checkPostingPermission(session);
 	const isStaff =
 		session.user.role === "ADMIN" || session.user.role === "MODERATOR";
 
@@ -54,25 +56,22 @@ export default async function Home() {
 			<SocialHeader />
 
 			<div className="container mx-auto max-w-7xl px-4 py-8 flex items-start gap-6 lg:gap-8">
-				<SocialSidebar />
+				<SocialSidebar hideCard />
 
 				<main className="flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
-					<PostEditor
-						user={{
-							name: session.user.name,
-							image: session.user.image ?? null,
-						}}
-						isAllowedToPost={isAllowed}
-						restrictionReason={reason}
-					/>
+					<ProfileForm user={session.user as User} isOwnProfile={true} />
 
-					<PostFeed
-						initialPosts={JSON.parse(JSON.stringify(posts))}
-						isStaff={isStaff}
-					/>
+					<div className="space-y-4">
+						<h2 className="text-xl font-black px-1">Your Scoops</h2>
+						<PostFeed
+							initialPosts={JSON.parse(JSON.stringify(posts))}
+							isStaff={isStaff}
+							authorId={session.user.id}
+						/>
+					</div>
 				</main>
 
-				<AsidePanel />
+				<AsidePanel hideCard />
 			</div>
 		</div>
 	);

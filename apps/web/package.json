@@ -13,6 +13,7 @@
 		"test": "vitest run",
 		"db:push": "prisma db push",
 		"db:seed": "prisma db seed",
+		"db:backfill-usernames": "tsx prisma/backfill-usernames.ts",
 		"generate": "prisma generate"
 	},
 	"prisma": {
