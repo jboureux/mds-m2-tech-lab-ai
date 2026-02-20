@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
 	/* config options here */
 	reactCompiler: true,
 	output: "standalone",
-	serverExternalPackages: ["better-auth"],
+	serverExternalPackages: ["better-auth", "@tensorflow/tfjs-node"],
 };
 
 export default nextConfig;

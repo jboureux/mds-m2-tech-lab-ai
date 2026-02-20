@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 interface Author {
 	id: string;
 	name: string | null;
-	email: string;
+	email?: string | null;
 	image: string | null;
 }
 

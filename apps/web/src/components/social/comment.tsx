@@ -24,8 +24,8 @@ interface CommentProps {
 		replies?: CommentProps["comment"][];
 	};
 	currentUser?: {
-		name: string;
-		image?: string | null;
+		name: string | null;
+		image: string | null;
 	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
