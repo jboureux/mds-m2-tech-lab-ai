@@ -2,6 +2,7 @@
 
 import type { User } from "better-auth";
 import {
+	FileText,
 	Loader2,
 	LogOut,
 	Mail,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { authClient, signOut, useSession } from "@/lib/auth-client";
 
 export function ProfileForm({ user: initialUser }: { user: User }) {
@@ -35,17 +37,24 @@ export function ProfileForm({ user: initialUser }: { user: User }) {
 	const isStandardMember = user.role === "USER";
 	const [isEditing, setIsEditing] = useState(false);
 	const [name, setName] = useState(user.name || "");
+	const [bio, setBio] = useState(user.bio || "");
 	const [isUpdating, setIsUpdating] = useState(false);
 
 	const handleUpdate = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (isStandardMember) return;
 
 		setIsUpdating(true);
 		try {
-			const { error } = await authClient.user.update({
-				name: name,
-			});
+			const updateData: { bio: string; name?: string } = {
+				bio: bio,
+			};
+
+			// Only non-standard members can update their name
+			if (!isStandardMember) {
+				updateData.name = name;
+			}
+
+			const { error } = await authClient.user.update(updateData);
 
 			if (error) {
 				toast.error(error.message || "Failed to update profile");
@@ -100,7 +109,7 @@ export function ProfileForm({ user: initialUser }: { user: User }) {
 								</span>
 							</CardDescription>
 						</div>
-						{!isStandardMember && !isEditing && (
+						{!isEditing && (
 							<Button
 								variant="outline"
 								size="sm"
@@ -129,10 +138,36 @@ export function ProfileForm({ user: initialUser }: { user: User }) {
 										value={name}
 										onChange={(e) => setName(e.target.value)}
 										placeholder="Your Name"
+										disabled={isStandardMember}
 										className="pl-10 h-11 bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl"
+									/>
+									{isStandardMember && (
+										<p className="text-[10px] text-muted-foreground mt-1 ml-1 italic">
+											Standard accounts cannot change their display name.
+										</p>
+									)}
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<Label
+									htmlFor="bio"
+									className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70"
+								>
+									Biography
+								</Label>
+								<div className="relative group">
+									<FileText className="absolute left-3 top-4 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
+									<Textarea
+										id="bio"
+										value={bio}
+										onChange={(e) => setBio(e.target.value)}
+										placeholder="Tell us a bit about yourself..."
+										className="pl-10 min-h-[100px] bg-slate-50 dark:bg-zinc-800 border-none ring-0 focus-visible:ring-2 focus-visible:ring-blue-600/50 transition-all rounded-xl resize-none"
 									/>
 								</div>
 							</div>
+
 							<div className="flex gap-2 justify-end pt-2">
 								<Button
 									type="button"
@@ -140,6 +175,7 @@ export function ProfileForm({ user: initialUser }: { user: User }) {
 									onClick={() => {
 										setIsEditing(false);
 										setName(user.name || "");
+										setBio(user.bio || "");
 									}}
 									className="text-xs font-bold"
 								>
@@ -158,42 +194,64 @@ export function ProfileForm({ user: initialUser }: { user: User }) {
 							</div>
 						</form>
 					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-							<div className="space-y-1">
-								<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
-									Role
-								</p>
-								<div className="flex items-center gap-2">
-									<Shield className="h-4 w-4 text-blue-600" />
-									<p className="text-sm font-semibold">{user.role}</p>
+						<div className="space-y-6">
+							{user.bio ? (
+								<div className="space-y-1">
+									<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
+										Biography
+									</p>
+									<p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed italic">
+										"{user.bio}"
+									</p>
 								</div>
-							</div>
-							<div className="space-y-1">
-								<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
-									Account ID
-								</p>
-								<p className="text-xs font-mono text-muted-foreground truncate">
-									{user.id}
-								</p>
-							</div>
-
-							{isStandardMember && (
-								<div className="col-span-full mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">
-									<div className="flex items-start gap-3">
-										<ShieldAlert className="h-5 w-5 text-blue-600 shrink-0" />
-										<div className="space-y-1">
-											<p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">
-												Standard Membership
-											</p>
-											<p className="text-[11px] text-blue-600 dark:text-blue-300 leading-relaxed font-medium">
-												Your profile is managed by your school institution.
-												Standard accounts are read-only and cannot change their
-												identity information.
-											</p>
-										</div>
-									</div>
+							) : (
+								<div className="space-y-1">
+									<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
+										Biography
+									</p>
+									<p className="text-xs text-muted-foreground italic">
+										No bio provided yet. Click "Edit Profile" to add one!
+									</p>
 								</div>
 							)}
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+								<div className="space-y-1">
+									<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
+										Role
+									</p>
+									<div className="flex items-center gap-2">
+										<Shield className="h-4 w-4 text-blue-600" />
+										<p className="text-sm font-semibold">{user.role}</p>
+									</div>
+								</div>
+								<div className="space-y-1">
+									<p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/70">
+										Account ID
+									</p>
+									<p className="text-xs font-mono text-muted-foreground truncate">
+										{user.id}
+									</p>
+								</div>
+
+								{isStandardMember && (
+									<div className="col-span-full mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">
+										<div className="flex items-start gap-3">
+											<ShieldAlert className="h-5 w-5 text-blue-600 shrink-0" />
+											<div className="space-y-1">
+												<p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">
+													Standard Membership
+												</p>
+												<p className="text-[11px] text-blue-600 dark:text-blue-300 leading-relaxed font-medium">
+													Your profile is partially managed by your school
+													institution. Standard accounts can only update their
+													biography.
+												</p>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
 						</div>
 					)}
 				</CardContent>
