@@ -116,7 +116,7 @@ export default async function PostPage({ params }: PostPageProps) {
 				</Button>
 
 				<article>
-					<PostCard post={post} />
+					<PostCard post={post} isStaff={isStaff} />
 				</article>
 
 				<section className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm space-y-6">
@@ -150,6 +150,7 @@ export default async function PostPage({ params }: PostPageProps) {
 									comment={comment as any}
 									isAllowedToComment={isAllowed}
 									restrictionReason={reason}
+									isStaff={isStaff}
 								/>
 							))
 						)}

@@ -26,12 +26,14 @@ interface CommentProps {
 	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
+	isStaff?: boolean;
 }
 
 export function Comment({
 	comment,
 	isAllowedToComment,
 	restrictionReason,
+	isStaff = false,
 }: CommentProps) {
 	const [mounted, setMounted] = React.useState(false);
 	const { data: session } = useSession();
@@ -79,8 +81,7 @@ export function Comment({
 
 			<div className="text-sm pl-9 space-y-2">
 				{comment.isToxic ? (
-					session?.user?.role === "ADMIN" ||
-					session?.user?.role === "MODERATOR" ? (
+					isStaff ? (
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 p-1.5 rounded bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase border border-amber-100 dark:border-amber-900/50">
 								<ShieldAlert className="h-3 w-3 shrink-0" />
@@ -140,6 +141,7 @@ export function Comment({
 							comment={reply}
 							isAllowedToComment={isAllowedToComment}
 							restrictionReason={restrictionReason}
+							isStaff={isStaff}
 						/>
 					))}
 				</div>

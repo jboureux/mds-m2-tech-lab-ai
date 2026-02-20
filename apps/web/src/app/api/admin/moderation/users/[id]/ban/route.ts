@@ -7,8 +7,8 @@ export async function POST(
 	req: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ) {
+	const { id } = await params;
 	try {
-		const { id } = await params;
 		const session = await auth.api.getSession({
 			headers: await headers(),
 		});
@@ -24,6 +24,13 @@ export async function POST(
 			);
 		}
 
+		if (!id || id === "undefined") {
+			return NextResponse.json(
+				{ error: "Invalid User ID provided" },
+				{ status: 400 },
+			);
+		}
+
 		const body = await req.json();
 		const { reason, durationInDays } = body;
 
@@ -34,26 +41,27 @@ export async function POST(
 			banExpires = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 		}
 
+		// Update the user record directly
+		// This is consistent with how other fields are managed in this project
 		const user = await db.user.update({
 			where: {
 				id,
 			},
 			data: {
 				banned: true,
-				banReason: reason,
+				banReason: reason || "Violation of community guidelines",
 				banExpires,
 			},
 		});
 
-		return NextResponse.json({ message: "User banned", user });
+		return NextResponse.json({ message: "User banned successfully", user });
 	} catch (error) {
 		console.error(
-			"[API/Admin/Moderation/Users/Ban] Failed to ban user:",
+			`[API/Admin/Moderation/Users/Ban] Failed to ban user ${id}:`,
 			error,
 		);
-		return NextResponse.json(
-			{ error: "Internal Server Error" },
-			{ status: 500 },
-		);
+		const errorMessage =
+			error instanceof Error ? error.message : "Internal Server Error";
+		return NextResponse.json({ error: errorMessage }, { status: 500 });
 	}
 }

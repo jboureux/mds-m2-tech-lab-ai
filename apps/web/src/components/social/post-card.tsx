@@ -22,7 +22,6 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/components/ui/card";
-import { useSession } from "@/lib/auth-client";
 
 interface PostCardProps {
 	post: {
@@ -41,10 +40,10 @@ interface PostCardProps {
 			comments: number;
 		};
 	};
+	isStaff?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
-	const { data: session } = useSession();
+export function PostCard({ post, isStaff = false }: PostCardProps) {
 	const [mounted, setMounted] = React.useState(false);
 	const [liked, setLiked] = React.useState(false);
 
@@ -54,8 +53,6 @@ export function PostCard({ post }: PostCardProps) {
 
 	const isFlagged = post.status === "FLAGGED" || post.isToxic;
 	const isPending = post.status === "PENDING";
-	const isStaff =
-		session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR";
 
 	const createdAt =
 		typeof post.createdAt === "string"

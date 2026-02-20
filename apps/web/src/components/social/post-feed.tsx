@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 import { PostCard } from "./post-card";
 
 interface Post {
@@ -29,7 +30,11 @@ interface PostFeedProps {
 }
 
 export function PostFeed({ initialPosts }: PostFeedProps) {
+	const { data: session } = useSession();
 	const { ref, inView } = useInView();
+
+	const isStaff =
+		session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR";
 
 	const {
 		data,
@@ -133,7 +138,7 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 
 			<div className="grid gap-6">
 				{posts.map((post: PostFeedProps["initialPosts"][number]) => (
-					<PostCard key={post.id} post={post} />
+					<PostCard key={post.id} post={post} isStaff={isStaff} />
 				))}
 			</div>
 

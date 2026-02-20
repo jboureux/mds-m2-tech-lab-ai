@@ -44,7 +44,7 @@ describe("API: POST /api/admin/moderation/users/[id]/ban", () => {
 		const data = await response.json();
 
 		expect(response.status).toBe(200);
-		expect(data.message).toBe("User banned");
+		expect(data.message).toBe("User banned successfully");
 		expect(db.user.update).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { id: "1" },
