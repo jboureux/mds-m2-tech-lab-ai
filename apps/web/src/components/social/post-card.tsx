@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
-import { Markdown } from "@/components/social/markdown";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
+import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ interface PostCardProps {
 		author: {
 			id: string;
 			name: string | null;
+			email?: string | null;
 			username?: string | null;
 			image: string | null;
 			role: string;

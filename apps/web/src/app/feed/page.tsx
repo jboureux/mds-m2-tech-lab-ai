@@ -31,6 +31,7 @@ export default async function Home() {
 				select: {
 					id: true,
 					name: true,
+					email: true,
 					username: true,
 					image: true,
 					role: true,

@@ -34,6 +34,7 @@ export default async function PostPage({ params }: PostPageProps) {
 				select: {
 					id: true,
 					name: true,
+					email: true,
 					image: true,
 					role: true,
 				},
