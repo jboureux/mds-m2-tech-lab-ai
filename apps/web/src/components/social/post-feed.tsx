@@ -5,7 +5,6 @@ import { Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
 import { PostCard } from "./post-card";
 
 interface Post {
