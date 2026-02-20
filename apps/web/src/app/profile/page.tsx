@@ -59,7 +59,7 @@ export default async function ProfilePage() {
 				<SocialSidebar hideCard />
 
 				<main className="flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
-					<ProfileForm user={session.user as User} />
+					<ProfileForm user={session.user as User} isOwnProfile={true} />
 
 					<div className="space-y-4">
 						<h2 className="text-xl font-black px-1">Your Scoops</h2>

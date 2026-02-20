@@ -7,7 +7,6 @@ import {
 	LogOut,
 	Mail,
 	Shield,
-	ShieldAlert,
 	User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -30,10 +29,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { signOut } from "@/lib/auth-client";
 
-export function ProfileForm({ user }: { user: User }) {
+export function ProfileForm({
+	user,
+	isOwnProfile = false,
+}: {
+	user: User;
+	isOwnProfile?: boolean;
+}) {
 	const router = useRouter();
 
-	const isStandardMember = user.role === "USER";
+	const _isStandardMember = user.role === "USER";
 	const [isEditing, setIsEditing] = useState(false);
 	const [name, setName] = useState(user.name || "");
 	const [username, setUsername] = useState(user.username || "");
@@ -119,7 +124,7 @@ export function ProfileForm({ user }: { user: User }) {
 								</span>
 							</CardDescription>
 						</div>
-						{!isEditing && (
+						{!isEditing && isOwnProfile && (
 							<Button
 								variant="outline"
 								size="sm"
@@ -266,39 +271,23 @@ export function ProfileForm({ user }: { user: User }) {
 										</p>
 									</div>
 								)}
-
-								{isStandardMember && (
-									<div className="col-span-full mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">
-										<div className="flex items-start gap-3">
-											<ShieldAlert className="h-5 w-5 text-blue-600 shrink-0" />
-											<div className="space-y-1">
-												<p className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-tight">
-													Standard Membership
-												</p>
-												<p className="text-[11px] text-blue-600 dark:text-blue-300 leading-relaxed font-medium">
-													Your profile is partially managed by your school
-													institution. Standard accounts can only update their
-													biography.
-												</p>
-											</div>
-										</div>
-									</div>
-								)}
 							</div>
 						</div>
 					)}
 				</CardContent>
-				<CardFooter className="border-t px-8 py-4 bg-slate-50/50 dark:bg-zinc-800/30">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={handleSignOut}
-						className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold gap-2 text-xs"
-					>
-						<LogOut className="h-4 w-4" />
-						Sign Out
-					</Button>
-				</CardFooter>
+				{isOwnProfile && (
+					<CardFooter className="border-t px-8 py-4 bg-slate-50/50 dark:bg-zinc-800/30">
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={handleSignOut}
+							className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold gap-2 text-xs"
+						>
+							<LogOut className="h-4 w-4" />
+							Sign Out
+						</Button>
+					</CardFooter>
+				)}
 			</Card>
 		</div>
 	);
