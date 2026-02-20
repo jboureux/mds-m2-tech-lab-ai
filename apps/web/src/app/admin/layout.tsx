@@ -1,6 +1,6 @@
-import { ArrowLeft, Home, LogOut } from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { Button } from "@/components/ui/button";

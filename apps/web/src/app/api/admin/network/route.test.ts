@@ -52,21 +52,21 @@ describe("Admin Network API", () => {
 
 	describe("GET", () => {
 		it("should return 401 if not authenticated", async () => {
-			(auth.api.getSession as any).mockResolvedValue(null);
+			vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
 			const response = await GET();
 			expect(response.status).toBe(401);
 		});
 
 		it("should return 403 if not an admin", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockUserSession);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockUserSession as any);
 			const response = await GET();
 			expect(response.status).toBe(403);
 		});
 
 		it("should return ranges if admin", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
 			const mockRanges = [{ id: "1", cidr: "1.1.1.1/32" }];
-			(db.allowedIP.findMany as any).mockResolvedValue(mockRanges);
+			vi.mocked(db.allowedIP.findMany).mockResolvedValue(mockRanges as any);
 
 			const response = await GET();
 			const data = await response.json();
@@ -78,12 +78,12 @@ describe("Admin Network API", () => {
 
 	describe("POST", () => {
 		it("should add a new CIDR range and invalidate cache", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
-			(db.allowedIP.findUnique as any).mockResolvedValue(null);
-			(db.allowedIP.create as any).mockResolvedValue({
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(db.allowedIP.findUnique).mockResolvedValue(null as any);
+			vi.mocked(db.allowedIP.create).mockResolvedValue({
 				id: "2",
 				cidr: "192.168.1.0/24",
-			});
+			} as any);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -99,7 +99,7 @@ describe("Admin Network API", () => {
 		});
 
 		it("should return 400 for invalid CIDR", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -111,8 +111,8 @@ describe("Admin Network API", () => {
 		});
 
 		it("should return 409 if CIDR already exists", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
-			(db.allowedIP.findUnique as any).mockResolvedValue({ id: "1" });
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(db.allowedIP.findUnique).mockResolvedValue({ id: "1" } as any);
 
 			const req = new Request("http://localhost/api/admin/network", {
 				method: "POST",
@@ -126,11 +126,11 @@ describe("Admin Network API", () => {
 
 	describe("DELETE", () => {
 		it("should remove a range and invalidate cache", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
-			(db.allowedIP.delete as any).mockResolvedValue({
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
+			vi.mocked(db.allowedIP.delete).mockResolvedValue({
 				id: "1",
 				cidr: "1.1.1.1/32",
-			});
+			} as any);
 
 			const req = new Request("http://localhost/api/admin/network?id=1", {
 				method: "DELETE",
@@ -146,7 +146,7 @@ describe("Admin Network API", () => {
 
 	describe("PATCH", () => {
 		it("should manually invalidate cache", async () => {
-			(auth.api.getSession as any).mockResolvedValue(mockAdminSession);
+			vi.mocked(auth.api.getSession).mockResolvedValue(mockAdminSession as any);
 
 			const response = await PATCH();
 			const _data = await response.json();

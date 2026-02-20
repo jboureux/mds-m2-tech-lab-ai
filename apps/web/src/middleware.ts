@@ -27,7 +27,7 @@ async function getAllowedRanges(origin: string) {
 				revalidate: 300, // 5 minutes revalidation
 				tags: ["allowed-ips"],
 			},
-		} as any);
+		} as RequestInit & { next: { revalidate: number; tags: string[] } });
 
 		if (response.ok) {
 			cachedAllowedRanges = await response.json();
