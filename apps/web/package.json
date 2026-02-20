@@ -18,6 +18,14 @@
 	"prisma": {
 		"seed": "tsx prisma/seed.ts"
 	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@tensorflow/tfjs-node",
+			"sharp",
+			"prisma",
+			"@prisma/engines"
+		]
+	},
 	"dependencies": {
 		"@better-auth/prisma-adapter": "1.5.0-beta.16",
 		"@prisma/adapter-pg": "^7.4.0",
