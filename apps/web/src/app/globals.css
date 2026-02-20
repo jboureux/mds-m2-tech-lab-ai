@@ -73,6 +73,14 @@
 	--chart-3: #f59e0b;
 	--chart-4: #6366f1;
 	--chart-5: #ec4899;
+	--sidebar: hsl(0 0% 98%);
+	--sidebar-foreground: hsl(240 5.3% 26.1%);
+	--sidebar-primary: hsl(240 5.9% 10%);
+	--sidebar-primary-foreground: hsl(0 0% 98%);
+	--sidebar-accent: hsl(240 4.8% 95.9%);
+	--sidebar-accent-foreground: hsl(240 5.9% 10%);
+	--sidebar-border: hsl(220 13% 91%);
+	--sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
 .dark {
@@ -95,6 +103,14 @@
 	--border: #1e293b;
 	--input: #1e293b;
 	--ring: #3b82f6;
+	--sidebar: #0f172a;
+	--sidebar-foreground: #f8fafc;
+	--sidebar-primary: #3b82f6;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #1e293b;
+	--sidebar-accent-foreground: #f8fafc;
+	--sidebar-border: #1e293b;
+	--sidebar-ring: #3b82f6;
 }
 
 @layer base {

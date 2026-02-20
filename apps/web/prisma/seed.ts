@@ -47,7 +47,7 @@ async function main() {
 			email: "admin@mds.com",
 			name: "Admin User",
 			role: Role.ADMIN,
-			emailVerified: new Date(),
+			emailVerified: true,
 		},
 	});
 	console.log(`👑 Seeded admin: ${admin.email}`);
@@ -58,7 +58,7 @@ async function main() {
 			email: "mod@mds.com",
 			name: "Moderator User",
 			role: Role.MODERATOR,
-			emailVerified: new Date(),
+			emailVerified: true,
 		},
 	});
 	console.log(`🛡️ Seeded moderator: ${moderator.email}`);
@@ -69,7 +69,7 @@ async function main() {
 			email: "vip@mds.com",
 			name: "VIP User",
 			role: Role.VIP,
-			emailVerified: new Date(),
+			emailVerified: true,
 		},
 	});
 	console.log(`⭐ Seeded VIP: ${vip.email}`);
@@ -82,7 +82,7 @@ async function main() {
 				email: faker.internet.email().toLowerCase(),
 				name: faker.person.fullName(),
 				role: Role.USER,
-				emailVerified: faker.datatype.boolean() ? new Date() : null,
+				emailVerified: faker.datatype.boolean(),
 			},
 		});
 		users.push(user);

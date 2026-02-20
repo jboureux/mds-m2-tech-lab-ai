@@ -8,9 +8,7 @@ services:
       - pnpm_store:/pnpm
     ports:
       - "${WEB_PORT:-3000}:3000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mds?schema=public
-      - NODE_ENV=development
+    env_file: ".env"
     depends_on:
       db:
         condition: service_healthy
