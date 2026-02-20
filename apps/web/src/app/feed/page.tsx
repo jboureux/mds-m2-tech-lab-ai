@@ -47,6 +47,8 @@ export default async function Home() {
 	});
 
 	const { isAllowed, reason } = await checkPostingPermission(session);
+	const isStaff =
+		session.user.role === "ADMIN" || session.user.role === "MODERATOR";
 
 	return (
 		<div className="flex min-h-screen flex-col bg-[#F4F2EE] dark:bg-[#000000] font-sans selection:bg-blue-100 dark:selection:bg-blue-900/40">
@@ -65,7 +67,10 @@ export default async function Home() {
 						restrictionReason={reason}
 					/>
 
-					<PostFeed initialPosts={JSON.parse(JSON.stringify(posts))} />
+					<PostFeed
+						initialPosts={JSON.parse(JSON.stringify(posts))}
+						isStaff={isStaff}
+					/>
 				</main>
 
 				<AsidePanel />

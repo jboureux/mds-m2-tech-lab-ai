@@ -5,7 +5,6 @@ import { Loader2, RefreshCw } from "lucide-react";
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
 import { PostCard } from "./post-card";
 
 interface Post {
@@ -27,14 +26,11 @@ interface Post {
 
 interface PostFeedProps {
 	initialPosts: Post[];
+	isStaff?: boolean;
 }
 
-export function PostFeed({ initialPosts }: PostFeedProps) {
-	const { data: session } = useSession();
+export function PostFeed({ initialPosts, isStaff = false }: PostFeedProps) {
 	const { ref, inView } = useInView();
-
-	const isStaff =
-		session?.user?.role === "ADMIN" || session?.user?.role === "MODERATOR";
 
 	const {
 		data,
