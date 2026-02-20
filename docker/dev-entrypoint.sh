@@ -5,18 +5,21 @@ set -e
 echo "⏳ Checking database connection..."
 
 # Install dependencies if node_modules is missing or package.json changed
-# In dev with volume, this ensures we're ready.
 echo "📦 Checking/Installing dependencies..."
 pnpm install
 
-# Force rebuild of native modules to ensure they match the container architecture
-# We use npm rebuild --build-from-source because pnpm rebuild sometimes restores incorrect binaries
-echo "🔧 Compiling native modules from source (@tensorflow/tfjs-node, sharp)..."
-npm rebuild @tensorflow/tfjs-node sharp --build-from-source
+# Force rebuild of native modules to ensure they match the container architecture (ARM64)
+echo "🔧 Rebuilding native modules (@tensorflow/tfjs-node, sharp)..."
+# Clean up potential broken build artifacts that cause ENOENT errors with bind mounts
+find node_modules/.pnpm -name "build" -type d -exec rm -rf {} + 2>/dev/null || true
+pnpm rebuild @tensorflow/tfjs-node sharp || echo "⚠️ Native rebuild failed, falling back to CPU mode."
 
 # Configure shared library path for TensorFlow
-echo "/app/node_modules/@tensorflow/tfjs-node/deps/lib" > /etc/ld.so.conf.d/tensorflow.conf
-ldconfig
+if [ -d "/app/node_modules/@tensorflow/tfjs-node/deps/lib" ]; then
+  mkdir -p /etc/ld.so.conf.d
+  echo "/app/node_modules/@tensorflow/tfjs-node/deps/lib" > /etc/ld.so.conf.d/tensorflow.conf
+  ldconfig || echo "⚠️ ldconfig failed"
+fi
 
 # Generate Prisma Client
 echo "🏗️ Generating Prisma client..."
