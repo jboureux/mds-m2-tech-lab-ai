@@ -1,45 +1,68 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
+import React from "react";
+import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "./post-card";
 
+interface Post {
+	id: string;
+	content: string;
+	status: string;
+	isToxic: boolean;
+	createdAt: string | Date;
+	author: {
+		name: string | null;
+		image: string | null;
+		role: string;
+	};
+	_count?: {
+		comments: number;
+	};
+}
+
 interface PostFeedProps {
-	initialPosts: Array<{
-		id: string;
-		content: string;
-		status: string;
-		isToxic: boolean;
-		createdAt: string | Date;
-		author: {
-			name: string | null;
-			image: string | null;
-			role: string;
-		};
-		_count?: {
-			comments: number;
-		};
-	}>;
+	initialPosts: Post[];
 }
 
 export function PostFeed({ initialPosts }: PostFeedProps) {
+	const { ref, inView } = useInView();
+
 	const {
-		data: posts,
+		data,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
 		isLoading,
 		isError,
 		refetch,
 		isRefetching,
-	} = useQuery({
+	} = useInfiniteQuery({
 		queryKey: ["posts"],
-		queryFn: async () => {
-			const response = await fetch("/api/posts");
+		queryFn: async ({ pageParam = null }) => {
+			const url = new URL("/api/posts", window.location.origin);
+			url.searchParams.set("limit", "10");
+			if (pageParam) url.searchParams.set("cursor", pageParam as string);
+			const response = await fetch(url.toString());
 			if (!response.ok) throw new Error("Failed to fetch posts");
 			return response.json();
 		},
-		initialData: initialPosts,
-		refetchOnWindowFocus: false,
+		initialPageParam: null,
+		getNextPageParam: (lastPage) => lastPage.nextCursor,
+		refetchInterval: 60000, // Poll every 1 minute to keep feed fresh
+		refetchOnWindowFocus: true,
 	});
+
+	React.useEffect(() => {
+		if (inView && hasNextPage && !isFetchingNextPage) {
+			fetchNextPage();
+		}
+	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+	// Use initialPosts only if data is not yet available
+	const posts = data?.pages.flatMap((page) => page.items) || initialPosts;
 
 	if (isError) {
 		return (
@@ -54,7 +77,7 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 		);
 	}
 
-	if (isLoading && !posts) {
+	if (isLoading && !posts.length) {
 		return (
 			<div className="flex flex-col items-center justify-center py-40 gap-4">
 				<Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
@@ -94,7 +117,7 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 				<h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
 					<span className="w-8 h-px bg-slate-200 dark:bg-zinc-800" />
 					Recent Activity
-					{isRefetching && (
+					{(isRefetching || isFetchingNextPage) && (
 						<Loader2 className="h-3 w-3 animate-spin text-blue-600" />
 					)}
 				</h2>
@@ -113,10 +136,17 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 				))}
 			</div>
 
-			<div className="py-10 text-center">
-				<p className="text-xs text-muted-foreground font-medium italic">
-					You've reached the end of the scoop. Go make some news!
-				</p>
+			{/* Loading trigger for infinite scroll */}
+			<div ref={ref} className="py-10 text-center">
+				{isFetchingNextPage ? (
+					<Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto" />
+				) : hasNextPage ? (
+					<div className="h-10 w-full" />
+				) : (
+					<p className="text-xs text-muted-foreground font-medium italic">
+						You've reached the end of the scoop. Go make some news!
+					</p>
+				)}
 			</div>
 		</div>
 	);

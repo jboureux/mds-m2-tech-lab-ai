@@ -25,6 +25,7 @@ export default async function Home() {
 				{ authorId: session.user.id }, // Users can see their own pending/flagged posts
 			],
 		},
+		take: 10,
 		include: {
 			author: {
 				select: {
