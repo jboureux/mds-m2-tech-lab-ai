@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, EyeOff, Gavel, Loader2, MoreHorizontal } from "lucide-react";
+import { Check, ExternalLink, EyeOff, Gavel, Loader2, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -119,6 +120,13 @@ export function ModerationActions({ post }: { post: Post }) {
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
+					<DropdownMenuItem asChild className="cursor-pointer">
+						<Link href={`/posts/${post.id}`} target="_blank">
+							<ExternalLink className="mr-2 h-4 w-4 text-blue-500" />
+							View Full Post
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						onClick={handleApprove}
 						className="text-emerald-600 focus:text-emerald-700"
