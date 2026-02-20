@@ -60,6 +60,7 @@ export function RichEditor({
 			TiptapMarkdown,
 		],
 		content,
+		immediatelyRender: false,
 		editorProps: {
 			attributes: {
 				class:
