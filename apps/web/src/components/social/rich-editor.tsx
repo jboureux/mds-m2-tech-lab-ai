@@ -83,7 +83,7 @@ export function RichEditor({
 			},
 		},
 		onUpdate: ({ editor }) => {
-			const storage = editor.storage as MarkdownStorage;
+			const storage = editor.storage as unknown as MarkdownStorage;
 			const markdown = storage.markdown.getMarkdown();
 			onChange(markdown);
 		},
@@ -147,7 +147,7 @@ export function RichEditor({
 	// Sync content from parent
 	React.useEffect(() => {
 		if (editor) {
-			const storage = editor.storage as MarkdownStorage;
+			const storage = editor.storage as unknown as MarkdownStorage;
 			if (content !== storage.markdown.getMarkdown()) {
 				editor.commands.setContent(content, false);
 			}
@@ -210,7 +210,6 @@ export function RichEditor({
 			// Tiptap commands
 			switch (type) {
 				case "bold":
-					console.log("Toggling bold");
 					editor.chain().focus().toggleBold().run();
 					break;
 				case "italic":
