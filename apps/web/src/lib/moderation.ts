@@ -33,6 +33,21 @@ export async function loadToxicityModel() {
 	if (toxicityModel) return toxicityModel;
 	try {
 		console.log("[MODERATION] Loading toxicity model...");
+
+		// Load the Node.js backend if running on the server to improve performance
+		if (typeof window === "undefined") {
+			try {
+				console.log("[MODERATION] Loading TensorFlow.js Node backend...");
+				await import("@tensorflow/tfjs-node");
+				console.log("[MODERATION] TensorFlow.js Node backend loaded.");
+			} catch (error) {
+				console.error(
+					"[MODERATION] Failed to load TensorFlow.js Node backend, falling back to default:",
+					error,
+				);
+			}
+		}
+
 		toxicityModel = await toxicity.load(TOXICITY_THRESHOLD, []);
 		console.log("[MODERATION] Toxicity model loaded.");
 		return toxicityModel;
