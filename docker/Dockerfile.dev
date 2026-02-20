@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libvips-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install prisma CLI globally as a reliable fallback
+RUN npm install -g prisma@7.4.0
+
 # Set pnpm home and store
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
