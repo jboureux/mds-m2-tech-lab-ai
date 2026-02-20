@@ -23,8 +23,11 @@ async function getAllowedRanges(origin: string) {
 	try {
 		// Fetch from our internal API (which runs in Node.js and has Prisma access)
 		const response = await fetch(`${origin}/api/network/allowed-ips`, {
-			next: { revalidate: 300 }, // 5 minutes revalidation
-		});
+			next: {
+				revalidate: 300, // 5 minutes revalidation
+				tags: ["allowed-ips"],
+			},
+		} as RequestInit & { next: { revalidate: number; tags: string[] } });
 
 		if (response.ok) {
 			cachedAllowedRanges = await response.json();

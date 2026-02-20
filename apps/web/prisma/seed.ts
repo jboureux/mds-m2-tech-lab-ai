@@ -96,7 +96,6 @@ async function main() {
 		const author = faker.helpers.arrayElement(allUsers);
 		const post = await prisma.post.create({
 			data: {
-				title: faker.lorem.sentence(),
 				content: faker.lorem.paragraphs(2),
 				status: faker.helpers.arrayElement([
 					PostStatus.PUBLISHED,

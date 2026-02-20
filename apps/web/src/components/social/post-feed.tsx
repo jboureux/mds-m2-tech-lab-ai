@@ -131,7 +131,7 @@ export function PostFeed({ initialPosts }: PostFeedProps) {
 			</div>
 
 			<div className="grid gap-6">
-				{posts.map((post) => (
+				{posts.map((post: PostFeedProps["initialPosts"][number]) => (
 					<PostCard key={post.id} post={post} />
 				))}
 			</div>
