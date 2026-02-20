@@ -1,16 +1,21 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { ShieldAlert } from "lucide-react";
+import { MessageSquare, ShieldAlert } from "lucide-react";
 import * as React from "react";
+import { CommentForm } from "@/components/social/comment-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
+import { useReplyStore } from "@/store/reply-store";
 
 interface CommentProps {
 	comment: {
 		id: string;
 		content: string;
 		isToxic: boolean;
+		postId: string;
 		createdAt: Date;
 		author: {
 			name: string | null;
@@ -19,10 +24,20 @@ interface CommentProps {
 		};
 		replies?: CommentProps["comment"][];
 	};
+	isAllowedToComment: boolean;
+	restrictionReason?: string;
 }
 
-export function Comment({ comment }: CommentProps) {
+export function Comment({
+	comment,
+	isAllowedToComment,
+	restrictionReason,
+}: CommentProps) {
 	const [mounted, setMounted] = React.useState(false);
+	const { data: session } = useSession();
+	const { replyingToId, setReplyingTo, cancelReply } = useReplyStore();
+
+	const isReplying = replyingToId === comment.id;
 
 	React.useEffect(() => {
 		setMounted(true);
@@ -54,13 +69,15 @@ export function Comment({ comment }: CommentProps) {
 					</div>
 					<span className="text-[10px] text-muted-foreground">
 						{mounted
-							? formatDistanceToNow(comment.createdAt, { addSuffix: true })
+							? formatDistanceToNow(new Date(comment.createdAt), {
+									addSuffix: true,
+								})
 							: "Just now"}
 					</span>
 				</div>
 			</div>
 
-			<div className="text-sm pl-9">
+			<div className="text-sm pl-9 space-y-2">
 				{comment.isToxic ? (
 					<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
 						<ShieldAlert className="h-3 w-3 shrink-0" />
@@ -71,12 +88,46 @@ export function Comment({ comment }: CommentProps) {
 						{comment.content}
 					</p>
 				)}
+
+				<div className="flex items-center gap-4">
+					<Button
+						variant="ghost"
+						size="sm"
+						className="h-7 px-2 text-[10px] text-muted-foreground hover:text-blue-600 gap-1.5"
+						onClick={() => setReplyingTo(isReplying ? null : comment.id)}
+					>
+						<MessageSquare className="h-3 w-3" />
+						Reply
+					</Button>
+				</div>
 			</div>
+
+			{isReplying && session?.user && (
+				<div className="pl-9">
+					<CommentForm
+						postId={comment.postId}
+						parentId={comment.id}
+						user={{
+							name: session.user.name,
+							image: session.user.image ?? null,
+						}}
+						isAllowedToComment={isAllowedToComment}
+						restrictionReason={restrictionReason}
+						onCancel={cancelReply}
+						onSuccess={cancelReply}
+					/>
+				</div>
+			)}
 
 			{comment.replies && comment.replies.length > 0 && (
 				<div className="mt-2 space-y-2">
 					{comment.replies.map((reply) => (
-						<Comment key={reply.id} comment={reply} />
+						<Comment
+							key={reply.id}
+							comment={reply}
+							isAllowedToComment={isAllowedToComment}
+							restrictionReason={restrictionReason}
+						/>
 					))}
 				</div>
 			)}

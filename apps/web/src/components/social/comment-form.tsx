@@ -11,26 +11,32 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CommentFormProps {
 	postId: string;
+	parentId?: string;
 	user: {
 		name: string | null;
 		image: string | null;
 	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
+	onCancel?: () => void;
+	onSuccess?: () => void;
 }
 
 export function CommentForm({
 	postId,
+	parentId,
 	user,
 	isAllowedToComment,
 	restrictionReason,
+	onCancel,
+	onSuccess,
 }: CommentFormProps) {
 	const [content, setContent] = React.useState("");
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
 	const mutation = useMutation({
-		mutationFn: async (newComment: { content: string }) => {
+		mutationFn: async (newComment: { content: string; parentId?: string }) => {
 			const response = await fetch(`/api/posts/${postId}/comments`, {
 				method: "POST",
 				headers: {
@@ -47,10 +53,11 @@ export function CommentForm({
 			return response.json();
 		},
 		onSuccess: () => {
-			toast.success("Comment posted!");
+			toast.success(parentId ? "Reply posted!" : "Comment posted!");
 			setContent("");
 			router.refresh();
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
+			onSuccess?.();
 		},
 		onError: (error: Error) => {
 			toast.error(error.message);
@@ -60,7 +67,7 @@ export function CommentForm({
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!isAllowedToComment || !content.trim()) return;
-		mutation.mutate({ content });
+		mutation.mutate({ content, parentId });
 	};
 
 	return (
@@ -74,28 +81,45 @@ export function CommentForm({
 					<Textarea
 						placeholder={
 							isAllowedToComment
-								? "Write a comment..."
+								? parentId
+									? "Write a reply..."
+									: "Write a comment..."
 								: "Posting comments restricted."
 						}
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						disabled={!isAllowedToComment || mutation.isPending}
 						className="min-h-[80px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-sm pr-12"
+						autoFocus={!!parentId}
 					/>
-					<Button
-						type="submit"
-						size="icon"
-						disabled={
-							!isAllowedToComment || !content.trim() || mutation.isPending
-						}
-						className="absolute bottom-2 right-2 h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-					>
-						{mutation.isPending ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							<SendHorizontal className="h-4 w-4" />
+					<div className="absolute bottom-2 right-2 flex gap-2">
+						{onCancel && (
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								onClick={onCancel}
+								disabled={mutation.isPending}
+								className="h-8 px-3 text-xs"
+							>
+								Cancel
+							</Button>
 						)}
-					</Button>
+						<Button
+							type="submit"
+							size="icon"
+							disabled={
+								!isAllowedToComment || !content.trim() || mutation.isPending
+							}
+							className="h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+						>
+							{mutation.isPending ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<SendHorizontal className="h-4 w-4" />
+							)}
+						</Button>
+					</div>
 				</form>
 
 				{!isAllowedToComment && restrictionReason && (
