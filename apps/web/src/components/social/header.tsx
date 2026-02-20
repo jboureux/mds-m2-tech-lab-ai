@@ -1,3 +1,4 @@
+import type { User } from "better-auth";
 import { Search } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -5,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/auth";
-import type { User } from "better-auth";
 
 export async function SocialHeader() {
 	const session = await auth.api.getSession({

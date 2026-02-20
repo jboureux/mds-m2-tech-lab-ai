@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { authClient, signOut } from "@/lib/auth-client";
+import { signOut } from "@/lib/auth-client";
 
 export function ProfileForm({ user }: { user: User }) {
 	const router = useRouter();
@@ -55,14 +55,28 @@ export function ProfileForm({ user }: { user: User }) {
 				updateData.username = username;
 			}
 
-			const { error } = await authClient.user.update(updateData);
+			const response = await fetch("/api/user/profile", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(updateData),
+			});
 
-			if (error) {
-				toast.error(error.message || "Failed to update profile");
+			const result = await response.json();
+
+			if (!response.ok) {
+				toast.error(result.error || "Failed to update profile");
 			} else {
 				toast.success("Profile updated successfully");
 				setIsEditing(false);
-				router.refresh();
+
+				// If username changed and we are on a profile page, redirect to new URL
+				if (result.user.username && result.user.username !== user.username) {
+					router.push(`/u/${result.user.username}`);
+				} else {
+					router.refresh();
+				}
 			}
 		} catch (_err) {
 			toast.error("An error occurred while updating profile");

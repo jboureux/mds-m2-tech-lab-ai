@@ -1,3 +1,4 @@
+import type { User } from "better-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AsidePanel } from "@/components/social/aside-panel";
@@ -7,7 +8,6 @@ import { ProfileForm } from "@/components/social/profile-form";
 import { SocialSidebar } from "@/components/social/sidebar";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
-import type { User } from "better-auth";
 
 export default async function ProfilePage() {
 	const session = await auth.api.getSession({
