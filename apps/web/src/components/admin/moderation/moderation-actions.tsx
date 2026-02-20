@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	Check,
 	ExternalLink,
@@ -46,6 +47,7 @@ interface Post {
 
 export function ModerationActions({ post }: { post: Post }) {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const [isLoading, setIsLoading] = useState(false);
 	const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
 	const [banReason, setBanReason] = useState("");
@@ -62,6 +64,7 @@ export function ModerationActions({ post }: { post: Post }) {
 			);
 			if (!res.ok) throw new Error("Failed to approve post");
 			toast.success("Post approved successfully");
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
 			router.refresh();
 		} catch (_error) {
 			toast.error("Failed to approve post");
@@ -78,6 +81,7 @@ export function ModerationActions({ post }: { post: Post }) {
 			});
 			if (!res.ok) throw new Error("Failed to hide post");
 			toast.success("Post removed successfully");
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
 			router.refresh();
 		} catch (_error) {
 			toast.error("Failed to remove post");
