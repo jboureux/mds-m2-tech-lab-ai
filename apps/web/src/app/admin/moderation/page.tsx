@@ -1,6 +1,7 @@
 import { CheckCircle, EyeOff, Flag, Gavel, ShieldAlert } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { BannedWordsManager } from "@/components/admin/moderation/banned-words-manager";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -71,7 +72,7 @@ export default async function AdminModerationPage() {
 	const bannedUsersCount = await db.user.count({ where: { banned: true } });
 
 	return (
-		<div className="flex flex-col gap-8 p-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+		<div className="flex flex-col gap-12 p-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
 			<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
 				<div className="space-y-1.5">
 					<div className="flex items-center gap-2 text-destructive font-bold text-xs uppercase tracking-[0.2em]">
@@ -112,99 +113,122 @@ export default async function AdminModerationPage() {
 				/>
 			</div>
 
-			<Card className="shadow-xl overflow-hidden border-border/50">
-				<CardHeader className="border-b bg-muted/20 py-6 px-8">
-					<CardTitle className="text-xl font-bold tracking-tight">
+			<section className="space-y-4">
+				<div className="flex flex-col gap-1">
+					<h2 className="text-2xl font-black tracking-tight">
+						Prohibited Keywords
+					</h2>
+					<p className="text-sm font-medium text-muted-foreground/70">
+						Manage the list of words that are automatically blocked from posts
+						and comments.
+					</p>
+				</div>
+				<BannedWordsManager />
+			</section>
+
+			<section className="space-y-4">
+				<div className="flex flex-col gap-1">
+					<h2 className="text-2xl font-black tracking-tight">
 						Flagged Content
-					</CardTitle>
-					<CardDescription className="text-sm text-muted-foreground/70">
-						Posts flagged by automated systems or users.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="p-0">
-					<Table>
-						<TableHeader className="bg-muted/30">
-							<TableRow className="hover:bg-transparent border-b">
-								<TableHead className="py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider w-[400px]">
-									Content Preview
-								</TableHead>
-								<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
-									Author
-								</TableHead>
-								<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
-									Reason
-								</TableHead>
-								<TableHead className="text-right py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
-									Actions
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{flaggedPosts.map((post) => (
-								<TableRow
-									key={post.id}
-									className="group border-b transition-colors hover:bg-muted/20"
-								>
-									<TableCell className="py-4 px-8 align-top">
-										<p className="text-sm font-medium line-clamp-4 break-words whitespace-pre-wrap">
-											{post.content}
-										</p>
-										<span className="text-[10px] text-muted-foreground mt-2 block">
-											ID: {post.id} • {post.createdAt.toLocaleDateString()}
-										</span>
-									</TableCell>
-									<TableCell className="align-top">
-										<div className="flex flex-col">
-											<span className="font-bold text-sm">
-												{post.author.name || "Anonymous"}
-											</span>
-											<span className="text-[11px] text-muted-foreground font-medium">
-												{post.author.email}
-											</span>
-										</div>
-									</TableCell>
-									<TableCell className="align-top">
-										<div className="flex flex-col gap-1.5">
-											{post.isToxic && (
-												<Badge
-													variant="outline"
-													className="bg-destructive/10 text-destructive border-destructive/20 font-bold text-[10px] px-2 py-0 w-fit"
-												>
-													Toxic Content
-												</Badge>
-											)}
-											{post.status === "FLAGGED" && (
-												<Badge
-													variant="outline"
-													className="bg-amber-100 text-amber-700 border-amber-200 font-bold text-[10px] px-2 py-0 w-fit"
-												>
-													Flagged by User
-												</Badge>
-											)}
-										</div>
-									</TableCell>{" "}
-									<TableCell className="text-right py-4 px-8 align-top">
-										<ModerationActions post={post} />
-									</TableCell>
+					</h2>
+					<p className="text-sm font-medium text-muted-foreground/70">
+						Posts flagged by automated systems or users requiring manual review.
+					</p>
+				</div>
+				<Card className="shadow-xl overflow-hidden border-border/50">
+					<CardHeader className="border-b bg-muted/20 py-6 px-8 hidden">
+						<CardTitle className="text-xl font-bold tracking-tight">
+							Flagged Content
+						</CardTitle>
+						<CardDescription className="text-sm text-muted-foreground/70">
+							Posts flagged by automated systems or users.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="p-0">
+						<Table>
+							<TableHeader className="bg-muted/30">
+								<TableRow className="hover:bg-transparent border-b">
+									<TableHead className="py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider w-[400px]">
+										Content Preview
+									</TableHead>
+									<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
+										Author
+									</TableHead>
+									<TableHead className="font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
+										Reason
+									</TableHead>
+									<TableHead className="text-right py-4 px-8 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">
+										Actions
+									</TableHead>
 								</TableRow>
-							))}
-							{flaggedPosts.length === 0 && (
-								<TableRow>
-									<TableCell
-										colSpan={4}
-										className="text-center py-16 text-muted-foreground italic"
+							</TableHeader>
+							<TableBody>
+								{flaggedPosts.map((post) => (
+									<TableRow
+										key={post.id}
+										className="group border-b transition-colors hover:bg-muted/20"
 									>
-										<div className="flex flex-col items-center gap-2">
-											<CheckCircle className="h-8 w-8 text-emerald-500/50" />
-											<p>All clear! No flagged content found.</p>
-										</div>
-									</TableCell>
-								</TableRow>
-							)}
-						</TableBody>
-					</Table>
-				</CardContent>
-			</Card>
+										<TableCell className="py-4 px-8 align-top">
+											<p className="text-sm font-medium line-clamp-4 break-words whitespace-pre-wrap">
+												{post.content}
+											</p>
+											<span className="text-[10px] text-muted-foreground mt-2 block">
+												ID: {post.id} • {post.createdAt.toLocaleDateString()}
+											</span>
+										</TableCell>
+										<TableCell className="align-top">
+											<div className="flex flex-col">
+												<span className="font-bold text-sm">
+													{post.author.name || "Anonymous"}
+												</span>
+												<span className="text-[11px] text-muted-foreground font-medium">
+													{post.author.email}
+												</span>
+											</div>
+										</TableCell>
+										<TableCell className="align-top">
+											<div className="flex flex-col gap-1.5">
+												{post.isToxic && (
+													<Badge
+														variant="outline"
+														className="bg-destructive/10 text-destructive border-destructive/20 font-bold text-[10px] px-2 py-0 w-fit"
+													>
+														Toxic Content
+													</Badge>
+												)}
+												{post.status === "FLAGGED" && (
+													<Badge
+														variant="outline"
+														className="bg-amber-100 text-amber-700 border-amber-200 font-bold text-[10px] px-2 py-0 w-fit"
+													>
+														Flagged by User
+													</Badge>
+												)}
+											</div>
+										</TableCell>{" "}
+										<TableCell className="text-right py-4 px-8 align-top">
+											<ModerationActions post={post} />
+										</TableCell>
+									</TableRow>
+								))}
+								{flaggedPosts.length === 0 && (
+									<TableRow>
+										<TableCell
+											colSpan={4}
+											className="text-center py-16 text-muted-foreground italic"
+										>
+											<div className="flex flex-col items-center gap-2">
+												<CheckCircle className="h-8 w-8 text-emerald-500/50" />
+												<p>All clear! No flagged content found.</p>
+											</div>
+										</TableCell>
+									</TableRow>
+								)}
+							</TableBody>
+						</Table>
+					</CardContent>
+				</Card>
+			</section>
 		</div>
 	);
 }

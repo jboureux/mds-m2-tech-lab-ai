@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
 
@@ -33,13 +34,10 @@ export async function POST(
 			);
 		}
 
-		// Basic word blocklist check
-		const bannedWords = await db.bannedWord.findMany();
-		const hasBannedWords = bannedWords.some((bw) =>
-			content.toLowerCase().includes(bw.word.toLowerCase()),
-		);
+		// Use the improved moderation utility
+		const isClean = await validateContent(content);
 
-		if (hasBannedWords) {
+		if (!isClean) {
 			return NextResponse.json(
 				{ error: "Comment contains forbidden content." },
 				{ status: 400 },
