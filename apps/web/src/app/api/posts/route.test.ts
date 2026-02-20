@@ -1,13 +1,15 @@
 import type { Post } from "@prisma/client";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
+import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
-import { GET } from "./route";
+import { GET, POST } from "./route";
 
 vi.mock("@/lib/prisma", () => ({
 	default: {
 		post: {
 			findMany: vi.fn(),
+			create: vi.fn(),
 		},
 		bannedWord: {
 			findMany: vi.fn(),
@@ -94,5 +96,78 @@ describe("API: GET /api/posts", () => {
 		const data = await response.json();
 
 		expect(data.nextCursor).toBeNull();
+	});
+});
+
+describe("API: POST /api/posts", () => {
+	beforeEach(() => {
+		vi.mocked(db.bannedWord.findMany).mockResolvedValue([]);
+	});
+
+	it("should return 401 if not authenticated", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null);
+
+		const req = new Request("http://localhost/api/posts", {
+			method: "POST",
+			body: JSON.stringify({ content: "test" }),
+		});
+
+		const response = await POST(req);
+		expect(response.status).toBe(401);
+	});
+
+	it("should return 400 if content is missing", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			user: { id: "user-1" },
+		} as any);
+		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
+
+		const req = new Request("http://localhost/api/posts", {
+			method: "POST",
+			body: JSON.stringify({ content: "" }),
+		});
+
+		const response = await POST(req);
+		expect(response.status).toBe(400);
+	});
+
+	it("should return 400 if content contains bad words", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			user: { id: "user-1" },
+		} as any);
+		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
+
+		const req = new Request("http://localhost/api/posts", {
+			method: "POST",
+			body: JSON.stringify({ content: "You are an ass" }), // 'ass' is a bad word
+		});
+
+		const response = await POST(req);
+		expect(response.status).toBe(400);
+		const data = await response.json();
+		expect(data.error).toContain("forbidden content");
+	});
+
+	it("should create post if content is clean", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			user: { id: "user-1" },
+		} as any);
+		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
+
+		vi.mocked(db.post.create).mockResolvedValue({
+			id: "post-1",
+			content: "Clean content",
+			authorId: "user-1",
+		} as any);
+
+		const req = new Request("http://localhost/api/posts", {
+			method: "POST",
+			body: JSON.stringify({ content: "Clean content" }),
+		});
+
+		const response = await POST(req);
+		expect(response.status).toBe(200);
+		const data = await response.json();
+		expect(data.id).toBe("post-1");
 	});
 });

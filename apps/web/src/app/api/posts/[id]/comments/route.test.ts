@@ -103,4 +103,25 @@ describe("POST /api/posts/[id]/comments", () => {
 		});
 		expect(response.status).toBe(400);
 	});
+
+	it("should return 400 if comment contains bad words", async () => {
+		const session = {
+			user: { id: userId },
+		} as unknown as { user: User; session: Session };
+		vi.mocked(auth.api.getSession).mockResolvedValue(session);
+		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
+		vi.mocked(db.bannedWord.findMany).mockResolvedValue([]);
+
+		const req = new Request(`http://localhost/api/posts/${postId}/comments`, {
+			method: "POST",
+			body: JSON.stringify({ content: "You are an ass" }), // 'ass' is a bad word
+		});
+
+		const response = await POST(req, {
+			params: Promise.resolve({ id: postId }),
+		});
+		expect(response.status).toBe(400);
+		const data = await response.json();
+		expect(data.error).toContain("forbidden content");
+	});
 });
