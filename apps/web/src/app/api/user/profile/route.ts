@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 		const body = await req.json();
 		const { id, name, username, bio } = body;
 
-		const currentUser = session.user as User & { username?: string };
+		const currentUser = session.user as User & { username?: string; role?: string };
 		const isAdmin = currentUser.role === "ADMIN";
 
 		// If no ID provided, default to current user

@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 interface Author {
 	id: string;
 	name: string | null;
-	email: string;
+	email?: string | null;
 	image: string | null;
 }
 
@@ -106,7 +106,7 @@ export function ModerationActions({ post }: { post: Post }) {
 			);
 			if (!res.ok) throw new Error("Failed to ban user");
 			toast.success(
-				`User ${post.author.name || post.author.email} banned successfully`,
+				`User ${post.author.name || post.author.email || "Unknown"} banned successfully`,
 			);
 			setIsBanDialogOpen(false);
 			// Also hide the post as it's likely bad
@@ -169,7 +169,7 @@ export function ModerationActions({ post }: { post: Post }) {
 						<DialogTitle>Ban User</DialogTitle>
 						<DialogDescription>
 							This will ban{" "}
-							<strong>{post.author.name || post.author.email}</strong> and
+							<strong>{post.author.name || post.author.email || "Unknown"}</strong> and
 							remove their post.
 						</DialogDescription>
 					</DialogHeader>

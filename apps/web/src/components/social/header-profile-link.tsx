@@ -9,7 +9,7 @@ interface HeaderProfileLinkProps {
 	profileHref: string;
 	user: {
 		name: string | null;
-		image: string | null;
+		image?: string | null;
 	};
 }
 

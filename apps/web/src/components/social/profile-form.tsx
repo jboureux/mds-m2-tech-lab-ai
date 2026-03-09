@@ -33,7 +33,7 @@ export function ProfileForm({
 	user,
 	isOwnProfile = false,
 }: {
-	user: User;
+	user: User & { role?: string; username?: string | null; bio?: string | null };
 	isOwnProfile?: boolean;
 }) {
 	const router = useRouter();
