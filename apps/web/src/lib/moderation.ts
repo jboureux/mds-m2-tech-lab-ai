@@ -1,6 +1,7 @@
 import * as toxicity from "@tensorflow-models/toxicity";
 import "@tensorflow/tfjs";
 import { Filter } from "bad-words";
+import translate from "@iamtraction/google-translate";
 import db from "@/lib/prisma";
 
 let filter: Filter | null = null;
@@ -68,7 +69,17 @@ export async function checkToxicity(content: string): Promise<boolean> {
 	if (!model) return false;
 
 	try {
-		const predictions = await model.classify([content]);
+		// Translate the content to English since the model only works with English text
+		let contentToCheck = content;
+		try {
+			const translationResult = await translate(content, { to: "en" });
+			contentToCheck = translationResult.text;
+			console.log(`[MODERATION] Original: "${content}" | Translated: "${contentToCheck}"`);
+		} catch (translationError) {
+			console.error("[MODERATION] Translation failed, proceeding with original text:", translationError);
+		}
+
+		const predictions = await model.classify([contentToCheck]);
 
 		// Create a readable summary of the predictions
 		const summary = predictions.map((p) => ({

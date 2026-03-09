@@ -23,6 +23,11 @@ vi.mock("@tensorflow-models/toxicity", () => ({
 	load: vi.fn(),
 }));
 
+// Mock translate
+vi.mock("@iamtraction/google-translate", () => ({
+	default: vi.fn().mockImplementation((text) => Promise.resolve({ text })),
+}));
+
 describe("Moderation Library", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
