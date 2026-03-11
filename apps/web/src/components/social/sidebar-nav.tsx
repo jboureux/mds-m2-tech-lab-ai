@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, ShieldAlert, User } from "lucide-react";
+import { LayoutDashboard, ShieldAlert, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type React from "react";
@@ -18,6 +18,7 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 		<nav className="flex flex-col gap-1">
 			<SidebarNavItem href="/feed" icon={LayoutDashboard} label="Feed" />
 			<SidebarNavItem href={profileHref} icon={User} label="Profile" />
+			<SidebarNavItem href="/profile/following" icon={Users} label="My Following" />
 			{user.role === "ADMIN" && (
 				<>
 					<Separator className="my-2" />

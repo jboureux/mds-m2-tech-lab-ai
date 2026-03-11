@@ -29,12 +29,14 @@ interface PostFeedProps {
 	initialPosts: Post[];
 	isStaff?: boolean;
 	authorId?: string;
+	hashtag?: string;
 }
 
 export function PostFeed({
 	initialPosts,
 	isStaff = false,
 	authorId,
+	hashtag,
 }: PostFeedProps) {
 	const { ref, inView } = useInView({
 		threshold: 0.1,
@@ -51,15 +53,16 @@ export function PostFeed({
 		refetch,
 		isRefetching,
 	} = useInfiniteQuery({
-		queryKey: authorId ? ["posts", { authorId }] : ["posts"],
+		queryKey: hashtag ? ["posts", { hashtag }] : authorId ? ["posts", { authorId }] : ["posts"],
 		queryFn: async ({ pageParam = null }) => {
 			const url = new URL("/api/posts", window.location.origin);
 			url.searchParams.set("limit", "20");
 			if (pageParam) url.searchParams.set("cursor", pageParam as string);
 			if (authorId) url.searchParams.set("authorId", authorId);
+			if (hashtag) url.searchParams.set("hashtag", hashtag);
 
 			console.log(
-				`[PostFeed] Fetching page with cursor: ${pageParam}, authorId: ${authorId}`,
+				`[PostFeed] Fetching page with cursor: ${pageParam}, authorId: ${authorId}, hashtag: ${hashtag}`,
 			);
 			const response = await fetch(url.toString());
 			if (!response.ok) throw new Error("Failed to fetch posts");
