@@ -37,10 +37,11 @@ export const suggestion = {
 					placement: "bottom-start",
 					maxWidth: "none",
 					role: "listbox",
-					// Disable default tippy styling as much as possible
+					// Completely disable default tippy styling
 					arrow: false,
 					interactiveBorder: 0,
 					offset: [0, 4],
+					theme: "none", // Use a non-existent theme to avoid default styles
 				});
 			},
 

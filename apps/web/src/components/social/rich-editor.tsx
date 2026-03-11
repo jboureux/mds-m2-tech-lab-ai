@@ -5,7 +5,6 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import "tippy.js/dist/tippy.css";
 import {
 	Bold,
 	Check,
