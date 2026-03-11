@@ -3,14 +3,15 @@ import type { Session, User } from "better-auth";
 import { describe, expect, it, vi } from "vitest";
 import Page from "./page";
 
-// Mock the components used in the page
-vi.mock("@/components/social/header", () => ({
+// Mock the components used in the page with correct paths
+// Mocking as synchronous components to avoid async rendering issues in tests
+vi.mock("@/components/social/server/header", () => ({
 	SocialHeader: () => <div data-testid="header">Header</div>,
 }));
-vi.mock("@/components/social/sidebar", () => ({
+vi.mock("@/components/social/server/sidebar", () => ({
 	SocialSidebar: () => <div data-testid="sidebar">Sidebar</div>,
 }));
-vi.mock("@/components/social/aside-panel", () => ({
+vi.mock("@/components/social/server/aside-panel", () => ({
 	AsidePanel: () => <div data-testid="aside">Aside</div>,
 }));
 vi.mock("@/components/social/post-editor", () => ({
@@ -38,6 +39,9 @@ vi.mock("@/lib/prisma", () => ({
 		post: {
 			findMany: vi.fn(),
 		},
+		follow: {
+			findMany: vi.fn(),
+		},
 	},
 }));
 
@@ -57,10 +61,13 @@ describe("Home Page", () => {
 		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
 		vi.mocked(db.post.findMany).mockResolvedValue([]);
 
+		// Await the Page component which is an async function
 		const page = await Page({
-			searchParams: Promise.resolve({ filter: undefined }),
+			searchParams: Promise.resolve({ feed: "all" }),
 		});
+		
 		render(page);
+		
 		expect(screen.getByTestId("editor")).toBeDefined();
 		expect(screen.getByTestId("feed")).toBeDefined();
 	});

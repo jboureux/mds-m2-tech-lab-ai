@@ -34,10 +34,11 @@ async function getFilter() {
  * Initializes and returns the toxicity model.
  */
 export async function loadToxicityModel() {
-	// 1. Skip if disabled in dev
+	// 1. Skip if disabled in dev (but NOT in test)
 	if (
 		process.env.NODE_ENV === "development" &&
-		process.env.ENABLE_AI_MODERATION !== "true"
+		process.env.ENABLE_AI_MODERATION !== "true" &&
+		!process.env.VITEST
 	) {
 		return null;
 	}
@@ -129,4 +130,18 @@ export async function cleanContent(content: string): Promise<string> {
 	if (!content || !content.trim()) return content;
 	const f = await getFilter();
 	return f.clean(content);
+}
+
+/**
+ * Resets the filter instance (primarily for testing).
+ */
+export function _resetFilter() {
+	filter = null;
+}
+
+/**
+ * Resets the toxicity model instance (primarily for testing).
+ */
+export function _resetToxicityModel() {
+	globalThis.toxicityModel = undefined;
 }
