@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { AtSign, User } from "lucide-react";
 import React, {
@@ -18,7 +17,6 @@ export interface MentionListProps {
 
 export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const itemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
 	// --- Effects ---
@@ -27,7 +25,6 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	useEffect(() => {
 		const selectedElement = itemsRef.current[selectedIndex];
 		if (selectedElement) {
-			// Use a small timeout to ensure the element is rendered and positioned
 			const timeoutId = setTimeout(() => {
 				selectedElement.scrollIntoView({
 					block: "nearest",
@@ -95,27 +92,25 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 
 	return (
 		<div 
-			className="z-50 min-w-[280px] flex flex-col overflow-hidden rounded-2xl border-2 border-blue-600/10 bg-white dark:bg-zinc-950 p-2 text-popover-foreground shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] animate-in fade-in-0 zoom-in-95 backdrop-blur-xl max-h-[450px]"
+			className="z-50 min-w-[260px] flex flex-col overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl animate-in fade-in-0 zoom-in-95 max-h-[400px]"
 			onWheel={(e) => e.stopPropagation()}
 		>
-			{/* Header - Fixed at top */}
-			<div className="shrink-0 px-3 py-2 border-b border-slate-100 dark:border-zinc-800 mb-2 flex items-center justify-between">
+			{/* Header */}
+			<div className="shrink-0 px-3 py-1.5 border-b bg-muted/30 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<div className="bg-blue-600/10 p-1.5 rounded-lg">
-						<AtSign className="h-3.5 w-3.5 text-blue-600" />
-					</div>
-					<span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">
-						Tag a Schoolmate
+					<AtSign className="h-3 w-3 text-muted-foreground" />
+					<span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+						Suggestions
 					</span>
 				</div>
-				<span className="text-[9px] text-muted-foreground font-medium bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+				<span className="text-[9px] text-muted-foreground bg-background px-1.5 py-0.5 rounded border">
 					{props.items.length}
 				</span>
 			</div>
 
-			{/* List - Scrollable middle part */}
-			<div className="flex-1 overflow-y-auto custom-scrollbar px-1 mb-2 max-h-[300px]">
-				<div className="flex flex-col gap-1">
+			{/* List */}
+			<div className="flex-1 overflow-y-auto overflow-x-hidden p-1 max-h-[280px]">
+				<div className="flex flex-col gap-0.5">
 					{props.items.map((item, index) => {
 						const isSelected = index === selectedIndex;
 						return (
@@ -126,24 +121,19 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 								}}
 								variant="ghost"
 								className={cn(
-									"group relative flex w-full items-center justify-start gap-3 p-2.5 h-auto text-sm font-normal rounded-xl transition-all duration-200 border-2 border-transparent",
+									"group relative flex w-full items-center justify-start gap-3 p-2 h-auto text-sm font-normal rounded-lg transition-colors border-none",
 									isSelected
-										? "bg-blue-50 dark:bg-blue-600/10 border-blue-600/20 shadow-sm"
-										: "hover:bg-slate-50 dark:hover:bg-zinc-900",
+										? "bg-primary text-primary-foreground shadow-sm"
+										: "hover:bg-accent hover:text-accent-foreground",
 								)}
 								onClick={() => selectItem(index)}
 							>
-								{/* Selection indicator pill */}
-								{isSelected && (
-									<div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-full" />
-								)}
-
 								<Avatar className={cn(
-									"h-10 w-10 border-2 transition-transform duration-300",
-									isSelected ? "border-blue-600 scale-110" : "border-transparent group-hover:scale-105"
+									"h-8 w-8 border transition-transform duration-200",
+									isSelected ? "border-primary-foreground/20 scale-105" : "border-transparent"
 								)}>
 									<AvatarImage src={item.image} />
-									<AvatarFallback className="bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 font-bold">
+									<AvatarFallback className="text-[10px] font-bold">
 										{item.username?.slice(0, 1).toUpperCase()}
 									</AvatarFallback>
 								</Avatar>
@@ -151,44 +141,51 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 								<div className="flex flex-col items-start overflow-hidden flex-1 text-left">
 									<div className="flex items-center gap-1.5 w-full">
 										<span className={cn(
-											"font-bold truncate transition-colors",
-											isSelected ? "text-blue-600" : "text-slate-900 dark:text-zinc-100"
+											"font-semibold truncate transition-colors",
+											isSelected ? "text-primary-foreground" : "text-foreground"
 										)}>
 											@{item.username}
 										</span>
 										{item.role && item.role !== "USER" && (
-											<span className="text-[8px] font-black uppercase bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-1 rounded">
+											<span className={cn(
+												"text-[7px] font-black uppercase px-1 rounded border",
+												isSelected ? "bg-white/20 border-white/30 text-white" : "bg-muted text-muted-foreground"
+											)}>
 												{item.role}
 											</span>
 										)}
 									</div>
-									<span className="text-[11px] text-muted-foreground font-medium truncate w-full">
+									<span className={cn(
+										"text-[10px] truncate w-full",
+										isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
+									)}>
 										{item.name || "Student"}
 									</span>
 								</div>
 
-								<div className={cn(
-									"transition-all duration-300 opacity-0 transform translate-x-2 group-hover:opacity-100 group-hover:translate-x-0",
-									isSelected && "opacity-100 translate-x-0"
-								)}>
-									<div className="bg-blue-600 rounded-full p-1 text-white shadow-lg">
-										<User className="h-3 w-3" />
+								{isSelected && (
+									<div className="shrink-0 bg-primary-foreground/20 rounded-full p-1 text-primary-foreground">
+										<User className="h-2.5 w-2.5" />
 									</div>
-								</div>
+								)}
 							</Button>
 						);
 					})}
 				</div>
 			</div>
 
-			{/* Helper - Fixed at bottom */}
-			<div className="shrink-0 mt-auto p-2 bg-slate-50/50 dark:bg-zinc-900/50 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center">
-				<p className="text-[9px] text-muted-foreground flex items-center gap-1.5 font-bold uppercase tracking-widest">
-					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm text-blue-600 font-black">↑↓</kbd> 
-					<span>to navigate</span>
-					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm ms-2 text-blue-600 font-black">ENTER</kbd> 
-					<span>to tag</span>
-				</p>
+			{/* Helper Footer */}
+			<div className="shrink-0 p-1.5 bg-muted/20 border-t flex items-center justify-center">
+				<div className="flex items-center gap-3 text-[8px] font-medium text-muted-foreground uppercase tracking-widest">
+					<span className="flex items-center gap-1">
+						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">↑↓</kbd> 
+						Navigate
+					</span>
+					<span className="flex items-center gap-1">
+						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">ENTER</kbd> 
+						Select
+					</span>
+				</div>
 			</div>
 		</div>
 	);

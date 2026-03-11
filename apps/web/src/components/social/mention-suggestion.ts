@@ -37,8 +37,10 @@ export const suggestion = {
 					placement: "bottom-start",
 					maxWidth: "none",
 					role: "listbox",
-					// Ensure no interference from default tippy themes
-					offset: [0, 8],
+					// Disable default tippy styling as much as possible
+					arrow: false,
+					interactiveBorder: 0,
+					offset: [0, 4],
 				});
 			},
 
