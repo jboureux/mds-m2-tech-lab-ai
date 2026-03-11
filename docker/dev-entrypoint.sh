@@ -7,7 +7,7 @@ echo "⏳ Checking database connection..."
 # Install dependencies if node_modules is missing or package.json changed
 # In dev with volume, this ensures we're ready.
 echo "📦 Checking/Installing dependencies..."
-pnpm install
+pnpm install --ignore-scripts
 
 # Generate Prisma Client
 echo "🏗️ Generating Prisma client..."

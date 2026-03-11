@@ -33,6 +33,11 @@ tasks:
     cmds:
       - "{{.DOCKER_COMPOSE}} logs -f {{.CLI_ARGS}}"
 
+  docs:
+    desc: "Follow docs container logs"
+    cmds:
+      - "{{.DOCKER_COMPOSE}} logs -f docs"
+
   migrate:data:
     desc: "Execute pending data migrations"
     cmds:
