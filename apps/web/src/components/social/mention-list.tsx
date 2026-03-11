@@ -27,10 +27,14 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	useEffect(() => {
 		const selectedElement = itemsRef.current[selectedIndex];
 		if (selectedElement) {
-			selectedElement.scrollIntoView({
-				block: "nearest",
-				behavior: "auto",
-			});
+			// Use a small timeout to ensure the element is rendered and positioned
+			const timeoutId = setTimeout(() => {
+				selectedElement.scrollIntoView({
+					block: "nearest",
+					behavior: "auto",
+				});
+			}, 10);
+			return () => clearTimeout(timeoutId);
 		}
 	}, [selectedIndex]);
 
@@ -90,8 +94,9 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	}
 
 	return (
-		<div className="z-50 min-w-[240px] overflow-hidden rounded-2xl border-2 border-blue-600/10 bg-white dark:bg-zinc-950 p-2 text-popover-foreground shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] animate-in fade-in-0 zoom-in-95 backdrop-blur-xl">
-			<div className="px-3 py-2 border-b border-slate-100 dark:border-zinc-800 mb-2 flex items-center justify-between">
+		<div className="z-50 min-w-[280px] flex flex-col overflow-hidden rounded-2xl border-2 border-blue-600/10 bg-white dark:bg-zinc-950 p-2 text-popover-foreground shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] animate-in fade-in-0 zoom-in-95 backdrop-blur-xl max-h-[450px]">
+			{/* Header - Fixed at top */}
+			<div className="shrink-0 px-3 py-2 border-b border-slate-100 dark:border-zinc-800 mb-2 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<div className="bg-blue-600/10 p-1.5 rounded-lg">
 						<AtSign className="h-3.5 w-3.5 text-blue-600" />
@@ -101,12 +106,13 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 					</span>
 				</div>
 				<span className="text-[9px] text-muted-foreground font-medium bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
-					{props.items.length} found
+					{props.items.length}
 				</span>
 			</div>
 
-			<ScrollArea className="max-h-[280px]">
-				<div className="flex flex-col gap-1 pr-3">
+			{/* List - Scrollable middle part */}
+			<div className="flex-1 overflow-y-auto custom-scrollbar px-1 mb-2 max-h-[300px]">
+				<div className="flex flex-col gap-1">
 					{props.items.map((item, index) => {
 						const isSelected = index === selectedIndex;
 						return (
@@ -117,7 +123,7 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 								}}
 								variant="ghost"
 								className={cn(
-									"group relative flex w-full items-center justify-start gap-3 p-2 h-auto text-sm font-normal rounded-xl transition-all duration-200 border-2 border-transparent",
+									"group relative flex w-full items-center justify-start gap-3 p-2.5 h-auto text-sm font-normal rounded-xl transition-all duration-200 border-2 border-transparent",
 									isSelected
 										? "bg-blue-50 dark:bg-blue-600/10 border-blue-600/20 shadow-sm"
 										: "hover:bg-slate-50 dark:hover:bg-zinc-900",
@@ -139,7 +145,7 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 									</AvatarFallback>
 								</Avatar>
 
-								<div className="flex flex-col items-start overflow-hidden flex-1">
+								<div className="flex flex-col items-start overflow-hidden flex-1 text-left">
 									<div className="flex items-center gap-1.5 w-full">
 										<span className={cn(
 											"font-bold truncate transition-colors",
@@ -170,12 +176,15 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 						);
 					})}
 				</div>
-			</ScrollArea>
+			</div>
 
-			<div className="mt-2 p-2 bg-slate-50/50 dark:bg-zinc-900/50 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center">
+			{/* Helper - Fixed at bottom */}
+			<div className="shrink-0 mt-auto p-2 bg-slate-50/50 dark:bg-zinc-900/50 rounded-xl border border-slate-100 dark:border-zinc-800 flex items-center justify-center">
 				<p className="text-[9px] text-muted-foreground flex items-center gap-1.5 font-bold uppercase tracking-widest">
-					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm">↑↓</kbd> to navigate
-					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm ms-2">Enter</kbd> to tag
+					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm text-blue-600 font-black">↑↓</kbd> 
+					<span>to navigate</span>
+					<kbd className="bg-white dark:bg-zinc-800 border px-1 rounded shadow-sm ms-2 text-blue-600 font-black">ENTER</kbd> 
+					<span>to tag</span>
 				</p>
 			</div>
 		</div>
