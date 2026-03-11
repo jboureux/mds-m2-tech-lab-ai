@@ -20,10 +20,9 @@ enum Role {
 }
 
 enum PostStatus {
-  PENDING
   PUBLISHED
   FLAGGED
-  REMOVED
+  HIDDEN
 }
 
 model User {
@@ -108,7 +107,7 @@ model Verification {
 model Post {
   id        String     @id @default(cuid())
   content   String
-  status    PostStatus @default(PENDING)
+  status    PostStatus @default(PUBLISHED)
   isToxic   Boolean    @default(false)
   authorId  String
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
