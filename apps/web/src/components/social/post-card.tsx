@@ -14,6 +14,7 @@ import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
+import { FollowButton } from "@/components/social/follow-button";
 import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -46,10 +47,15 @@ interface PostCardProps {
 		};
 		likes?: { type: string }[] | boolean;
 	};
+	currentUserId?: string | null;
 	isStaff?: boolean;
 }
 
-export function PostCard({ post, isStaff = false }: PostCardProps) {
+export function PostCard({
+	post,
+	currentUserId,
+	isStaff = false,
+}: PostCardProps) {
 	const [mounted, setMounted] = React.useState(false);
 	const initialLiked = Array.isArray(post.likes) && post.likes.length > 0;
 	const [liked, setLiked] = React.useState(initialLiked);
@@ -91,10 +97,12 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 
 			const data = await res.json();
 			setLiked(data.liked);
-		} catch (err: any) {
+		} catch (err) {
 			setLiked(previousLiked);
 			setLikesCount(previousCount);
-			toast.error(err.message || "Failed to update like");
+			const message =
+				err instanceof Error ? err.message : "Failed to update like";
+			toast.error(message);
 		} finally {
 			setIsLiking(false);
 		}
@@ -140,6 +148,11 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 								{post.author.role}
 							</Badge>
 						)}
+						<FollowButton
+							userId={post.author.id}
+							currentUserId={currentUserId}
+							className="h-6 px-2 text-[10px]"
+						/>
 					</div>
 					<div className="flex items-center gap-1">
 						<span className="text-[11px] text-muted-foreground font-medium">

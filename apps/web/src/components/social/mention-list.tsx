@@ -1,3 +1,5 @@
+"use client";
+
 import { AtSign, User } from "lucide-react";
 import {
 	forwardRef,

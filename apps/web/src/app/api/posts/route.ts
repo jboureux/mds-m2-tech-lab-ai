@@ -2,6 +2,7 @@ import { PostStatus, type Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { extractHashtags } from "@/lib/hashtags";
 import { checkToxicity, validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
@@ -41,11 +42,23 @@ export async function POST(req: Request) {
 			);
 		}
 
+		// Extract hashtags
+		const tags = extractHashtags(content);
+
 		const post = await db.post.create({
 			data: {
 				content,
 				authorId: session.user.id,
 				status: PostStatus.PUBLISHED,
+				hashtags: {
+					connectOrCreate: tags.map((tag) => ({
+						where: { name: tag },
+						create: { name: tag },
+					})),
+				},
+			},
+			include: {
+				hashtags: true,
 			},
 		});
 
@@ -108,6 +121,8 @@ export async function GET(req: Request) {
 	const limit = Number.parseInt(searchParams.get("limit") || "20", 10);
 	const cursor = searchParams.get("cursor") || undefined;
 	const authorId = searchParams.get("authorId") || undefined;
+	const hashtag = searchParams.get("hashtag") || undefined;
+	const feedType = searchParams.get("feedType") || "all";
 	const likedByMe = searchParams.get("likedByMe") === "true";
 	const taggedInMe = searchParams.get("taggedInMe") === "true";
 
@@ -117,7 +132,7 @@ export async function GET(req: Request) {
 		});
 
 		console.log(
-			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, likedByMe ${likedByMe}, taggedInMe ${taggedInMe}`,
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, hashtag ${hashtag}, feedType ${feedType}, likedByMe ${likedByMe}, taggedInMe ${taggedInMe}`,
 		);
 
 		const isStaff =
@@ -125,7 +140,16 @@ export async function GET(req: Request) {
 
 		let where: Prisma.PostWhereInput = {};
 
-		if (likedByMe && session) {
+		if (hashtag) {
+			where = {
+				hashtags: {
+					some: {
+						name: hashtag.toLowerCase(),
+					},
+				},
+				status: isStaff ? undefined : { in: [PostStatus.PUBLISHED] },
+			};
+		} else if (likedByMe && session) {
 			where = {
 				likes: {
 					some: {
@@ -150,6 +174,37 @@ export async function GET(req: Request) {
 					: session?.user.id === authorId
 						? { in: [PostStatus.PUBLISHED, PostStatus.FLAGGED] } // Author sees their own published/flagged
 						: PostStatus.PUBLISHED, // Others only see published
+			};
+		} else if (feedType === "discovery" && session) {
+			// Personalized "For You" Feed
+			// 1. Get followed users IDs
+			const following = await db.follow.findMany({
+				where: { followerId: session.user.id },
+				select: { followingId: true },
+			});
+			const followingIds = following.map((f) => f.followingId);
+
+			// 2. Get user's preferred hashtags (from their own posts)
+			const userPosts = await db.post.findMany({
+				where: { authorId: session.user.id },
+				select: { hashtags: { select: { name: true } } },
+				take: 50,
+			});
+			const preferredTags = Array.from(
+				new Set(userPosts.flatMap((p) => p.hashtags.map((h) => h.name))),
+			);
+
+			where = {
+				OR: [
+					{ authorId: { in: followingIds } },
+					{ hashtags: { some: { name: { in: preferredTags } } } },
+					{ status: PostStatus.PUBLISHED }, // Fallback to all published
+				],
+				status: PostStatus.PUBLISHED,
+				// Focus on recent content (last 7 days) if it's discovery
+				createdAt: {
+					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+				},
 			};
 		} else {
 			// Feed view rules (OR logic)

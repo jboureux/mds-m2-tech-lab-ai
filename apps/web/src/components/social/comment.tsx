@@ -92,10 +92,12 @@ export function Comment({
 
 			const data = await res.json();
 			setLiked(data.liked);
-		} catch (err: any) {
+		} catch (err) {
 			setLiked(previousLiked);
 			setLikesCount(previousCount);
-			toast.error(err.message || "Failed to update like");
+			const message =
+				err instanceof Error ? err.message : "Failed to update like";
+			toast.error(message);
 		} finally {
 			setIsLiking(false);
 		}

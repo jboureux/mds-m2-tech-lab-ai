@@ -1,11 +1,11 @@
 import type { User } from "better-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { AsidePanel } from "@/components/social/aside-panel";
-import { SocialHeader } from "@/components/social/header";
 import { PostFeed } from "@/components/social/post-feed";
 import { ProfileForm } from "@/components/social/profile-form";
-import { SocialSidebar } from "@/components/social/sidebar";
+import { AsidePanel } from "@/components/social/server/aside-panel";
+import { SocialHeader } from "@/components/social/server/header";
+import { SocialSidebar } from "@/components/social/server/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
@@ -127,6 +127,7 @@ export default async function ProfilePage() {
 							<TabsContent value="posts" className="mt-6">
 								<PostFeed
 									initialPosts={JSON.parse(JSON.stringify(posts))}
+									currentUserId={session.user.id}
 									isStaff={isStaff}
 									authorId={session.user.id}
 								/>
@@ -134,6 +135,7 @@ export default async function ProfilePage() {
 							<TabsContent value="liked" className="mt-6">
 								<PostFeed
 									initialPosts={JSON.parse(JSON.stringify(likedPosts))}
+									currentUserId={session.user.id}
 									isStaff={isStaff}
 									likedByMe={true}
 								/>

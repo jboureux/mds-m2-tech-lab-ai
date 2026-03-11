@@ -55,4 +55,11 @@ describe("Markdown Component", () => {
 		expect(container.querySelector("script")).toBeNull();
 		expect(screen.getByText("safe")).toBeDefined();
 	});
+
+	it("should linkify hashtags", () => {
+		render(<Markdown content="Hello #world" />);
+		const link = screen.getByText("#world");
+		expect(link.tagName).toBe("A");
+		expect(link.getAttribute("href")).toBe("/feed/hashtag/world");
+	});
 });

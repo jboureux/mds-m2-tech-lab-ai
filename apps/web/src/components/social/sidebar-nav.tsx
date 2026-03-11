@@ -6,6 +6,7 @@ import {
 	LogOut,
 	ShieldAlert,
 	User,
+	Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -51,6 +52,11 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 				active={filter === "tagged"}
 			/>
 			<SidebarNavItem href={profileHref} icon={User} label="Profile" />
+			<SidebarNavItem
+				href="/profile/following"
+				icon={Users}
+				label="My Following"
+			/>
 			{user.role === "ADMIN" && (
 				<>
 					<Separator className="my-2" />

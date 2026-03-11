@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import type * as React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { FollowButton } from "@/components/social/follow-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -122,6 +122,7 @@ export function ProfileForm({
 								Edit Profile
 							</Button>
 						)}
+						{!isOwnProfile && <FollowButton userId={user.id} />}
 					</div>
 				</CardHeader>
 				<CardContent className="px-8 pb-8 space-y-6">
