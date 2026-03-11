@@ -84,6 +84,7 @@ export async function GET(req: Request) {
 	const limit = Number.parseInt(searchParams.get("limit") || "20", 10);
 	const cursor = searchParams.get("cursor") || undefined;
 	const authorId = searchParams.get("authorId") || undefined;
+	const likedByMe = searchParams.get("likedByMe") === "true";
 
 	try {
 		const session = await auth.api.getSession({
@@ -91,7 +92,7 @@ export async function GET(req: Request) {
 		});
 
 		console.log(
-			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}`,
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, likedByMe ${likedByMe}`,
 		);
 
 		const isStaff =
@@ -99,7 +100,15 @@ export async function GET(req: Request) {
 
 		let where: Prisma.PostWhereInput = {};
 
-		if (authorId) {
+		if (likedByMe && session) {
+			where = {
+				likes: {
+					some: {
+						userId: session.user.id,
+					},
+				},
+			};
+		} else if (authorId) {
 			// Profile view rules
 			where = {
 				authorId,
@@ -152,8 +161,19 @@ export async function GET(req: Request) {
 				_count: {
 					select: {
 						comments: true,
+						likes: true,
 					},
 				},
+				likes: session
+					? {
+							where: {
+								userId: session.user.id,
+							},
+							select: {
+								type: true,
+							},
+						}
+					: false,
 			},
 			orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 		});

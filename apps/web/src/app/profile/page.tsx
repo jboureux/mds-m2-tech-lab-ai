@@ -6,6 +6,7 @@ import { SocialHeader } from "@/components/social/header";
 import { PostFeed } from "@/components/social/post-feed";
 import { ProfileForm } from "@/components/social/profile-form";
 import { SocialSidebar } from "@/components/social/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
 
@@ -24,7 +25,7 @@ export default async function ProfilePage() {
 		redirect(`/u/${user.username}`);
 	}
 
-	// If no username, show the profile form to allow setting it
+	// Fetch user's own posts
 	const posts = await db.post.findMany({
 		where: {
 			authorId: session.user.id,
@@ -42,6 +43,52 @@ export default async function ProfilePage() {
 			_count: {
 				select: {
 					comments: true,
+					likes: true,
+				},
+			},
+			likes: {
+				where: {
+					userId: session.user.id,
+				},
+				select: {
+					type: true,
+				},
+			},
+		},
+		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+	});
+
+	// Fetch posts liked by user
+	const likedPosts = await db.post.findMany({
+		where: {
+			likes: {
+				some: {
+					userId: session.user.id,
+				},
+			},
+		},
+		include: {
+			author: {
+				select: {
+					id: true,
+					name: true,
+					username: true,
+					image: true,
+					role: true,
+				},
+			},
+			_count: {
+				select: {
+					comments: true,
+					likes: true,
+				},
+			},
+			likes: {
+				where: {
+					userId: session.user.id,
+				},
+				select: {
+					type: true,
 				},
 			},
 		},
@@ -62,12 +109,36 @@ export default async function ProfilePage() {
 					<ProfileForm user={session.user as User} isOwnProfile={true} />
 
 					<div className="space-y-4">
-						<h2 className="text-xl font-black px-1">Your Scoops</h2>
-						<PostFeed
-							initialPosts={JSON.parse(JSON.stringify(posts))}
-							isStaff={isStaff}
-							authorId={session.user.id}
-						/>
+						<Tabs defaultValue="posts" className="w-full">
+							<TabsList className="w-full bg-white dark:bg-zinc-900 border-none h-12 p-1 rounded-xl shadow-sm">
+								<TabsTrigger
+									value="posts"
+									className="flex-1 rounded-lg font-black text-[10px] uppercase tracking-wider"
+								>
+									Your Scoops
+								</TabsTrigger>
+								<TabsTrigger
+									value="liked"
+									className="flex-1 rounded-lg font-black text-[10px] uppercase tracking-wider"
+								>
+									Liked Scoops
+								</TabsTrigger>
+							</TabsList>
+							<TabsContent value="posts" className="mt-6">
+								<PostFeed
+									initialPosts={JSON.parse(JSON.stringify(posts))}
+									isStaff={isStaff}
+									authorId={session.user.id}
+								/>
+							</TabsContent>
+							<TabsContent value="liked" className="mt-6">
+								<PostFeed
+									initialPosts={JSON.parse(JSON.stringify(likedPosts))}
+									isStaff={isStaff}
+									likedByMe={true}
+								/>
+							</TabsContent>
+						</Tabs>
 					</div>
 				</main>
 

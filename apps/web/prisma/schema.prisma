@@ -25,6 +25,10 @@ enum PostStatus {
   HIDDEN
 }
 
+enum ReactionType {
+  LIKE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -44,6 +48,8 @@ model User {
   sessions      Session[]
   posts         Post[]
   comments      Comment[]
+  postLikes     PostLike[]
+  commentLikes  CommentLike[]
 
   @@map("user")
 }
@@ -115,6 +121,7 @@ model Post {
   updatedAt DateTime   @updatedAt
 
   comments  Comment[]
+  likes     PostLike[]
 
   @@map("post")
 }
@@ -133,7 +140,33 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  likes     CommentLike[]
+
   @@map("comment")
+}
+
+model PostLike {
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type      ReactionType @default(LIKE)
+  createdAt DateTime     @default(now())
+
+  @@id([userId, postId])
+  @@map("post_like")
+}
+
+model CommentLike {
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  type      ReactionType @default(LIKE)
+  createdAt DateTime     @default(now())
+
+  @@id([userId, commentId])
+  @@map("comment_like")
 }
 
 model AllowedIP {
