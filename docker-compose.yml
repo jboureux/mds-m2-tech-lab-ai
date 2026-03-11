@@ -13,6 +13,18 @@ services:
       db:
         condition: service_healthy
 
+  docs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      - .:/app
+      - pnpm_store:/pnpm
+    ports:
+      - "3005:3001"
+    command: pnpm --filter docs dev
+    env_file: ".env"
+
   db:
     image: postgres:17-alpine
     environment:

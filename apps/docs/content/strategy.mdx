@@ -1,0 +1,32 @@
+# Méthodologie Agentic Coding
+
+Cette page détaille les processus opérationnels utilisés pour construire l'application MDS avec Gemini CLI.
+
+## 📋 Le Cycle Plan-Act-Validate
+
+Chaque tâche exécutée par l'agent IA suit ce cycle rigoureux :
+
+### 1. Planning (Plan)
+L'agent analyse la requête, explore le code existant et propose une stratégie.
+- **Livrable** : Une liste d'étapes claires avant toute modification.
+
+### 2. Action (Act)
+L'agent applique les modifications chirurgicalement.
+- **Règle** : Préférer plusieurs petits commits atomiques à un seul gros changement.
+
+### 3. Validation (Validate)
+L'agent vérifie la réussite de l'action.
+- **Outils** : `vitest`, `pnpm build`, `biome check`.
+
+## 🛠️ Usage des Skills
+
+Les "Skills" sont des injecteurs de contexte métier. 
+Exemple : Le skill `next-best-practices` garantit que nous n'utilisons pas de hooks clients dans des Server Components.
+
+## 🧩 Gestion des Contextes (PRP)
+
+Le flux PRP (Product Requirements Page) permet de garder une trace des décisions :
+1. **Idée** : Discussion avec l'utilisateur.
+2. **PRP** : Création du document dans `concept_library/PRP_flow/PRPs/`.
+3. **Ticket** : Création de l'issue GitHub liée au PRP.
+4. **Implémentation** : Développement sur une branche dédiée.
