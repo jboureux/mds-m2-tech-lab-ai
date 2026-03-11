@@ -1,17 +1,12 @@
 import { Hash, Info, UserPlus, Wifi, WifiOff } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { FollowButton } from "@/components/social/follow-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
-
-const FollowButton = dynamic(
-	() => import("@/components/social/follow-button").then((m) => m.FollowButton),
-	{ ssr: false },
-);
 
 export async function AsidePanel({ hideCard = false }: { hideCard?: boolean }) {
 	const h = await headers();

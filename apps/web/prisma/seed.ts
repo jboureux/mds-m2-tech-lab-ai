@@ -110,22 +110,33 @@ async function main() {
 	for (const user of allUsers) {
 		const toFollow = faker.helpers.arrayElements(
 			allUsers.filter((u) => u.id !== user.id),
-			{ min: 1, max: 3 }
+			{ min: 1, max: 3 },
 		);
-		
+
 		for (const target of toFollow) {
-			await prisma.follow.create({
-				data: {
-					followerId: user.id,
-					followingId: target.id,
-				}
-			}).catch(() => {}); // Ignore duplicate follows
+			await prisma.follow
+				.create({
+					data: {
+						followerId: user.id,
+						followingId: target.id,
+					},
+				})
+				.catch(() => {}); // Ignore duplicate follows
 		}
 	}
 	console.log("🔗 Seeded social graph (follows).");
 
 	// Seed Hashtags
-	const hashtagNames = ["school", "tech", "homework", "party", "science", "sports", "coding", "nextjs"];
+	const hashtagNames = [
+		"school",
+		"tech",
+		"homework",
+		"party",
+		"science",
+		"sports",
+		"coding",
+		"nextjs",
+	];
 	const hashtags = [];
 	for (const name of hashtagNames) {
 		const tag = await prisma.hashtag.create({
@@ -141,13 +152,20 @@ async function main() {
 	for (let i = 0; i < 40; i++) {
 		const author = faker.helpers.arrayElement(allUsers);
 		const createdAt = new Date(now.getTime() - i * 1000 * 60 * 60); // Spaced by 60 minutes
-		
+
 		// Randomly pick 0-2 hashtags
-		const postHashtags = faker.helpers.arrayElements(hashtags, { min: 0, max: 2 });
-		
+		const postHashtags = faker.helpers.arrayElements(hashtags, {
+			min: 0,
+			max: 2,
+		});
+
 		const post = await prisma.post.create({
 			data: {
-				content: faker.lorem.paragraphs(1) + (postHashtags.length > 0 ? "\n\n" + postHashtags.map(h => `#${h.name}`).join(" ") : ""),
+				content:
+					faker.lorem.paragraphs(1) +
+					(postHashtags.length > 0
+						? `\n\n${postHashtags.map((h) => `#${h.name}`).join(" ")}`
+						: ""),
 				status: faker.helpers.arrayElement([
 					PostStatus.PUBLISHED,
 					PostStatus.PUBLISHED,
@@ -158,8 +176,8 @@ async function main() {
 				authorId: author.id,
 				createdAt,
 				hashtags: {
-					connect: postHashtags.map(h => ({ id: h.id })),
-				}
+					connect: postHashtags.map((h) => ({ id: h.id })),
+				},
 			},
 		});
 		posts.push(post);

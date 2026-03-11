@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { AsidePanel } from "@/components/social/server/aside-panel";
 import { FollowingList } from "@/components/social/following-list";
+import { AsidePanel } from "@/components/social/server/aside-panel";
 import { SocialHeader } from "@/components/social/server/header";
 import { SocialSidebar } from "@/components/social/server/sidebar";
 import { auth } from "@/lib/auth";
