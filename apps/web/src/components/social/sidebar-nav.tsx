@@ -18,7 +18,11 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 		<nav className="flex flex-col gap-1">
 			<SidebarNavItem href="/feed" icon={LayoutDashboard} label="Feed" />
 			<SidebarNavItem href={profileHref} icon={User} label="Profile" />
-			<SidebarNavItem href="/profile/following" icon={Users} label="My Following" />
+			<SidebarNavItem
+				href="/profile/following"
+				icon={Users}
+				label="My Following"
+			/>
 			{user.role === "ADMIN" && (
 				<>
 					<Separator className="my-2" />

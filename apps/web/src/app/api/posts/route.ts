@@ -121,9 +121,7 @@ export async function GET(req: Request) {
 						name: hashtag.toLowerCase(),
 					},
 				},
-				status: isStaff
-					? undefined
-					: { in: [PostStatus.PUBLISHED] },
+				status: isStaff ? undefined : { in: [PostStatus.PUBLISHED] },
 			};
 		} else if (authorId) {
 			// Profile view rules
@@ -150,19 +148,21 @@ export async function GET(req: Request) {
 				select: { hashtags: { select: { name: true } } },
 				take: 50,
 			});
-			const preferredTags = Array.from(new Set(userPosts.flatMap(p => p.hashtags.map(h => h.name))));
+			const preferredTags = Array.from(
+				new Set(userPosts.flatMap((p) => p.hashtags.map((h) => h.name))),
+			);
 
 			where = {
 				OR: [
 					{ authorId: { in: followingIds } },
 					{ hashtags: { some: { name: { in: preferredTags } } } },
-					{ status: PostStatus.PUBLISHED } // Fallback to all published
+					{ status: PostStatus.PUBLISHED }, // Fallback to all published
 				],
 				status: PostStatus.PUBLISHED,
 				// Focus on recent content (last 7 days) if it's discovery
 				createdAt: {
-					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-				}
+					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+				},
 			};
 		} else {
 			// Feed view rules (OR logic)

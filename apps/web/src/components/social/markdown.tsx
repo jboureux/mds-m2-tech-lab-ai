@@ -1,7 +1,7 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -47,7 +47,7 @@ function processChildren(children: React.ReactNode): React.ReactNode {
 		}
 		if (React.isValidElement(child) && child.props.children) {
 			return React.cloneElement(child, {
-				// @ts-ignore
+				// @ts-expect-error
 				children: processChildren(child.props.children),
 			});
 		}

@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { headers } from "next/headers";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/auth";
-import { HeaderProfileLink } from "./header-profile-link";
+import { HeaderProfileLink } from "@/components/social/header-profile-link";
 
 export async function SocialHeader() {
 	const session = await auth.api.getSession({

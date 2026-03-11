@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Comment } from "@/components/social/comment";
 import { CommentForm } from "@/components/social/comment-form";
-import { SocialHeader } from "@/components/social/header";
+import { SocialHeader } from "@/components/social/server/header";
 import { PostCard } from "@/components/social/post-card";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
@@ -117,7 +117,7 @@ export default async function PostPage({ params }: PostPageProps) {
 				</Button>
 
 				<article>
-					<PostCard post={post} isStaff={isStaff} />
+					<PostCard post={post} currentUserId={session.user.id} isStaff={isStaff} />
 				</article>
 
 				<section className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm space-y-6">

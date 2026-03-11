@@ -27,6 +27,7 @@ interface Post {
 
 interface PostFeedProps {
 	initialPosts: Post[];
+	currentUserId?: string | null;
 	isStaff?: boolean;
 	authorId?: string;
 	hashtag?: string;
@@ -34,6 +35,7 @@ interface PostFeedProps {
 
 export function PostFeed({
 	initialPosts,
+	currentUserId,
 	isStaff = false,
 	authorId,
 	hashtag,
@@ -53,7 +55,11 @@ export function PostFeed({
 		refetch,
 		isRefetching,
 	} = useInfiniteQuery({
-		queryKey: hashtag ? ["posts", { hashtag }] : authorId ? ["posts", { authorId }] : ["posts"],
+		queryKey: hashtag
+			? ["posts", { hashtag }]
+			: authorId
+				? ["posts", { authorId }]
+				: ["posts"],
 		queryFn: async ({ pageParam = null }) => {
 			const url = new URL("/api/posts", window.location.origin);
 			url.searchParams.set("limit", "20");
@@ -167,7 +173,12 @@ export function PostFeed({
 
 			<div className="grid gap-6">
 				{posts.map((post, index) => (
-					<PostCard key={`${post.id}-${index}`} post={post} isStaff={isStaff} />
+					<PostCard
+						key={`${post.id}-${index}`}
+						post={post}
+						currentUserId={currentUserId}
+						isStaff={isStaff}
+					/>
 				))}
 			</div>
 

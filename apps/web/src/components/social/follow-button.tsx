@@ -1,20 +1,22 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserPlus, UserMinus, Loader2 } from "lucide-react";
+import { Loader2, UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
 
 interface FollowButtonProps {
 	userId: string;
+	currentUserId: string | null | undefined;
 	className?: string;
 }
 
-export function FollowButton({ userId, className }: FollowButtonProps) {
+export function FollowButton({
+	userId,
+	currentUserId,
+	className,
+}: FollowButtonProps) {
 	const queryClient = useQueryClient();
-	const session = authClient.useSession();
-	const currentUserId = session.data?.user?.id;
 
 	const { data: followingList, isLoading: isFollowingLoading } = useQuery({
 		queryKey: ["following"],
@@ -72,7 +74,10 @@ export function FollowButton({ userId, className }: FollowButtonProps) {
 		return null;
 	}
 
-	const isLoading = isFollowingLoading || followMutation.isPending || unfollowMutation.isPending;
+	const isLoading =
+		isFollowingLoading ||
+		followMutation.isPending ||
+		unfollowMutation.isPending;
 
 	if (isFollowing) {
 		return (

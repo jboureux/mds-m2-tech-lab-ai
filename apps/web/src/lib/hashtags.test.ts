@@ -34,7 +34,7 @@ describe("Hashtag Extraction", () => {
 
 	it("should handle empty or null input", () => {
 		expect(extractHashtags("")).toEqual([]);
-		// @ts-ignore
+		// @ts-expect-error
 		expect(extractHashtags(null)).toEqual([]);
 	});
 });

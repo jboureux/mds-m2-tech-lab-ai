@@ -1,12 +1,12 @@
 import { LayoutDashboard, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AsidePanel } from "@/components/social/aside-panel";
-import { SocialHeader } from "@/components/social/header";
+import { AsidePanel } from "@/components/social/server/aside-panel";
+import { SocialHeader } from "@/components/social/server/header";
 import { PostEditor } from "@/components/social/post-editor";
 import { PostFeed } from "@/components/social/post-feed";
-import { SocialSidebar } from "@/components/social/sidebar";
+import { SocialSidebar } from "@/components/social/server/sidebar";
 import { auth } from "@/lib/auth";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
@@ -43,24 +43,33 @@ export default async function Home({
 			select: { hashtags: { select: { name: true } } },
 			take: 50,
 		});
-		const preferredTags = Array.from(new Set(userPosts.flatMap(p => p.hashtags.map(h => h.name))));
+		const preferredTags = Array.from(
+			new Set(userPosts.flatMap((p) => p.hashtags.map((h) => h.name))),
+		);
 
 		posts = await db.post.findMany({
 			where: {
 				OR: [
 					{ authorId: { in: followingIds } },
 					{ hashtags: { some: { name: { in: preferredTags } } } },
-					{ status: "PUBLISHED" }
+					{ status: "PUBLISHED" },
 				],
 				status: "PUBLISHED",
 				createdAt: {
-					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-				}
+					gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+				},
 			},
 			take: 20,
 			include: {
 				author: {
-					select: { id: true, name: true, email: true, username: true, image: true, role: true },
+					select: {
+						id: true,
+						name: true,
+						email: true,
+						username: true,
+						image: true,
+						role: true,
+					},
 				},
 				_count: { select: { comments: true } },
 			},
@@ -69,15 +78,19 @@ export default async function Home({
 	} else {
 		posts = await db.post.findMany({
 			where: {
-				OR: [
-					{ status: "PUBLISHED" },
-					{ authorId: session.user.id },
-				],
+				OR: [{ status: "PUBLISHED" }, { authorId: session.user.id }],
 			},
 			take: 20,
 			include: {
 				author: {
-					select: { id: true, name: true, email: true, username: true, image: true, role: true },
+					select: {
+						id: true,
+						name: true,
+						email: true,
+						username: true,
+						image: true,
+						role: true,
+					},
 				},
 				_count: { select: { comments: true } },
 			},
@@ -135,6 +148,7 @@ export default async function Home({
 
 					<PostFeed
 						initialPosts={JSON.parse(JSON.stringify(posts))}
+						currentUserId={session.user.id}
 						isStaff={isStaff}
 					/>
 				</main>

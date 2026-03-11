@@ -1,12 +1,12 @@
+import { Hash } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { AsidePanel } from "@/components/social/aside-panel";
-import { SocialHeader } from "@/components/social/header";
+import { AsidePanel } from "@/components/social/server/aside-panel";
+import { SocialHeader } from "@/components/social/server/header";
 import { PostFeed } from "@/components/social/post-feed";
-import { SocialSidebar } from "@/components/social/sidebar";
+import { SocialSidebar } from "@/components/social/server/sidebar";
 import { auth } from "@/lib/auth";
 import db from "@/lib/prisma";
-import { Hash } from "lucide-react";
 
 export default async function HashtagFeedPage({
 	params,
@@ -76,6 +76,7 @@ export default async function HashtagFeedPage({
 
 					<PostFeed
 						initialPosts={JSON.parse(JSON.stringify(initialPosts))}
+						currentUserId={session.user.id}
 						isStaff={isStaff}
 						hashtag={tag}
 					/>

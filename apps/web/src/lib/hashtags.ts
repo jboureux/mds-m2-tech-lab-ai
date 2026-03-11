@@ -5,12 +5,12 @@
  */
 export function extractHashtags(text: string): string[] {
 	if (!text) return [];
-	
+
 	// Regex: find # followed by alphanumeric or underscore
 	// We avoid matching # at the end of a word or standalone #
 	const hashtagRegex = /#(\w+)/g;
 	const matches = text.matchAll(hashtagRegex);
-	
+
 	const hashtags = new Set<string>();
 	for (const match of matches) {
 		const tag = match[1].toLowerCase();
@@ -18,6 +18,6 @@ export function extractHashtags(text: string): string[] {
 			hashtags.add(tag);
 		}
 	}
-	
+
 	return Array.from(hashtags);
 }

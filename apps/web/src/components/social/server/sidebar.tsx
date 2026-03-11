@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
-import { SidebarNav } from "./sidebar-nav";
+import { SidebarNav } from "@/components/social/sidebar-nav";
 
 export async function SocialSidebar({
 	hideCard = false,
