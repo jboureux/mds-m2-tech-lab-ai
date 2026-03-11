@@ -4,11 +4,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, SendHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { RichEditor } from "@/components/social/rich-editor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 interface PostEditorProps {
 	user: {
@@ -50,8 +50,6 @@ export function PostEditor({
 			setContent("");
 			setIsExpanded(false);
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
-			// Also refresh the page if we're using server components for the feed
-			// window.location.reload(); // Or use router.refresh() if needed
 		},
 		onError: (error: Error) => {
 			toast.error(error.message);
@@ -86,7 +84,7 @@ export function PostEditor({
 	}
 
 	return (
-		<Card className="w-full bg-white dark:bg-zinc-900 border-none shadow-lg animate-in fade-in zoom-in duration-200">
+		<Card className="w-full bg-white dark:bg-zinc-900 border-none shadow-lg animate-in fade-in zoom-in duration-200 text-slate-900 dark:text-zinc-100">
 			<CardContent className="pt-6 space-y-4">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
@@ -121,14 +119,11 @@ export function PostEditor({
 						>
 							Share something
 						</Label>
-						<Textarea
-							id="content"
-							placeholder="What's happening in school?"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
+
+						<RichEditor
+							content={content}
+							onChange={setContent}
 							disabled={!isAllowedToPost || mutation.isPending}
-							className="min-h-[150px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-base"
-							autoFocus
 						/>
 					</div>
 				</form>

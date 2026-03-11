@@ -5,9 +5,9 @@ import { Loader2, SendHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
+import { RichEditor } from "@/components/social/rich-editor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 interface CommentFormProps {
 	postId: string;
@@ -78,7 +78,9 @@ export function CommentForm({
 			</Avatar>
 			<div className="flex-1 space-y-3">
 				<form onSubmit={handleSubmit} className="relative group">
-					<Textarea
+					<RichEditor
+						content={content}
+						onChange={setContent}
 						placeholder={
 							isAllowedToComment
 								? parentId
@@ -86,13 +88,10 @@ export function CommentForm({
 									: "Write a comment..."
 								: "Posting comments restricted."
 						}
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
 						disabled={!isAllowedToComment || mutation.isPending}
-						className="min-h-[80px] resize-none bg-slate-50 dark:bg-zinc-800 border-none focus-visible:ring-2 focus-visible:ring-blue-600/50 text-sm pr-12"
-						autoFocus={!!parentId}
 					/>
-					<div className="absolute bottom-2 right-2 flex gap-2">
+
+					<div className="flex justify-end mt-2 gap-2">
 						{onCancel && (
 							<Button
 								type="button"
@@ -107,17 +106,17 @@ export function CommentForm({
 						)}
 						<Button
 							type="submit"
-							size="icon"
 							disabled={
 								!isAllowedToComment || !content.trim() || mutation.isPending
 							}
-							className="h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+							className="h-8 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm text-xs font-bold gap-2"
 						>
 							{mutation.isPending ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
+								<Loader2 className="h-3 w-3 animate-spin" />
 							) : (
-								<SendHorizontal className="h-4 w-4" />
+								<SendHorizontal className="h-3 w-3" />
 							)}
+							{parentId ? "Reply" : "Comment"}
 						</Button>
 					</div>
 				</form>

@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, ShieldAlert } from "lucide-react";
 import * as React from "react";
 import { CommentForm } from "@/components/social/comment-form";
+import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,9 +91,10 @@ export function Comment({
 								<ShieldAlert className="h-3 w-3 shrink-0" />
 								Staff View: Toxic Comment
 							</div>
-							<p className="text-slate-700 dark:text-slate-300 italic opacity-80">
-								{comment.content}
-							</p>
+							<Markdown
+								content={comment.content}
+								className="text-slate-700 dark:text-slate-300 italic opacity-80"
+							/>
 						</div>
 					) : (
 						<div className="flex items-center gap-2 p-2 rounded bg-destructive/5 text-destructive text-[11px] italic">
@@ -101,9 +103,10 @@ export function Comment({
 						</div>
 					)
 				) : (
-					<p className="text-slate-700 dark:text-slate-300">
-						{comment.content}
-					</p>
+					<Markdown
+						content={comment.content}
+						className="text-slate-700 dark:text-slate-300"
+					/>
 				)}
 
 				<div className="flex items-center gap-4">

@@ -104,6 +104,7 @@ export const auth = betterAuth({
 		admin(),
 		magicLink({
 			sendMagicLink: async ({ email, token: _token, url }, _ctx) => {
+				console.log(`[Auth] Attempting to send magic link to: ${email}`);
 				// 1. Check if user is authorized (either already registered or pre-registered)
 				const [existingUser, preRegistered] = await Promise.all([
 					db.user.findUnique({ where: { email } }),
@@ -111,6 +112,9 @@ export const auth = betterAuth({
 				]);
 
 				if (!existingUser && !preRegistered) {
+					console.warn(
+						`[Auth] Blocked magic link for unauthorized email: ${email}`,
+					);
 					// Throwing an APIError here will be caught by the client
 					// and prevent the email from being sent.
 					throw new APIError("BAD_REQUEST", {
@@ -118,6 +122,7 @@ export const auth = betterAuth({
 					});
 				}
 
+				console.log(`[Auth] Email authorized. Sending via Resend...`);
 				const { error } = await resend.emails.send({
 					from:
 						process.env.RESEND_FROM_ADDRESS || "Test Mail <test@resend.dev>",
@@ -127,9 +132,10 @@ export const auth = betterAuth({
 				});
 
 				if (error) {
-					console.error("Failed to send magic link email", error);
+					console.error("[Auth] Resend error details:", error);
 					throw new Error("Failed to send magic link email");
 				}
+				console.log(`[Auth] Magic link sent successfully to: ${email}`);
 			},
 			// Must be false to allow pre-registered users to create their account on first login.
 			// Security is still enforced by databaseHooks.user.create.before and the check above.
