@@ -22,7 +22,7 @@ export default async function Home() {
 		where: {
 			OR: [
 				{ status: "PUBLISHED" },
-				{ authorId: session.user.id }, // Users can see their own pending/flagged posts
+				{ authorId: session.user.id }, // Users can see their own flagged/hidden posts (content will be blurred in UI)
 			],
 		},
 		take: 20,

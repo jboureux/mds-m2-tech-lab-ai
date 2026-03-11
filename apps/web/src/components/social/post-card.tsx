@@ -53,7 +53,6 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 	}, []);
 
 	const isFlagged = post.status === "FLAGGED" || post.isToxic;
-	const isPending = post.status === "PENDING";
 
 	const createdAt =
 		typeof post.createdAt === "string"
@@ -149,16 +148,6 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 					<p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
 						{post.content}
 					</p>
-				)}
-
-				{isPending && !isFlagged && (
-					<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-[10px] text-amber-600 dark:text-amber-400 font-bold border border-amber-100 dark:border-amber-900/50 uppercase tracking-wider">
-						<span className="relative flex h-2 w-2">
-							<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-							<span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-						</span>
-						Awaiting Review
-					</div>
 				)}
 			</CardContent>
 

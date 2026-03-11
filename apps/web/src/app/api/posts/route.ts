@@ -93,21 +93,31 @@ export async function GET(req: Request) {
 			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}`,
 		);
 
+		const isStaff =
+			session?.user.role === "ADMIN" || session?.user.role === "MODERATOR";
+
 		const posts = await db.post.findMany({
 			where: authorId
 				? {
 						authorId,
-						status:
-							session?.user.id === authorId ||
-							session?.user.role === "ADMIN" ||
-							session?.user.role === "MODERATOR"
-								? undefined
-								: "PUBLISHED",
+						status: isStaff
+							? undefined // Staff sees everything on a profile
+							: session?.user.id === authorId
+								? { in: ["PUBLISHED", "FLAGGED"] } // Author sees their own published/flagged
+								: "PUBLISHED", // Others only see published
 					}
 				: {
 						OR: [
 							{ status: "PUBLISHED" },
-							...(session ? [{ authorId: session.user.id }] : []),
+							...(session
+								? [
+										{
+											authorId: session.user.id,
+											status: { in: ["PUBLISHED", "FLAGGED"] },
+										},
+									]
+								: []),
+							...(isStaff ? [{ status: { in: ["FLAGGED", "HIDDEN"] } }] : []),
 						],
 					},
 			take: limit,

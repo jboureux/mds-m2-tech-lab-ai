@@ -43,7 +43,7 @@ export default async function AdminModerationPage() {
 	const flaggedPosts = await db.post.findMany({
 		where: {
 			OR: [{ status: "FLAGGED" }, { isToxic: true }],
-			NOT: { status: "REMOVED" },
+			NOT: { status: "HIDDEN" },
 		},
 		include: {
 			author: {
@@ -63,11 +63,11 @@ export default async function AdminModerationPage() {
 	const flaggedCount = await db.post.count({
 		where: {
 			OR: [{ status: "FLAGGED" }, { isToxic: true }],
-			NOT: { status: "REMOVED" },
+			NOT: { status: "HIDDEN" },
 		},
 	});
-	const removedCount = await db.post.count({
-		where: { status: "REMOVED" },
+	const hiddenCount = await db.post.count({
+		where: { status: "HIDDEN" },
 	});
 	const bannedUsersCount = await db.user.count({ where: { banned: true } });
 
@@ -93,13 +93,13 @@ export default async function AdminModerationPage() {
 				<StatsCard
 					title="Flagged Posts"
 					value={flaggedCount}
-					description="Pending review"
+					description="Awaiting review"
 					icon={Flag}
 					color="amber"
 				/>
 				<StatsCard
-					title="Removed Content"
-					value={removedCount}
+					title="Hidden Content"
+					value={hiddenCount}
 					description="Hidden from feed"
 					icon={EyeOff}
 					color="destructive"

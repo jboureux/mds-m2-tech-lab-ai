@@ -80,11 +80,11 @@ export function ModerationActions({ post }: { post: Post }) {
 				method: "POST",
 			});
 			if (!res.ok) throw new Error("Failed to hide post");
-			toast.success("Post removed successfully");
+			toast.success("Post hidden successfully");
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
 			router.refresh();
 		} catch (_error) {
-			toast.error("Failed to remove post");
+			toast.error("Failed to hide post");
 		} finally {
 			setIsLoading(false);
 		}
