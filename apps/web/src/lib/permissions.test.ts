@@ -117,6 +117,6 @@ describe("checkPostingPermission", () => {
 
 		const result = await checkPostingPermission(session);
 		expect(result.isAllowed).toBe(false);
-		expect(result.reason).toContain("campus");
+		expect(result.reason).toContain("Wi-Fi");
 	});
 });
