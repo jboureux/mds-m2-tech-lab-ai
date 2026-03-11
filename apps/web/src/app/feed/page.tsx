@@ -40,8 +40,19 @@ export default async function Home() {
 			_count: {
 				select: {
 					comments: true,
+					likes: true,
 				},
 			},
+			likes: session
+				? {
+						where: {
+							userId: session.user.id,
+						},
+						select: {
+							type: true,
+						},
+					}
+				: false,
 		},
 		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 	});
