@@ -1,7 +1,7 @@
 import * as toxicity from "@tensorflow-models/toxicity";
 import "@tensorflow/tfjs";
-import { Filter } from "bad-words";
 import translate from "@iamtraction/google-translate";
+import { Filter } from "bad-words";
 import db from "@/lib/prisma";
 
 let filter: Filter | null = null;
@@ -74,9 +74,14 @@ export async function checkToxicity(content: string): Promise<boolean> {
 		try {
 			const translationResult = await translate(content, { to: "en" });
 			contentToCheck = translationResult.text;
-			console.log(`[MODERATION] Original: "${content}" | Translated: "${contentToCheck}"`);
+			console.log(
+				`[MODERATION] Original: "${content}" | Translated: "${contentToCheck}"`,
+			);
 		} catch (translationError) {
-			console.error("[MODERATION] Translation failed, proceeding with original text:", translationError);
+			console.error(
+				"[MODERATION] Translation failed, proceeding with original text:",
+				translationError,
+			);
 		}
 
 		const predictions = await model.classify([contentToCheck]);
@@ -85,8 +90,8 @@ export async function checkToxicity(content: string): Promise<boolean> {
 		const summary = predictions.map((p) => ({
 			label: p.label,
 			match: p.results[0].match,
-			// @ts-ignore - probabilities is an object/array with index 1 being the probability of the label
-			probability: (p.results[0].probabilities[1] * 100).toFixed(2) + "%",
+			// @ts-expect-error - probabilities is an object/array with index 1 being the probability of the label
+			probability: `${(p.results[0].probabilities[1] * 100).toFixed(2)}%`,
 		}));
 
 		console.log(

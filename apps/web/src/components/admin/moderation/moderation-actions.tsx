@@ -169,8 +169,10 @@ export function ModerationActions({ post }: { post: Post }) {
 						<DialogTitle>Ban User</DialogTitle>
 						<DialogDescription>
 							This will ban{" "}
-							<strong>{post.author.name || post.author.email || "Unknown"}</strong> and
-							remove their post.
+							<strong>
+								{post.author.name || post.author.email || "Unknown"}
+							</strong>{" "}
+							and remove their post.
 						</DialogDescription>
 					</DialogHeader>
 					<div className="grid gap-4 py-4">
