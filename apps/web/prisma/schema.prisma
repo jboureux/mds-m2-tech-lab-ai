@@ -50,6 +50,7 @@ model User {
   comments      Comment[]
   postLikes     PostLike[]
   commentLikes  CommentLike[]
+  taggedInPosts Post[]    @relation("UserTags")
 
   @@map("user")
 }
@@ -122,6 +123,7 @@ model Post {
 
   comments  Comment[]
   likes     PostLike[]
+  tags      User[]     @relation("UserTags")
 
   @@map("post")
 }

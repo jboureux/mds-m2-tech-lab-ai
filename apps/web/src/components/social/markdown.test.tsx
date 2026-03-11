@@ -39,6 +39,16 @@ describe("Markdown Component", () => {
 		expect(span?.textContent).toBe("red text");
 	});
 
+	it("should render mentions correctly as links", () => {
+		const mentionContent =
+			'<span data-type="mention" data-id="user-1" data-label="jdoe">@jdoe</span>';
+		const { container } = render(<Markdown content={mentionContent} />);
+		const link = container.querySelector("a");
+		expect(link).toBeDefined();
+		expect(link?.getAttribute("href")).toBe("/u/jdoe");
+		expect(link?.textContent).toBe("@jdoe");
+	});
+
 	it("should sanitize dangerous HTML", () => {
 		const dangerousContent = '<script>alert("xss")</script><p>safe</p>';
 		const { container } = render(<Markdown content={dangerousContent} />);

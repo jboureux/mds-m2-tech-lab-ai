@@ -9,7 +9,11 @@ import { auth } from "@/lib/auth";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
 
-export default async function Home() {
+export default async function Home(props: {
+	searchParams: Promise<{ filter?: string }>;
+}) {
+	const searchParams = await props.searchParams;
+	const filter = searchParams.filter;
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -18,13 +22,23 @@ export default async function Home() {
 		redirect("/");
 	}
 
+	const isTaggedFilter = filter === "tagged";
+
+	const where = isTaggedFilter
+		? {
+				tags: {
+					some: {
+						id: session.user.id,
+					},
+				},
+				OR: [{ status: "PUBLISHED" as const }, { authorId: session.user.id }],
+			}
+		: {
+				OR: [{ status: "PUBLISHED" as const }, { authorId: session.user.id }],
+			};
+
 	const posts = await db.post.findMany({
-		where: {
-			OR: [
-				{ status: "PUBLISHED" },
-				{ authorId: session.user.id }, // Users can see their own flagged/hidden posts (content will be blurred in UI)
-			],
-		},
+		where,
 		take: 20,
 		include: {
 			author: {
@@ -69,18 +83,21 @@ export default async function Home() {
 				<SocialSidebar />
 
 				<main className="flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
-					<PostEditor
-						user={{
-							name: session.user.name,
-							image: session.user.image ?? null,
-						}}
-						isAllowedToPost={isAllowed}
-						restrictionReason={reason}
-					/>
+					{!isTaggedFilter && (
+						<PostEditor
+							user={{
+								name: session.user.name,
+								image: session.user.image ?? null,
+							}}
+							isAllowedToPost={isAllowed}
+							restrictionReason={reason}
+						/>
+					)}
 
 					<PostFeed
 						initialPosts={JSON.parse(JSON.stringify(posts))}
 						isStaff={isStaff}
+						taggedInMe={isTaggedFilter}
 					/>
 				</main>
 
