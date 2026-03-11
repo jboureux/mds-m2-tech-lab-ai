@@ -1,9 +1,11 @@
 "use client";
 
+import Mention from "@tiptap/extension-mention";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import "tippy.js/dist/tippy.css";
 import {
 	Bold,
 	Check,
@@ -26,6 +28,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { suggestion } from "./mention-suggestion";
 
 // --- Types ---
 
@@ -123,6 +126,12 @@ export function RichEditor({
 			Link.configure({
 				openOnClick: false,
 				HTMLAttributes: { class: "text-blue-600 underline cursor-pointer" },
+			}),
+			Mention.configure({
+				HTMLAttributes: {
+					class: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md px-1 py-0.5 font-medium",
+				},
+				suggestion,
 			}),
 			TiptapMarkdown.configure({
 				html: true,

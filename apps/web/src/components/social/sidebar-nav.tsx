@@ -1,8 +1,8 @@
 "use client";
 
-import { LayoutDashboard, LogOut, ShieldAlert, User } from "lucide-react";
+import { AtSign, LayoutDashboard, LogOut, ShieldAlert, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Separator } from "@/components/ui/separator";
 import { signOut } from "@/lib/auth-client";
@@ -16,6 +16,8 @@ interface SidebarNavProps {
 
 export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const filter = searchParams.get("filter");
 
 	const handleSignOut = async () => {
 		await signOut({
@@ -29,7 +31,18 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 
 	return (
 		<nav className="flex flex-col gap-1">
-			<SidebarNavItem href="/feed" icon={LayoutDashboard} label="Feed" />
+			<SidebarNavItem
+				href="/feed"
+				icon={LayoutDashboard}
+				label="Feed"
+				active={!filter && usePathname() === "/feed"}
+			/>
+			<SidebarNavItem
+				href="/feed?filter=tagged"
+				icon={AtSign}
+				label="Tagged"
+				active={filter === "tagged"}
+			/>
 			<SidebarNavItem href={profileHref} icon={User} label="Profile" />
 			{user.role === "ADMIN" && (
 				<>
@@ -62,17 +75,21 @@ function SidebarNavItem({
 	icon: Icon,
 	label,
 	badge,
+	active: customActive,
 	variant = "default",
 }: {
 	href: string;
 	icon: React.ElementType;
 	label: string;
 	badge?: number;
+	active?: boolean;
 	variant?: "default" | "destructive";
 }) {
 	const pathname = usePathname();
 	const active =
-		pathname === href || (href !== "/feed" && pathname.startsWith(href));
+		customActive !== undefined
+			? customActive
+			: pathname === href || (href !== "/feed" && pathname.startsWith(href));
 
 	return (
 		<Link

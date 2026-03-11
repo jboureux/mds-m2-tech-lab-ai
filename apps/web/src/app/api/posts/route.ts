@@ -49,6 +49,30 @@ export async function POST(req: Request) {
 			},
 		});
 
+		// Extract mentions and link them to the post
+		const mentionRegex = /\B@([a-z0-9_-]+)/gi;
+		const mentions = content.match(mentionRegex);
+		if (mentions) {
+			const usernames = mentions.map((m: string) => m.slice(1));
+			const taggedUsers = await db.user.findMany({
+				where: {
+					username: { in: usernames, mode: "insensitive" },
+				},
+				select: { id: true },
+			});
+
+			if (taggedUsers.length > 0) {
+				await db.post.update({
+					where: { id: post.id },
+					data: {
+						tags: {
+							connect: taggedUsers.map((u) => ({ id: u.id })),
+						},
+					},
+				});
+			}
+		}
+
 		// Async toxicity check (fire and forget pattern)
 		// Note: In serverless environments (like Vercel), this might be terminated early.
 		// In Dockerized/long-running Node.js, this works fine.
@@ -85,6 +109,7 @@ export async function GET(req: Request) {
 	const cursor = searchParams.get("cursor") || undefined;
 	const authorId = searchParams.get("authorId") || undefined;
 	const likedByMe = searchParams.get("likedByMe") === "true";
+	const taggedInMe = searchParams.get("taggedInMe") === "true";
 
 	try {
 		const session = await auth.api.getSession({
@@ -92,7 +117,7 @@ export async function GET(req: Request) {
 		});
 
 		console.log(
-			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, likedByMe ${likedByMe}`,
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, likedByMe ${likedByMe}, taggedInMe ${taggedInMe}`,
 		);
 
 		const isStaff =
@@ -105,6 +130,14 @@ export async function GET(req: Request) {
 				likes: {
 					some: {
 						userId: session.user.id,
+					},
+				},
+			};
+		} else if (taggedInMe && session) {
+			where = {
+				tags: {
+					some: {
+						id: session.user.id,
 					},
 				},
 			};
