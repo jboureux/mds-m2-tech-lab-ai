@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FollowButton } from "@/components/social/follow-button";
 import {
 	Card,
 	CardContent,
@@ -134,6 +135,7 @@ export function ProfileForm({
 								Edit Profile
 							</Button>
 						)}
+						{!isOwnProfile && <FollowButton userId={user.id} />}
 					</div>
 				</CardHeader>
 				<CardContent className="px-8 pb-8 space-y-6">

@@ -1,6 +1,8 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -13,6 +15,44 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 interface MarkdownProps {
 	content: string;
 	className?: string;
+}
+
+// Function to linkify hashtags in a string
+function linkifyHashtags(text: string) {
+	if (typeof text !== "string") return text;
+
+	const parts = text.split(/(#\w+)/g);
+	return parts.map((part, i) => {
+		if (part.startsWith("#") && part.length > 1) {
+			const tag = part.slice(1);
+			return (
+				<Link
+					key={i}
+					href={`/feed/hashtag/${tag.toLowerCase()}`}
+					className="text-blue-600 dark:text-blue-400 hover:underline font-bold"
+				>
+					{part}
+				</Link>
+			);
+		}
+		return part;
+	});
+}
+
+// Function to recursively process children to find text and linkify hashtags
+function processChildren(children: React.ReactNode): React.ReactNode {
+	return React.Children.map(children, (child) => {
+		if (typeof child === "string") {
+			return linkifyHashtags(child);
+		}
+		if (React.isValidElement(child) && child.props.children) {
+			return React.cloneElement(child, {
+				// @ts-ignore
+				children: processChildren(child.props.children),
+			});
+		}
+		return child;
+	});
 }
 
 // Extend default schema to allow style attribute with color for span
@@ -68,31 +108,37 @@ export function Markdown({ content, className }: MarkdownProps) {
 					},
 					p: ({ children }) => (
 						<p className="mb-4 last:mb-0 leading-relaxed whitespace-pre-wrap">
-							{children}
+							{processChildren(children)}
 						</p>
 					),
 					h1: ({ children }) => (
 						<h1 className="text-xl font-bold mb-4 mt-6 first:mt-0">
-							{children}
+							{processChildren(children)}
 						</h1>
 					),
 					h2: ({ children }) => (
 						<h2 className="text-lg font-bold mb-3 mt-5 first:mt-0">
-							{children}
+							{processChildren(children)}
 						</h2>
 					),
 					h3: ({ children }) => (
 						<h3 className="text-base font-bold mb-2 mt-4 first:mt-0">
-							{children}
+							{processChildren(children)}
 						</h3>
 					),
 					ul: ({ children }) => (
-						<ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>
+						<ul className="list-disc pl-6 mb-4 space-y-1">
+							{processChildren(children)}
+						</ul>
 					),
 					ol: ({ children }) => (
-						<ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>
+						<ol className="list-decimal pl-6 mb-4 space-y-1">
+							{processChildren(children)}
+						</ol>
 					),
-					li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+					li: ({ children }) => (
+						<li className="leading-relaxed">{processChildren(children)}</li>
+					),
 					a: ({ children, href }) => (
 						<a
 							href={href}
@@ -105,7 +151,7 @@ export function Markdown({ content, className }: MarkdownProps) {
 					),
 					blockquote: ({ children }) => (
 						<blockquote className="border-l-4 border-slate-200 dark:border-zinc-700 pl-4 italic my-4 text-muted-foreground">
-							{children}
+							{processChildren(children)}
 						</blockquote>
 					),
 					table: ({ children }) => (

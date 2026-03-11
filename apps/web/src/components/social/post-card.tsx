@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import * as React from "react";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
+import { FollowButton } from "@/components/social/follow-button";
 import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -94,6 +95,7 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 								{post.author.role}
 							</Badge>
 						)}
+						<FollowButton userId={post.author.id} className="h-6 px-2 text-[10px]" />
 					</div>
 					<div className="flex items-center gap-1">
 						<span className="text-[11px] text-muted-foreground font-medium">
