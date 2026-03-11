@@ -138,7 +138,7 @@ model Post {
   id        String   @id @default(cuid())
   content   String
   authorId  String
-  status    PostStatus @default(PUBLISHED) // PUBLISHED, FLAGGED, REMOVED
+  status    PostStatus @default(PUBLISHED) // PUBLISHED, FLAGGED, HIDDEN
   isToxic   Boolean    @default(false)Alors, juste concernant l'inscription des utilisateurs, le modérateur s'occupera de fournir un document de type CSV ou autre, afin de pouvoir permettre l'inscription des différents utilisateurs définis dans le document. Un utilisateur ne peut pas s'inscrire tout seul, mais il pourra s'enregistrer tout seul en partant de cette confirmation, établi le workflow en conséquence.
   createdAt DateTime   @default(now())
   comments  Comment[]

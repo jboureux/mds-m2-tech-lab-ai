@@ -73,7 +73,7 @@ describe("API: GET /api/admin/moderation/posts", () => {
 			expect.objectContaining({
 				where: {
 					OR: [{ status: "FLAGGED" }, { isToxic: true }],
-					NOT: { status: "REMOVED" },
+					NOT: { status: "HIDDEN" },
 				},
 			}),
 		);

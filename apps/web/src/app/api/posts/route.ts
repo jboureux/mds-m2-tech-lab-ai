@@ -1,3 +1,4 @@
+import { PostStatus, type Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
 			data: {
 				content,
 				authorId: session.user.id,
-				status: "PUBLISHED",
+				status: PostStatus.PUBLISHED,
 			},
 		});
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
 					await db.post.update({
 						where: { id: post.id },
 						data: {
-							status: "FLAGGED",
+							status: PostStatus.FLAGGED,
 							isToxic: true,
 						},
 					});
@@ -93,23 +94,47 @@ export async function GET(req: Request) {
 			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}`,
 		);
 
+		const isStaff =
+			session?.user.role === "ADMIN" || session?.user.role === "MODERATOR";
+
+		let where: Prisma.PostWhereInput = {};
+
+		if (authorId) {
+			// Profile view rules
+			where = {
+				authorId,
+				status: isStaff
+					? undefined // Staff sees everything on a profile
+					: session?.user.id === authorId
+						? { in: [PostStatus.PUBLISHED, PostStatus.FLAGGED] } // Author sees their own published/flagged
+						: PostStatus.PUBLISHED, // Others only see published
+			};
+		} else {
+			// Feed view rules (OR logic)
+			const orConditions: Prisma.PostWhereInput[] = [
+				{ status: PostStatus.PUBLISHED },
+			];
+
+			if (session) {
+				// Logged-in users see their own flagged posts
+				orConditions.push({
+					authorId: session.user.id,
+					status: { in: [PostStatus.PUBLISHED, PostStatus.FLAGGED] },
+				});
+			}
+
+			if (isStaff) {
+				// Staff see all flagged or hidden content for moderation
+				orConditions.push({
+					status: { in: [PostStatus.FLAGGED, PostStatus.HIDDEN] },
+				});
+			}
+
+			where = { OR: orConditions };
+		}
+
 		const posts = await db.post.findMany({
-			where: authorId
-				? {
-						authorId,
-						status:
-							session?.user.id === authorId ||
-							session?.user.role === "ADMIN" ||
-							session?.user.role === "MODERATOR"
-								? undefined
-								: "PUBLISHED",
-					}
-				: {
-						OR: [
-							{ status: "PUBLISHED" },
-							...(session ? [{ authorId: session.user.id }] : []),
-						],
-					},
+			where,
 			take: limit,
 			skip: cursor ? 1 : 0,
 			cursor: cursor ? { id: cursor } : undefined,

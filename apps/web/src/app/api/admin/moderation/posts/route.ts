@@ -23,7 +23,7 @@ export async function GET(_req: Request) {
 		const flaggedPosts = await db.post.findMany({
 			where: {
 				OR: [{ status: "FLAGGED" }, { isToxic: true }],
-				NOT: { status: "REMOVED" },
+				NOT: { status: "HIDDEN" },
 			},
 			include: {
 				author: {

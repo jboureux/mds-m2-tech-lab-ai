@@ -21,7 +21,7 @@ describe("Social Schema Logic (Mocks)", () => {
 		const mockPost = {
 			id: "post-1",
 			content: "This is a test post",
-			status: PostStatus.PENDING,
+			status: PostStatus.PUBLISHED,
 			isToxic: false,
 			authorId: "user-1",
 			createdAt: new Date(),
@@ -33,7 +33,7 @@ describe("Social Schema Logic (Mocks)", () => {
 		const result = await db.post.create({
 			data: {
 				content: "This is a test post",
-				status: PostStatus.PENDING,
+				status: PostStatus.PUBLISHED,
 				isToxic: false,
 				authorId: "user-1",
 			},
@@ -43,7 +43,7 @@ describe("Social Schema Logic (Mocks)", () => {
 		expect(db.post.create).toHaveBeenCalledWith({
 			data: expect.objectContaining({
 				isToxic: false,
-				status: PostStatus.PENDING,
+				status: PostStatus.PUBLISHED,
 			}),
 		});
 	});

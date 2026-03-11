@@ -29,11 +29,11 @@ export async function POST(
 				id,
 			},
 			data: {
-				status: "REMOVED",
+				status: "HIDDEN",
 			},
 		});
 
-		return NextResponse.json({ message: "Post removed", post });
+		return NextResponse.json({ message: "Post hidden", post });
 	} catch (error) {
 		console.error(
 			"[API/Admin/Moderation/Posts/Hide] Failed to hide post:",
