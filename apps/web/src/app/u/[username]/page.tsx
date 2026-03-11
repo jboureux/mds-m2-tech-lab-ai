@@ -1,3 +1,6 @@
+import type { User } from "better-auth";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { AsidePanel } from "@/components/social/aside-panel";
 import { SocialHeader } from "@/components/social/header";
 import { PostFeed } from "@/components/social/post-feed";
