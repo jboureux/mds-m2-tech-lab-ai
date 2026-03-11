@@ -31,16 +31,10 @@ export default async function Home(props: {
 						id: session.user.id,
 					},
 				},
-				OR: [
-					{ status: "PUBLISHED" as const },
-					{ authorId: session.user.id },
-				],
+				OR: [{ status: "PUBLISHED" as const }, { authorId: session.user.id }],
 			}
 		: {
-				OR: [
-					{ status: "PUBLISHED" as const },
-					{ authorId: session.user.id },
-				],
+				OR: [{ status: "PUBLISHED" as const }, { authorId: session.user.id }],
 			};
 
 	const posts = await db.post.findMany({

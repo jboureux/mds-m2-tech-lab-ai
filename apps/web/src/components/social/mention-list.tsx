@@ -1,18 +1,24 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { AtSign, User } from "lucide-react";
-import React, {
+import {
 	forwardRef,
 	useEffect,
 	useImperativeHandle,
 	useRef,
 	useState,
 } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface MentionListProps {
-	items: any[];
-	command: (item: any) => void;
+	items: {
+		id: string;
+		username: string;
+		name?: string;
+		image?: string;
+		role?: string;
+	}[];
+	command: (item: { id: string; label: string }) => void;
 }
 
 export const MentionList = forwardRef((props: MentionListProps, ref) => {
@@ -36,6 +42,7 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	}, [selectedIndex]);
 
 	// Reset selection when items change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Reset selection when new items are fetched (search query changed)
 	useEffect(() => {
 		setSelectedIndex(0);
 	}, [props.items]);
@@ -91,7 +98,7 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	}
 
 	return (
-		<div 
+		<div
 			className="z-50 min-w-[260px] flex flex-col overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl animate-in fade-in-0 zoom-in-95 max-h-[400px]"
 			onWheel={(e) => e.stopPropagation()}
 		>
@@ -128,10 +135,14 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 								)}
 								onClick={() => selectItem(index)}
 							>
-								<Avatar className={cn(
-									"h-8 w-8 border transition-transform duration-200",
-									isSelected ? "border-primary-foreground/20 scale-105" : "border-transparent"
-								)}>
+								<Avatar
+									className={cn(
+										"h-8 w-8 border transition-transform duration-200",
+										isSelected
+											? "border-primary-foreground/20 scale-105"
+											: "border-transparent",
+									)}
+								>
 									<AvatarImage src={item.image} />
 									<AvatarFallback className="text-[10px] font-bold">
 										{item.username?.slice(0, 1).toUpperCase()}
@@ -140,25 +151,37 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 
 								<div className="flex flex-col items-start overflow-hidden flex-1 text-left">
 									<div className="flex items-center gap-1.5 w-full">
-										<span className={cn(
-											"font-semibold truncate transition-colors",
-											isSelected ? "text-primary-foreground" : "text-foreground"
-										)}>
+										<span
+											className={cn(
+												"font-semibold truncate transition-colors",
+												isSelected
+													? "text-primary-foreground"
+													: "text-foreground",
+											)}
+										>
 											@{item.username}
 										</span>
 										{item.role && item.role !== "USER" && (
-											<span className={cn(
-												"text-[7px] font-black uppercase px-1 rounded border",
-												isSelected ? "bg-white/20 border-white/30 text-white" : "bg-muted text-muted-foreground"
-											)}>
+											<span
+												className={cn(
+													"text-[7px] font-black uppercase px-1 rounded border",
+													isSelected
+														? "bg-white/20 border-white/30 text-white"
+														: "bg-muted text-muted-foreground",
+												)}
+											>
 												{item.role}
 											</span>
 										)}
 									</div>
-									<span className={cn(
-										"text-[10px] truncate w-full",
-										isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
-									)}>
+									<span
+										className={cn(
+											"text-[10px] truncate w-full",
+											isSelected
+												? "text-primary-foreground/70"
+												: "text-muted-foreground",
+										)}
+									>
 										{item.name || "Student"}
 									</span>
 								</div>
@@ -178,11 +201,15 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 			<div className="shrink-0 p-1.5 bg-muted/20 border-t flex items-center justify-center">
 				<div className="flex items-center gap-3 text-[8px] font-medium text-muted-foreground uppercase tracking-widest">
 					<span className="flex items-center gap-1">
-						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">↑↓</kbd> 
+						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">
+							↑↓
+						</kbd>
 						Navigate
 					</span>
 					<span className="flex items-center gap-1">
-						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">ENTER</kbd> 
+						<kbd className="bg-background border px-1 rounded shadow-sm text-[7px] font-mono">
+							ENTER
+						</kbd>
 						Select
 					</span>
 				</div>

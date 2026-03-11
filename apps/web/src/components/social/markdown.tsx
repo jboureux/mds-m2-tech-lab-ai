@@ -46,10 +46,20 @@ export function Markdown({ content, className }: MarkdownProps) {
 			<ReactMarkdown
 				rehypePlugins={[rehypeRaw, [rehypeSanitize, schema]]}
 				components={{
-					span: ({ node, children, ...props }: any) => {
-						console.log("Span props:", props);
-						if (props["data-type"] === "mention" || props.dataType === "mention") {
-							const username = props["data-label"] || props.dataLabel || (typeof children[0] === 'string' ? children[0].replace(/^@/, '') : children[0]);
+					span: (
+						// biome-ignore lint/suspicious/noExplicitAny: react-markdown component props are complex
+						{ node, children, ...props }: any,
+					) => {
+						if (
+							props["data-type"] === "mention" ||
+							props.dataType === "mention"
+						) {
+							const username =
+								props["data-label"] ||
+								props.dataLabel ||
+								(typeof children[0] === "string"
+									? children[0].replace(/^@/, "")
+									: children[0]);
 							return (
 								<Link
 									href={`/u/${username}`}

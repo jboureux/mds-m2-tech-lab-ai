@@ -1,6 +1,12 @@
 "use client";
 
-import { AtSign, LayoutDashboard, LogOut, ShieldAlert, User } from "lucide-react";
+import {
+	AtSign,
+	LayoutDashboard,
+	LogOut,
+	ShieldAlert,
+	User,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
@@ -16,6 +22,7 @@ interface SidebarNavProps {
 
 export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 	const router = useRouter();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const filter = searchParams.get("filter");
 
@@ -35,7 +42,7 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 				href="/feed"
 				icon={LayoutDashboard}
 				label="Feed"
-				active={!filter && usePathname() === "/feed"}
+				active={!filter && pathname === "/feed"}
 			/>
 			<SidebarNavItem
 				href="/feed?filter=tagged"

@@ -1,7 +1,7 @@
 "use client";
 
-import Mention from "@tiptap/extension-mention";
 import Link from "@tiptap/extension-link";
+import Mention from "@tiptap/extension-mention";
 import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -128,7 +128,8 @@ export function RichEditor({
 			}),
 			Mention.configure({
 				HTMLAttributes: {
-					class: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md px-1 py-0.5 font-medium",
+					class:
+						"bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md px-1 py-0.5 font-medium",
 				},
 				suggestion,
 			}),
@@ -149,9 +150,11 @@ export function RichEditor({
 			},
 		},
 		onUpdate: ({ editor }) => {
+			// biome-ignore lint/suspicious/noExplicitAny: tiptap-markdown doesn't provide easy types for storage access
 			onChange((editor.storage as any).markdown.getMarkdown());
 		},
 		onSelectionUpdate: ({ editor }) => updateVisualState(editor),
+
 		onTransaction: ({ editor }) => updateVisualState(editor),
 		editable: !disabled,
 	});
@@ -172,10 +175,11 @@ export function RichEditor({
 	};
 
 	React.useEffect(() => {
+		// biome-ignore lint/suspicious/noExplicitAny: tiptap-markdown doesn't provide easy types for storage access
 		if (editor && content !== (editor.storage as any).markdown.getMarkdown()) {
 			editor.commands.setContent(content, { emitUpdate: false });
 		}
-	}, [content, editor]);
+	}, [editor, content]);
 
 	const handleFormat = (type: FormatType) => {
 		if (type === "link") {

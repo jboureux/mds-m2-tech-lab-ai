@@ -13,10 +13,12 @@ export const suggestion = {
 	},
 
 	render: () => {
+		// biome-ignore lint/suspicious/noExplicitAny: Required by tiptap ReactRenderer
 		let component: ReactRenderer<any>;
 		let popup: Instance[];
 
 		return {
+			// biome-ignore lint/suspicious/noExplicitAny: Required by tiptap
 			onStart: (props: any) => {
 				component = new ReactRenderer(MentionList, {
 					props,
@@ -45,6 +47,7 @@ export const suggestion = {
 				});
 			},
 
+			// biome-ignore lint/suspicious/noExplicitAny: Required by tiptap
 			onUpdate(props: any) {
 				component.updateProps(props);
 
@@ -57,6 +60,7 @@ export const suggestion = {
 				});
 			},
 
+			// biome-ignore lint/suspicious/noExplicitAny: Required by tiptap
 			onKeyDown(props: any) {
 				if (props.event.key === "Escape") {
 					popup?.[0]?.hide();
@@ -64,6 +68,7 @@ export const suggestion = {
 					return true;
 				}
 
+				// biome-ignore lint/suspicious/noExplicitAny: Required by tiptap
 				return (component.ref as any)?.onKeyDown(props);
 			},
 
