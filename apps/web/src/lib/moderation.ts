@@ -1,7 +1,12 @@
+import * as toxicity from "@tensorflow-models/toxicity";
+import "@tensorflow/tfjs";
+import translate from "@iamtraction/google-translate";
 import { Filter } from "bad-words";
 import db from "@/lib/prisma";
 
 let filter: Filter | null = null;
+let toxicityModel: toxicity.ToxicityClassifier | null = null;
+const TOXICITY_THRESHOLD = 0.8;
 
 /**
  * Initializes and returns the bad-words filter, adding custom banned words from the database.
@@ -20,6 +25,88 @@ async function getFilter() {
 		}
 	}
 	return filter;
+}
+
+/**
+ * Initializes and returns the toxicity model.
+ */
+export async function loadToxicityModel() {
+	if (toxicityModel) return toxicityModel;
+	try {
+		console.log("[MODERATION] Loading toxicity model...");
+
+		// Load the Node.js backend if running on the server to improve performance
+		if (typeof window === "undefined") {
+			try {
+				console.log("[MODERATION] Loading TensorFlow.js Node backend...");
+				await import("@tensorflow/tfjs-node");
+				console.log("[MODERATION] TensorFlow.js Node backend loaded.");
+			} catch (error) {
+				console.error(
+					"[MODERATION] Failed to load TensorFlow.js Node backend, falling back to default:",
+					error,
+				);
+			}
+		}
+
+		toxicityModel = await toxicity.load(TOXICITY_THRESHOLD, []);
+		console.log("[MODERATION] Toxicity model loaded.");
+		return toxicityModel;
+	} catch (error) {
+		console.error("[MODERATION] Failed to load toxicity model:", error);
+		return null;
+	}
+}
+
+/**
+ * Checks if the content is toxic using the TensorFlow.js model.
+ * Returns true if toxic, false otherwise.
+ */
+export async function checkToxicity(content: string): Promise<boolean> {
+	if (!content || !content.trim()) return false;
+
+	const model = await loadToxicityModel();
+	if (!model) return false;
+
+	try {
+		// Translate the content to English since the model only works with English text
+		let contentToCheck = content;
+		try {
+			const translationResult = await translate(content, { to: "en" });
+			contentToCheck = translationResult.text;
+			console.log(
+				`[MODERATION] Original: "${content}" | Translated: "${contentToCheck}"`,
+			);
+		} catch (translationError) {
+			console.error(
+				"[MODERATION] Translation failed, proceeding with original text:",
+				translationError,
+			);
+		}
+
+		const predictions = await model.classify([contentToCheck]);
+
+		// Create a readable summary of the predictions
+		const summary = predictions.map((p) => ({
+			label: p.label,
+			match: p.results[0].match,
+			// @ts-expect-error - probabilities is an object/array with index 1 being the probability of the label
+			probability: `${(p.results[0].probabilities[1] * 100).toFixed(2)}%`,
+		}));
+
+		console.log(
+			"[MODERATION] Toxicity Analysis:",
+			JSON.stringify(summary, null, 2),
+		);
+
+		// Check if any prediction is a match (true)
+		return predictions.some((prediction) =>
+			prediction.results.some((result) => result.match),
+		);
+	} catch (error) {
+		console.error("[MODERATION] Error checking toxicity:", error);
+		return false;
+	}
 }
 
 /**
@@ -46,4 +133,11 @@ export async function cleanContent(content: string): Promise<string> {
  */
 export function _resetFilter() {
 	filter = null;
+}
+
+/**
+ * Resets the toxicity model instance (primarily for testing).
+ */
+export function _resetToxicityModel() {
+	toxicityModel = null;
 }

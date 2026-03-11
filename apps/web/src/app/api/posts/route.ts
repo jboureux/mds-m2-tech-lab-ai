@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { validateContent } from "@/lib/moderation";
+import { checkToxicity, validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
 
@@ -44,8 +44,28 @@ export async function POST(req: Request) {
 			data: {
 				content,
 				authorId: session.user.id,
-				status: "PUBLISHED", // Default to published for now, will add moderation later
+				status: "PUBLISHED",
 			},
+		});
+
+		// Async toxicity check (fire and forget pattern)
+		// Note: In serverless environments (like Vercel), this might be terminated early.
+		// In Dockerized/long-running Node.js, this works fine.
+		void checkToxicity(content).then(async (isToxic) => {
+			if (isToxic) {
+				console.log(`[MODERATION] Post ${post.id} flagged as toxic.`);
+				try {
+					await db.post.update({
+						where: { id: post.id },
+						data: {
+							status: "FLAGGED",
+							isToxic: true,
+						},
+					});
+				} catch (error) {
+					console.error(`[MODERATION] Failed to flag post ${post.id}:`, error);
+				}
+			}
 		});
 
 		return NextResponse.json(post);

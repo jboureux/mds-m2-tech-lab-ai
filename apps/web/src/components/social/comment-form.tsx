@@ -14,7 +14,7 @@ interface CommentFormProps {
 	parentId?: string;
 	user: {
 		name: string | null;
-		image: string | null;
+		image?: string | null;
 	};
 	isAllowedToComment: boolean;
 	restrictionReason?: string;
