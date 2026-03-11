@@ -31,7 +31,7 @@ describe("API: POST /api/admin/moderation/posts/[id]/hide", () => {
 			session: {},
 		} as any);
 
-		const mockPost = { id: "1", status: "REMOVED" };
+		const mockPost = { id: "1", status: "HIDDEN" };
 		vi.mocked(db.post.update).mockResolvedValue(mockPost as any);
 
 		const params = Promise.resolve({ id: "1" });
@@ -39,10 +39,10 @@ describe("API: POST /api/admin/moderation/posts/[id]/hide", () => {
 		const data = await response.json();
 
 		expect(response.status).toBe(200);
-		expect(data.message).toBe("Post removed");
+		expect(data.message).toBe("Post hidden");
 		expect(db.post.update).toHaveBeenCalledWith({
 			where: { id: "1" },
-			data: { status: "REMOVED" },
+			data: { status: "HIDDEN" },
 		});
 	});
 });
