@@ -53,7 +53,7 @@ export async function loadToxicityModel() {
 			try {
 				await import("@tensorflow/tfjs-node");
 				console.log("[MODERATION] TensorFlow.js Node backend loaded.");
-			} catch (e) {
+			} catch (_e) {
 				console.warn(
 					"[MODERATION] tfjs-node not found, using default backend.",
 				);

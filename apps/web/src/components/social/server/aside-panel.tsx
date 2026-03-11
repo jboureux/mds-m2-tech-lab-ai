@@ -33,7 +33,12 @@ export async function AsidePanel({ hideCard = false }: { hideCard?: boolean }) {
 	});
 
 	// Fetch Suggested People (not followed by current user)
-	let suggestedPeople: any[] = [];
+	let suggestedPeople: {
+		id: string;
+		name: string | null;
+		username: string | null;
+		image: string | null;
+	}[] = [];
 	if (session) {
 		const following = await db.follow.findMany({
 			where: { followerId: session.user.id },

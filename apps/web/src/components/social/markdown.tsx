@@ -27,7 +27,8 @@ function linkifyHashtags(text: string) {
 			const tag = part.slice(1);
 			return (
 				<Link
-					key={i}
+					// biome-ignore lint/suspicious/noArrayIndexKey: hashtags are static parts of the text
+					key={`${tag}-${i}`}
 					href={`/feed/hashtag/${tag.toLowerCase()}`}
 					className="text-blue-600 dark:text-blue-400 hover:underline font-bold"
 				>

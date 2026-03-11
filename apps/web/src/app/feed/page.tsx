@@ -1,4 +1,4 @@
-import { LayoutDashboard, Sparkles, AtSign } from "lucide-react";
+import { AtSign, LayoutDashboard, Sparkles } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,7 +17,7 @@ export default async function Home(props: {
 	const searchParams = await props.searchParams;
 	const feed = searchParams.feed || "all";
 	const filter = searchParams.filter;
-	
+
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -30,7 +30,24 @@ export default async function Home(props: {
 		session.user.role === "ADMIN" || session.user.role === "MODERATOR";
 	const isTaggedFilter = filter === "tagged";
 
-	let posts: any[] = [];
+	let posts: {
+		id: string;
+		content: string;
+		status: string;
+		isToxic: boolean;
+		createdAt: string | Date;
+		author: {
+			id: string;
+			name: string | null;
+			email: string;
+			image: string | null;
+			role: string;
+		};
+		_count?: {
+			comments: number;
+			likes: number;
+		};
+	}[] = [];
 
 	const commonInclude = {
 		author: {
