@@ -24,7 +24,8 @@ export async function GET(_req: Request) {
 			where: {
 				OR: [{ status: "FLAGGED" }, { isToxic: true }],
 				NOT: { status: "HIDDEN" },
-			},			include: {
+			},
+			include: {
 				author: {
 					select: {
 						id: true,

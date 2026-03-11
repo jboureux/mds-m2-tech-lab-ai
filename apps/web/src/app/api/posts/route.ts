@@ -1,10 +1,10 @@
+import { PostStatus, type Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { checkToxicity, validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
-import { PostStatus } from "@prisma/client";
 
 export async function POST(req: Request) {
 	const session = await auth.api.getSession({
@@ -97,7 +97,7 @@ export async function GET(req: Request) {
 		const isStaff =
 			session?.user.role === "ADMIN" || session?.user.role === "MODERATOR";
 
-		let where: any = {};
+		let where: Prisma.PostWhereInput = {};
 
 		if (authorId) {
 			// Profile view rules
@@ -111,7 +111,9 @@ export async function GET(req: Request) {
 			};
 		} else {
 			// Feed view rules (OR logic)
-			const orConditions: any[] = [{ status: PostStatus.PUBLISHED }];
+			const orConditions: Prisma.PostWhereInput[] = [
+				{ status: PostStatus.PUBLISHED },
+			];
 
 			if (session) {
 				// Logged-in users see their own flagged posts

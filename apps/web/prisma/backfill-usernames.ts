@@ -22,8 +22,8 @@ async function updateWithUniqueUsername(userId: string, baseUsername: string) {
 			});
 			console.log(`✅ Updated user ${userId} with username: ${username}`);
 			success = true;
-		} catch (error: any) {
-			if (error.code === "P2002") {
+		} catch (error) {
+			if (error instanceof Error && (error as any).code === "P2002") {
 				// Unique constraint violation
 				username = `${baseUsername}${counter}`;
 				counter++;
