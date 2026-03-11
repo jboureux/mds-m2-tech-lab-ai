@@ -94,7 +94,10 @@ export const MentionList = forwardRef((props: MentionListProps, ref) => {
 	}
 
 	return (
-		<div className="z-50 min-w-[280px] flex flex-col overflow-hidden rounded-2xl border-2 border-blue-600/10 bg-white dark:bg-zinc-950 p-2 text-popover-foreground shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] animate-in fade-in-0 zoom-in-95 backdrop-blur-xl max-h-[450px]">
+		<div 
+			className="z-50 min-w-[280px] flex flex-col overflow-hidden rounded-2xl border-2 border-blue-600/10 bg-white dark:bg-zinc-950 p-2 text-popover-foreground shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] animate-in fade-in-0 zoom-in-95 backdrop-blur-xl max-h-[450px]"
+			onWheel={(e) => e.stopPropagation()}
+		>
 			{/* Header - Fixed at top */}
 			<div className="shrink-0 px-3 py-2 border-b border-slate-100 dark:border-zinc-800 mb-2 flex items-center justify-between">
 				<div className="flex items-center gap-2">
