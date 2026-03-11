@@ -1,10 +1,18 @@
 "use client";
 
-import { LayoutDashboard, ShieldAlert, User, Users } from "lucide-react";
+import {
+	AtSign,
+	LayoutDashboard,
+	LogOut,
+	ShieldAlert,
+	User,
+	Users,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Separator } from "@/components/ui/separator";
+import { signOut } from "@/lib/auth-client";
 
 interface SidebarNavProps {
 	user: {
@@ -14,9 +22,35 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ user, profileHref }: SidebarNavProps) {
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const filter = searchParams.get("filter");
+
+	const handleSignOut = async () => {
+		await signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					router.push("/");
+				},
+			},
+		});
+	};
+
 	return (
 		<nav className="flex flex-col gap-1">
-			<SidebarNavItem href="/feed" icon={LayoutDashboard} label="Feed" />
+			<SidebarNavItem
+				href="/feed"
+				icon={LayoutDashboard}
+				label="Feed"
+				active={!filter && pathname === "/feed"}
+			/>
+			<SidebarNavItem
+				href="/feed?filter=tagged"
+				icon={AtSign}
+				label="Tagged"
+				active={filter === "tagged"}
+			/>
 			<SidebarNavItem href={profileHref} icon={User} label="Profile" />
 			<SidebarNavItem
 				href="/profile/following"
@@ -34,6 +68,17 @@ export function SidebarNav({ user, profileHref }: SidebarNavProps) {
 					/>
 				</>
 			)}
+			<Separator className="my-2" />
+			<button
+				type="button"
+				onClick={handleSignOut}
+				className="flex items-center justify-between px-3 py-2 rounded-lg transition-colors group hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-600 dark:text-zinc-400 hover:text-red-600"
+			>
+				<div className="flex items-center gap-3">
+					<LogOut className="h-5 w-5 text-slate-400 group-hover:text-red-500" />
+					<span className="text-sm font-medium">Sign Out</span>
+				</div>
+			</button>
 		</nav>
 	);
 }
@@ -43,17 +88,21 @@ function SidebarNavItem({
 	icon: Icon,
 	label,
 	badge,
+	active: customActive,
 	variant = "default",
 }: {
 	href: string;
 	icon: React.ElementType;
 	label: string;
 	badge?: number;
+	active?: boolean;
 	variant?: "default" | "destructive";
 }) {
 	const pathname = usePathname();
 	const active =
-		pathname === href || (href !== "/feed" && pathname.startsWith(href));
+		customActive !== undefined
+			? customActive
+			: pathname === href || (href !== "/feed" && pathname.startsWith(href));
 
 	return (
 		<Link

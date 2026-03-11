@@ -55,12 +55,24 @@ function processChildren(children: React.ReactNode): React.ReactNode {
 	});
 }
 
-// Extend default schema to allow style attribute with color for span
+// Extend default schema to allow style attribute with color for span and mention attributes
 const schema = {
 	...defaultSchema,
+	tagNames: [...(defaultSchema.tagNames || []), "span"],
 	attributes: {
 		...defaultSchema.attributes,
-		span: ["style"], // Allow style on span
+		span: [
+			...(defaultSchema.attributes?.span || []),
+			"style",
+			"data-type",
+			"data-id",
+			"data-label",
+			"dataType",
+			"dataId",
+			"dataLabel",
+			"className",
+			"class",
+		],
 	},
 };
 
@@ -73,6 +85,31 @@ export function Markdown({ content, className }: MarkdownProps) {
 			<ReactMarkdown
 				rehypePlugins={[rehypeRaw, [rehypeSanitize, schema]]}
 				components={{
+					span: (
+						// biome-ignore lint/suspicious/noExplicitAny: react-markdown component props are complex
+						{ node, children, ...props }: any,
+					) => {
+						if (
+							props["data-type"] === "mention" ||
+							props.dataType === "mention"
+						) {
+							const username =
+								props["data-label"] ||
+								props.dataLabel ||
+								(typeof children[0] === "string"
+									? children[0].replace(/^@/, "")
+									: children[0]);
+							return (
+								<Link
+									href={`/u/${username}`}
+									className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md px-1 py-0.5 font-medium hover:underline inline-flex items-center"
+								>
+									@{username}
+								</Link>
+							);
+						}
+						return <span {...props}>{children}</span>;
+					},
 					code: (
 						// biome-ignore lint/suspicious/noExplicitAny: react-markdown component props are complex
 						{ node, inline, className: codeClassName, children, ...props }: any,

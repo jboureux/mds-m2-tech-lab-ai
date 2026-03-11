@@ -62,6 +62,30 @@ export async function POST(req: Request) {
 			},
 		});
 
+		// Extract mentions and link them to the post
+		const mentionRegex = /\B@([a-z0-9_-]+)/gi;
+		const mentions = content.match(mentionRegex);
+		if (mentions) {
+			const usernames = mentions.map((m: string) => m.slice(1));
+			const taggedUsers = await db.user.findMany({
+				where: {
+					username: { in: usernames, mode: "insensitive" },
+				},
+				select: { id: true },
+			});
+
+			if (taggedUsers.length > 0) {
+				await db.post.update({
+					where: { id: post.id },
+					data: {
+						tags: {
+							connect: taggedUsers.map((u) => ({ id: u.id })),
+						},
+					},
+				});
+			}
+		}
+
 		// Async toxicity check (fire and forget pattern)
 		// Note: In serverless environments (like Vercel), this might be terminated early.
 		// In Dockerized/long-running Node.js, this works fine.
@@ -99,6 +123,8 @@ export async function GET(req: Request) {
 	const authorId = searchParams.get("authorId") || undefined;
 	const hashtag = searchParams.get("hashtag") || undefined;
 	const feedType = searchParams.get("feedType") || "all";
+	const likedByMe = searchParams.get("likedByMe") === "true";
+	const taggedInMe = searchParams.get("taggedInMe") === "true";
 
 	try {
 		const session = await auth.api.getSession({
@@ -106,7 +132,7 @@ export async function GET(req: Request) {
 		});
 
 		console.log(
-			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, hashtag ${hashtag}, feedType ${feedType}`,
+			`[API_POSTS_GET] Fetching posts for user ${session?.user.email || "guest"} with limit ${limit}, cursor ${cursor}, authorId ${authorId}, hashtag ${hashtag}, feedType ${feedType}, likedByMe ${likedByMe}, taggedInMe ${taggedInMe}`,
 		);
 
 		const isStaff =
@@ -122,6 +148,22 @@ export async function GET(req: Request) {
 					},
 				},
 				status: isStaff ? undefined : { in: [PostStatus.PUBLISHED] },
+			};
+		} else if (likedByMe && session) {
+			where = {
+				likes: {
+					some: {
+						userId: session.user.id,
+					},
+				},
+			};
+		} else if (taggedInMe && session) {
+			where = {
+				tags: {
+					some: {
+						id: session.user.id,
+					},
+				},
 			};
 		} else if (authorId) {
 			// Profile view rules
@@ -207,8 +249,19 @@ export async function GET(req: Request) {
 				_count: {
 					select: {
 						comments: true,
+						likes: true,
 					},
 				},
+				likes: session
+					? {
+							where: {
+								userId: session.user.id,
+							},
+							select: {
+								type: true,
+							},
+						}
+					: false,
 			},
 			orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 		});

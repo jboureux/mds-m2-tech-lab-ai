@@ -22,6 +22,7 @@ interface Post {
 	};
 	_count?: {
 		comments: number;
+		likes: number;
 	};
 }
 
@@ -31,6 +32,8 @@ interface PostFeedProps {
 	isStaff?: boolean;
 	authorId?: string;
 	hashtag?: string;
+	likedByMe?: boolean;
+	taggedInMe?: boolean;
 }
 
 export function PostFeed({
@@ -39,6 +42,8 @@ export function PostFeed({
 	isStaff = false,
 	authorId,
 	hashtag,
+	likedByMe = false,
+	taggedInMe = false,
 }: PostFeedProps) {
 	const { ref, inView } = useInView({
 		threshold: 0.1,
@@ -57,18 +62,24 @@ export function PostFeed({
 	} = useInfiniteQuery({
 		queryKey: hashtag
 			? ["posts", { hashtag }]
-			: authorId
-				? ["posts", { authorId }]
-				: ["posts"],
+			: likedByMe
+				? ["posts", { likedByMe }]
+				: taggedInMe
+					? ["posts", { taggedInMe }]
+					: authorId
+						? ["posts", { authorId }]
+						: ["posts"],
 		queryFn: async ({ pageParam = null }) => {
 			const url = new URL("/api/posts", window.location.origin);
 			url.searchParams.set("limit", "20");
 			if (pageParam) url.searchParams.set("cursor", pageParam as string);
 			if (authorId) url.searchParams.set("authorId", authorId);
 			if (hashtag) url.searchParams.set("hashtag", hashtag);
+			if (likedByMe) url.searchParams.set("likedByMe", "true");
+			if (taggedInMe) url.searchParams.set("taggedInMe", "true");
 
 			console.log(
-				`[PostFeed] Fetching page with cursor: ${pageParam}, authorId: ${authorId}, hashtag: ${hashtag}`,
+				`[PostFeed] Fetching page with cursor: ${pageParam}, authorId: ${authorId}, hashtag: ${hashtag}, likedByMe: ${likedByMe}, taggedInMe: ${taggedInMe}`,
 			);
 			const response = await fetch(url.toString());
 			if (!response.ok) throw new Error("Failed to fetch posts");
@@ -136,10 +147,12 @@ export function PostFeed({
 					✨
 				</div>
 				<h3 className="font-black text-lg text-slate-800 dark:text-zinc-200">
-					The scoop is empty!
+					{taggedInMe ? "No tags found!" : "The scoop is empty!"}
 				</h3>
 				<p className="text-muted-foreground text-sm mt-1">
-					Be the first to share something amazing with your school.
+					{taggedInMe
+						? "You haven't been tagged in any scoops yet."
+						: "Be the first to share something amazing with your school."}
 				</p>
 				<Button
 					onClick={() => refetch()}

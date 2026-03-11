@@ -4,7 +4,6 @@ import type { User } from "better-auth";
 import {
 	FileText,
 	Loader2,
-	LogOut,
 	Mail,
 	Shield,
 	User as UserIcon,
@@ -28,7 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { signOut } from "@/lib/auth-client";
 
 export function ProfileForm({
 	user,
@@ -77,16 +75,6 @@ export function ProfileForm({
 		} finally {
 			setIsUpdating(false);
 		}
-	};
-
-	const handleSignOut = async () => {
-		await signOut({
-			fetchOptions: {
-				onSuccess: () => {
-					router.push("/");
-				},
-			},
-		});
 	};
 
 	return (
@@ -277,19 +265,6 @@ export function ProfileForm({
 						</div>
 					)}
 				</CardContent>
-				{isOwnProfile && (
-					<CardFooter className="border-t px-8 py-4 bg-slate-50/50 dark:bg-zinc-800/30">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={handleSignOut}
-							className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold gap-2 text-xs"
-						>
-							<LogOut className="h-4 w-4" />
-							Sign Out
-						</Button>
-					</CardFooter>
-				)}
 			</Card>
 		</div>
 	);

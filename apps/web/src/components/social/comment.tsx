@@ -1,8 +1,9 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, ShieldAlert } from "lucide-react";
+import { Heart, MessageSquare, ShieldAlert } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
 import { CommentForm } from "@/components/social/comment-form";
 import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +24,10 @@ interface CommentProps {
 			role: string;
 		};
 		replies?: CommentProps["comment"][];
+		_count?: {
+			likes: number;
+		};
+		likes?: { type: string }[] | boolean;
 	};
 	currentUser?: {
 		name: string;
@@ -45,9 +50,56 @@ export function Comment({
 
 	const isReplying = replyingToId === comment.id;
 
+	const initialLiked = Array.isArray(comment.likes) && comment.likes.length > 0;
+	const [liked, setLiked] = React.useState(initialLiked);
+	const [likesCount, setLikesCount] = React.useState(
+		comment._count?.likes || 0,
+	);
+	const [isLiking, setIsLiking] = React.useState(false);
+
 	React.useEffect(() => {
 		setMounted(true);
-	}, []);
+		setLiked(initialLiked);
+		setLikesCount(comment._count?.likes || 0);
+	}, [initialLiked, comment._count?.likes]);
+
+	const handleLike = async (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (isLiking) return;
+		setIsLiking(true);
+
+		const previousLiked = liked;
+		const previousCount = likesCount;
+
+		const newLiked = !liked;
+		const newCount = newLiked ? likesCount + 1 : likesCount - 1;
+
+		setLiked(newLiked);
+		setLikesCount(Math.max(0, newCount));
+
+		try {
+			const res = await fetch(`/api/comments/${comment.id}/like`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+			});
+
+			if (!res.ok) {
+				const error = await res.json();
+				throw new Error(error.error || "Failed to update like");
+			}
+
+			const data = await res.json();
+			setLiked(data.liked);
+		} catch (err: any) {
+			setLiked(previousLiked);
+			setLikesCount(previousCount);
+			toast.error(err.message || "Failed to update like");
+		} finally {
+			setIsLiking(false);
+		}
+	};
 
 	return (
 		<div className="flex flex-col gap-3 pl-4 border-l border-slate-200 dark:border-slate-800 ml-4 py-2">
@@ -110,6 +162,23 @@ export function Comment({
 				)}
 
 				<div className="flex items-center gap-4">
+					<Button
+						variant="ghost"
+						size="sm"
+						className={`h-7 px-2 text-[10px] gap-1.5 transition-colors ${
+							liked
+								? "text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/20"
+								: "text-muted-foreground hover:text-blue-600"
+						}`}
+						onClick={handleLike}
+					>
+						<Heart
+							className={`h-3 w-3 transition-transform group-hover:scale-110 ${
+								liked ? "fill-current" : ""
+							}`}
+						/>
+						{likesCount > 0 ? likesCount : "Like"}
+					</Button>
 					<Button
 						variant="ghost"
 						size="sm"

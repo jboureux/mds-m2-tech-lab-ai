@@ -51,6 +51,17 @@ export default async function PostPage({ params }: PostPageProps) {
 							role: true,
 						},
 					},
+					_count: {
+						select: {
+							likes: true,
+						},
+					},
+					likes: session
+						? {
+								where: { userId: session.user.id },
+								select: { type: true },
+							}
+						: false,
 					replies: {
 						include: {
 							author: {
@@ -60,6 +71,17 @@ export default async function PostPage({ params }: PostPageProps) {
 									role: true,
 								},
 							},
+							_count: {
+								select: {
+									likes: true,
+								},
+							},
+							likes: session
+								? {
+										where: { userId: session.user.id },
+										select: { type: true },
+									}
+								: false,
 							replies: {
 								include: {
 									author: {
@@ -69,6 +91,17 @@ export default async function PostPage({ params }: PostPageProps) {
 											role: true,
 										},
 									},
+									_count: {
+										select: {
+											likes: true,
+										},
+									},
+									likes: session
+										? {
+												where: { userId: session.user.id },
+												select: { type: true },
+											}
+										: false,
 								},
 							},
 						},
@@ -81,8 +114,15 @@ export default async function PostPage({ params }: PostPageProps) {
 			_count: {
 				select: {
 					comments: true,
+					likes: true,
 				},
 			},
+			likes: session
+				? {
+						where: { userId: session.user.id },
+						select: { type: true },
+					}
+				: false,
 		},
 	});
 

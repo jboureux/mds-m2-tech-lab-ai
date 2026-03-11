@@ -57,7 +57,9 @@ describe("Home Page", () => {
 		vi.mocked(checkPostingPermission).mockResolvedValue({ isAllowed: true });
 		vi.mocked(db.post.findMany).mockResolvedValue([]);
 
-		const page = await Page();
+		const page = await Page({
+			searchParams: Promise.resolve({ filter: undefined }),
+		});
 		render(page);
 		expect(screen.getByTestId("editor")).toBeDefined();
 		expect(screen.getByTestId("feed")).toBeDefined();
