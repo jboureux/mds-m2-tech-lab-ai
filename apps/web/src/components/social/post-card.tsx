@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { toast } from "sonner";
 import { ModerationActions } from "@/components/admin/moderation/moderation-actions";
 import { Markdown } from "@/components/social/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,18 +42,63 @@ interface PostCardProps {
 		};
 		_count?: {
 			comments: number;
+			likes?: number;
 		};
+		likes?: { type: string }[] | boolean;
 	};
 	isStaff?: boolean;
 }
 
 export function PostCard({ post, isStaff = false }: PostCardProps) {
 	const [mounted, setMounted] = React.useState(false);
-	const [liked, setLiked] = React.useState(false);
+	const initialLiked = Array.isArray(post.likes) && post.likes.length > 0;
+	const [liked, setLiked] = React.useState(initialLiked);
+	const [likesCount, setLikesCount] = React.useState(post._count?.likes || 0);
+	const [isLiking, setIsLiking] = React.useState(false);
 
 	React.useEffect(() => {
 		setMounted(true);
-	}, []);
+		setLiked(initialLiked);
+		setLikesCount(post._count?.likes || 0);
+	}, [initialLiked, post._count?.likes]);
+
+	const handleLike = async (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (isLiking) return;
+		setIsLiking(true);
+
+		const previousLiked = liked;
+		const previousCount = likesCount;
+
+		const newLiked = !liked;
+		const newCount = newLiked ? likesCount + 1 : likesCount - 1;
+
+		setLiked(newLiked);
+		setLikesCount(Math.max(0, newCount));
+
+		try {
+			const res = await fetch(`/api/posts/${post.id}/like`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+			});
+
+			if (!res.ok) {
+				const error = await res.json();
+				throw new Error(error.error || "Failed to update like");
+			}
+
+			const data = await res.json();
+			setLiked(data.liked);
+		} catch (err: any) {
+			setLiked(previousLiked);
+			setLikesCount(previousCount);
+			toast.error(err.message || "Failed to update like");
+		} finally {
+			setIsLiking(false);
+		}
+	};
 
 	const isFlagged = post.status === "FLAGGED" || post.isToxic;
 
@@ -159,15 +205,22 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 				<div className="flex items-center gap-1">
 					<div className="flex -space-x-1.5">
 						<div className="h-5 w-5 rounded-full bg-blue-600 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[8px] text-white font-bold">
-							<Heart className="h-2.5 w-2.5 fill-current" />
+							<Heart className={`h-2.5 w-2.5 ${liked ? "fill-current" : ""}`} />
 						</div>
 					</div>
-					<span className="ml-1">Be the first to like this</span>
+					<span className="ml-1">
+						{likesCount === 0
+							? "Be the first to like this"
+							: `${likesCount} ${likesCount === 1 ? "person" : "people"} liked this`}
+					</span>
 				</div>
 				<div className="flex items-center gap-3">
-					<button type="button" className="hover:text-blue-600 hover:underline">
+					<Link
+						href={`/posts/${post.id}`}
+						className="hover:text-blue-600 hover:underline"
+					>
 						{post._count?.comments || 0} comments
-					</button>
+					</Link>
 				</div>
 			</div>
 
@@ -176,8 +229,8 @@ export function PostCard({ post, isStaff = false }: PostCardProps) {
 					icon={Heart}
 					label="Like"
 					active={liked}
-					activeColor="text-red-500 fill-red-500"
-					onClick={() => setLiked(!liked)}
+					activeColor="text-blue-600 fill-blue-600"
+					onClick={handleLike}
 				/>
 				<Button
 					variant="ghost"
