@@ -65,9 +65,9 @@ describe("Home Page", () => {
 		const page = await Page({
 			searchParams: Promise.resolve({ feed: "all" }),
 		});
-		
+
 		render(page);
-		
+
 		expect(screen.getByTestId("editor")).toBeDefined();
 		expect(screen.getByTestId("feed")).toBeDefined();
 	});
