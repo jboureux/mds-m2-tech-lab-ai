@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { checkToxicity, validateContent } from "@/lib/moderation";
 import { checkPostingPermission } from "@/lib/permissions";
 import db from "@/lib/prisma";
+import { PostStatus } from "@prisma/client";
 
 export async function POST(req: Request) {
 	const session = await auth.api.getSession({
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
 			data: {
 				content,
 				authorId: session.user.id,
-				status: "PUBLISHED",
+				status: PostStatus.PUBLISHED,
 			},
 		});
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
 					await db.post.update({
 						where: { id: post.id },
 						data: {
-							status: "FLAGGED",
+							status: PostStatus.FLAGGED,
 							isToxic: true,
 						},
 					});
@@ -96,30 +97,42 @@ export async function GET(req: Request) {
 		const isStaff =
 			session?.user.role === "ADMIN" || session?.user.role === "MODERATOR";
 
+		let where: any = {};
+
+		if (authorId) {
+			// Profile view rules
+			where = {
+				authorId,
+				status: isStaff
+					? undefined // Staff sees everything on a profile
+					: session?.user.id === authorId
+						? { in: [PostStatus.PUBLISHED, PostStatus.FLAGGED] } // Author sees their own published/flagged
+						: PostStatus.PUBLISHED, // Others only see published
+			};
+		} else {
+			// Feed view rules (OR logic)
+			const orConditions: any[] = [{ status: PostStatus.PUBLISHED }];
+
+			if (session) {
+				// Logged-in users see their own flagged posts
+				orConditions.push({
+					authorId: session.user.id,
+					status: { in: [PostStatus.PUBLISHED, PostStatus.FLAGGED] },
+				});
+			}
+
+			if (isStaff) {
+				// Staff see all flagged or hidden content for moderation
+				orConditions.push({
+					status: { in: [PostStatus.FLAGGED, PostStatus.HIDDEN] },
+				});
+			}
+
+			where = { OR: orConditions };
+		}
+
 		const posts = await db.post.findMany({
-			where: authorId
-				? {
-						authorId,
-						status: isStaff
-							? undefined // Staff sees everything on a profile
-							: session?.user.id === authorId
-								? { in: ["PUBLISHED", "FLAGGED"] } // Author sees their own published/flagged
-								: "PUBLISHED", // Others only see published
-					}
-				: {
-						OR: [
-							{ status: "PUBLISHED" },
-							...(session
-								? [
-										{
-											authorId: session.user.id,
-											status: { in: ["PUBLISHED", "FLAGGED"] },
-										},
-									]
-								: []),
-							...(isStaff ? [{ status: { in: ["FLAGGED", "HIDDEN"] } }] : []),
-						],
-					},
+			where,
 			take: limit,
 			skip: cursor ? 1 : 0,
 			cursor: cursor ? { id: cursor } : undefined,
